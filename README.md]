@@ -1,0 +1,6 @@
+Main Layout Patterns:
+Dark theme with bg-[#111c44] as primary background
+bg-[#1B2559] for elevated sections
+Green accents with border-green-600 and shadow-green-400
+Consistent rounded corners with rounded-md or rounded-lg
+Modal forms for editing (using the Dialog component)
