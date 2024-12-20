@@ -1,11 +1,9 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase'
 import { PricingClient } from '@/components/pricing/pricing-client'
 
 export default async function Pricing() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore })
+  const supabase = createClient()
   
   const {
     data: { user },

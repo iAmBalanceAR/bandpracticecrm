@@ -1,57 +1,52 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
-import type { Database } from '@/types/supabase'
 
-export async function middleware(req: NextRequest) {
-  const res = NextResponse.next()
-  const supabase = createMiddlewareClient<Database>({ req, res })
-
-  try {
-    const { data: { user }, error: userError } = await supabase.auth.getUser()
-    
-    if (userError) {
-      throw userError
-    }
-
-    // Protected routes
-    if (req.nextUrl.pathname.startsWith('/dashboard') || 
-        req.nextUrl.pathname.startsWith('/account')) {
-      if (!user) {
-        return NextResponse.redirect(new URL('/auth/signin', req.url))
-      }
-
-      // Check subscription status for premium routes
-      if (req.nextUrl.pathname.startsWith('/dashboard/premium')) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('subscription_status')
-          .eq('id', user.id)
-          .single()
-
-        if (!profile?.subscription_status || 
-            !['active', 'trialing'].includes(profile.subscription_status)) {
-          return NextResponse.redirect(new URL('/pricing', req.url))
-        }
-      }
-    }
-
-    // Auth routes - redirect to dashboard if already logged in
-    if (req.nextUrl.pathname.startsWith('/auth') && user) {
-      return NextResponse.redirect(new URL('/dashboard', req.url))
-    }
-  } catch (error) {
-    console.error('Auth error:', error)
-    // On auth error, redirect to sign in
-    if (req.nextUrl.pathname.startsWith('/dashboard') || 
-        req.nextUrl.pathname.startsWith('/account')) {
-      return NextResponse.redirect(new URL('/auth/signin', req.url))
-    }
+export async function middleware(request: NextRequest) {
+  // Skip auth check for auth-related routes
+  if (request.nextUrl.pathname.startsWith('/auth/')) {
+    return NextResponse.next()
   }
 
-  return res
+  let response = NextResponse.next({
+    request: {
+      headers: request.headers,
+    },
+  })
+
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        get(name: string) {
+          return request.cookies.get(name)?.value
+        },
+        set(name: string, value: string, options: any) {
+          response.cookies.set({
+            name,
+            value,
+            ...options,
+          })
+        },
+        remove(name: string, options: any) {
+          response.cookies.set({
+            name,
+            value: '',
+            ...options,
+          })
+        },
+      },
+    }
+  )
+
+  await supabase.auth.getSession()
+
+  return response
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/account/:path*', '/auth/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 } 

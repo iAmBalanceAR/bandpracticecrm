@@ -2,7 +2,7 @@
 
 import React from 'react'
 import { useState } from 'react'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import createClient from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent } from '@/components/ui/card'
@@ -10,7 +10,7 @@ import { Alert, AlertDescription } from '@/components/ui/alert'
 import { Separator } from '@/components/ui/separator'
 import { Github } from 'lucide-react'
 import { useMobile } from '@/components/providers/mobile-provider'
-import type { Database } from '@/types/supabase'
+import { useRouter } from 'next/navigation'
 
 export function AuthForm() {
   const [email, setEmail] = useState('')
@@ -18,7 +18,8 @@ export function AuthForm() {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [message, setMessage] = useState<string | null>(null)
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClient()
+  const router = useRouter()
   const { isMobile, isTouchDevice } = useMobile()
 
   const handleOAuthSignIn = async (provider: 'google' | 'github' | 'facebook') => {
@@ -46,99 +47,111 @@ export function AuthForm() {
     setError(null)
     
     try {
-      const { error: signInError } = await supabase.auth.signInWithPassword({
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
       if (signInError) throw signInError
+
+      // If sign in was successful, redirect to root page
+      if (data?.user) {
+        router.push('/')
+      }
     } catch (error: any) {
       setError(error.message)
+    } finally {
       setLoading(false)
     }
   }
 
   return (
-    <div className="flex min-h-full flex-col justify-center">
-      <Card className="mx-auto w-full max-w-sm mobile:max-w-full mobile:mx-4 p-8 mobile:p-6">
-        <CardContent className="space-y-4">
-          <form onSubmit={handleSignIn} className="space-y-4">
-            <div className="space-y-2">
-              <Input
-                type="email"
-                placeholder="Email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={`w-full h-12 mobile:h-14 text-lg mobile:text-base ${
-                  isTouchDevice ? 'touch-manipulation' : ''
-                }`}
-                required
-                autoComplete="email"
-                disabled={loading}
-              />
-            </div>
-            <div className="space-y-2">
-              <Input
-                type="password"
-                placeholder="Password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={`w-full h-12 mobile:h-14 text-lg mobile:text-base ${
-                  isTouchDevice ? 'touch-manipulation' : ''
-                }`}
-                required
-                autoComplete="current-password"
-                disabled={loading}
-              />
+    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">
+          Sign in to your account
+        </h2>
+      </div>
+
+      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
+        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+          <form className="space-y-6" onSubmit={handleSignIn}>
+            {error && (
+              <Alert variant="destructive" className="bg-red-900 border-red-600">
+                <AlertDescription>{error}</AlertDescription>
+              </Alert>
+            )}
+            
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+                Email address
+              </label>
+              <div className="mt-2">
+                <input
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
             </div>
 
-            <Button
-              type="submit"
-              className="w-full h-12 mobile:h-14 text-lg mobile:text-base"
-              disabled={loading}
-            >
-              {loading ? 'Loading...' : 'Sign In'}
-            </Button>
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+                Password
+              </label>
+              <div className="mt-2">
+                <input
+                  id="password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                />
+              </div>
+            </div>
+
+            <div>
+              <button
+                type="submit"
+                disabled={loading}
+                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+              >
+                {loading ? 'Loading...' : 'Sign in'}
+              </button>
+            </div>
           </form>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <Separator className="w-full" />
+          <div className="mt-6">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm font-medium leading-6">
+                <span className="bg-white px-6 text-gray-900">Or continue with</span>
+              </div>
             </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-background px-2 text-muted-foreground">
-                Or continue with
-              </span>
+
+            <div className="mt-6">
+              <button
+                onClick={() => handleOAuthSignIn('github')}
+                disabled={loading}
+                className="flex w-full items-center justify-center gap-3 rounded-md bg-[#24292F] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]"
+              >
+                <Github className="h-5 w-5" />
+                <span className="text-sm font-semibold leading-6">GitHub</span>
+              </button>
             </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-3">
-            <Button
-              variant="outline"
-              className={`h-12 mobile:h-14 text-lg mobile:text-base ${
-                isTouchDevice ? 'touch-manipulation' : ''
-              }`}
-              onClick={() => handleOAuthSignIn('github')}
-              disabled={loading}
-            >
-              <Github className="mr-2 h-5 w-5" />
-              Github
-            </Button>
-          </div>
-
-          {error && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertDescription>{error}</AlertDescription>
-            </Alert>
-          )}
-
-          {message && (
-            <Alert className="mt-4">
-              <AlertDescription>{message}</AlertDescription>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 } 

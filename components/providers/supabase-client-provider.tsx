@@ -1,13 +1,19 @@
 'use client'
 
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import createClient from '@/utils/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
-import type { SupabaseClient, User, Session } from '@supabase/auth-helpers-nextjs'
+import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types/supabase'
 
+type SupabaseClient = ReturnType<typeof createBrowserClient<Database>>
+type UserResponse = Awaited<ReturnType<SupabaseClient['auth']['getUser']>>
+type SessionResponse = Awaited<ReturnType<SupabaseClient['auth']['getSession']>>
+type User = NonNullable<UserResponse['data']['user']>
+type Session = NonNullable<SessionResponse['data']['session']>
+
 type SupabaseContext = {
-  supabase: SupabaseClient<Database>
+  supabase: SupabaseClient
   user: User | null
   isLoading: boolean
   session: Session | null
@@ -21,9 +27,9 @@ export default function SupabaseProvider({
   session: initialSession,
 }: {
   children: React.ReactNode
-  session: Session | null
+  session: NonNullable<SessionResponse['data']['session']> | null
 }) {
-  const [supabase] = useState(() => createClientComponentClient<Database>())
+  const [supabase] = useState(() => createClient())
   const [user, setUser] = useState<User | null>(initialSession?.user ?? null)
   const [session, setSession] = useState<Session | null>(initialSession)
   const [isLoading, setIsLoading] = useState(!initialSession)
@@ -90,7 +96,7 @@ export default function SupabaseProvider({
         setUser(newSession?.user ?? null)
         setSession(newSession)
         if (pathname === '/auth/signin' || pathname === '/auth/signup') {
-          router.push('/dashboard')
+          router.push('/')
         }
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
@@ -105,9 +111,14 @@ export default function SupabaseProvider({
         await refreshUser()
       }
 
-      // Only refresh if we're not on a 404 page and not during auth transitions
-      if (!pathname.includes('404') && !pathname.includes('/auth/')) {
-        router.refresh()
+      // Only refresh on sign in/out and avoid refreshing on error pages
+      if (
+        (event === 'SIGNED_IN' || event === 'SIGNED_OUT') &&
+        !pathname.includes('404') && 
+        !pathname.includes('/auth/') &&
+        !pathname.includes('/error')
+      ) {
+        router.replace(pathname)
       }
     })
 

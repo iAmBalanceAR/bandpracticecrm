@@ -1,68 +1,51 @@
-import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
-import { createCheckoutSession, createOrRetrieveCustomer } from '@/utils/stripe'
-import type { Database } from '@/types/supabase'
+import { stripe, createOrRetrieveCustomer } from '@/utils/stripe'
 
-export async function GET(request: Request) {
+interface CheckoutRequest {
+  priceId: string
+}
+
+export async function POST(request: Request) {
   try {
-    const { searchParams } = new URL(request.url)
-    const priceId = searchParams.get('priceId')
-
-    if (!priceId) {
-      return NextResponse.json(
-        { message: 'Price ID is required' },
-        { status: 400 }
-      )
-    }
-
-    const cookieStore = cookies()
-    const supabase = createRouteHandlerClient<Database>({ cookies: () => cookieStore })
-
+    const supabase = createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
 
     if (userError || !user) {
-      return NextResponse.json(
-        { message: 'Unauthorized' },
-        { status: 401 }
-      )
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
+
+    const { priceId } = await request.json() as CheckoutRequest
+
+    if (!priceId) {
+      return new NextResponse('Price ID is required', { status: 400 })
     }
 
     // Get or create customer
-    const customerId = await createOrRetrieveCustomer(
-      user.id,
-      user.email!,
-      user.user_metadata?.full_name
-    )
+    const customerId = await createOrRetrieveCustomer(user.id, user.email!, user.user_metadata?.full_name)
 
-    // Create checkout session
-    const checkoutSession = await createCheckoutSession(
-      customerId,
-      priceId,
-      process.env.NEXT_PUBLIC_SITE_URL!
-    )
-
-    if (!checkoutSession?.url) {
-      return NextResponse.json(
-        { message: 'Failed to create checkout session' },
-        { status: 500 }
-      )
-    }
-
-    // Log the session details for debugging
-    console.log('Checkout Session Created:', {
-      id: checkoutSession.id,
-      url: checkoutSession.url,
-      customerId,
-      priceId
+    // Create a checkout session
+    const session = await stripe.checkout.sessions.create({
+      customer: customerId,
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: 'subscription',
+      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/account/billing?success=true`,
+      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing?canceled=true`,
+      subscription_data: {
+        metadata: {
+          supabase_user_id: user.id,
+        },
+      },
     })
 
-    return NextResponse.json({ url: checkoutSession.url })
-  } catch (error: any) {
-    console.error('Error in checkout route:', error)
-    return NextResponse.json(
-      { message: error.message || 'Internal server error' },
-      { status: 500 }
-    )
+    return NextResponse.json({ sessionId: session.id })
+  } catch (error) {
+    console.error('Checkout error:', error)
+    return new NextResponse('Internal Error', { status: 500 })
   }
 } 

@@ -17,7 +17,12 @@ export default function LayoutWrapper({
   const { user } = useSupabase()
 
   const hiddenSidebarPaths = ['/splash', '/auth/signin', '/auth/signup']
-  const showSidebar = !hiddenSidebarPaths.includes(pathname) && !!user
+  const showSidebar = !hiddenSidebarPaths.includes(pathname || '') && !!user
+
+  // For 404 pages, just show the content without the layout
+  if (!pathname) {
+    return <>{children}</>
+  }
 
   // Preserve existing layout while auth is loading
   if (loading) {

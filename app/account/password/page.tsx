@@ -1,13 +1,10 @@
 import React from 'react'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import ChangePasswordForm from '@/components/account/change-password-form'
-import type { Database } from '@/types/supabase'
 
 export default async function ChangePasswordPage() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore })
+  const supabase = createClient()
   
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 

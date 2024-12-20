@@ -1,13 +1,19 @@
-import { headers } from 'next/headers'
 import { NextResponse } from 'next/server'
 import { stripe } from '@/utils/stripe'
-import { createClient } from '@supabase/supabase-js'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '@/types/supabase'
 import type { Stripe } from 'stripe'
 
-const supabase = createClient<Database>(
+// Create a Supabase client specifically for webhooks
+const supabase = createSupabaseClient<Database>(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY!
+  process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use service role key for admin access
+  {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+    }
+  }
 )
 
 const relevantEvents = new Set([
@@ -146,18 +152,18 @@ async function upsertSubscriptionRecord(subscription: Stripe.Subscription, custo
   }
 }
 
-export async function POST(request: Request) {
-  const body = await request.text()
-  const sig = headers().get('Stripe-Signature')
+export async function POST(req: Request) {
+  const body = await req.text()
+  const signature = req.headers.get('stripe-signature')
 
   let event: Stripe.Event
 
   try {
-    if (!sig) throw new Error('No signature')
+    if (!signature) throw new Error('No signature')
     
     event = stripe.webhooks.constructEvent(
       body,
-      sig,
+      signature,
       process.env.STRIPE_WEBHOOK_SECRET!
     )
   } catch (err: any) {
@@ -190,8 +196,14 @@ export async function POST(request: Request) {
             subscription.customer as string
           ) as Stripe.Customer
 
+          const userId = customer.metadata.supabase_user_id
+          if (!userId) {
+            console.error('No supabase_user_id found in customer metadata')
+            return new NextResponse('Missing user ID in metadata', { status: 400 })
+          }
+
           // Update the subscription record
-          await upsertSubscriptionRecord(subscription, customer.metadata.supabaseUUID)
+          await upsertSubscriptionRecord(subscription, userId)
 
           // Also update the profile subscription status
           const status = subscription.status
@@ -203,7 +215,7 @@ export async function POST(request: Request) {
                 subscription_price_id: subscription.items.data[0].price.id,
                 subscription_id: subscription.id,
               })
-              .eq('id', customer.metadata.supabaseUUID)
+              .eq('id', userId)
           }
           break
         default:

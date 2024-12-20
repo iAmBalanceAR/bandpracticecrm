@@ -13,7 +13,7 @@ const nextConfig = {
     }
     config.plugins.push(new CaseSensitivePathsPlugin())
     return config
-  }
+  },
 }
 
 module.exports = nextConfig 

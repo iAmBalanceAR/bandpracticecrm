@@ -1,7 +1,7 @@
 import Stripe from 'stripe'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2024-11-20.acacia' as const,
+  apiVersion: '2023-10-16' as const,
   typescript: true,
 })
 
@@ -15,14 +15,22 @@ export async function createOrRetrieveCustomer(
   })
 
   if (customers.data.length > 0) {
-    return customers.data[0].id
+    const customer = customers.data[0]
+    if (!customer.metadata.supabase_user_id) {
+      await stripe.customers.update(customer.id, {
+        metadata: {
+          supabase_user_id: uuid,
+        },
+      })
+    }
+    return customer.id
   }
 
   const customer = await stripe.customers.create({
     email,
     name,
     metadata: {
-      supabaseUUID: uuid,
+      supabase_user_id: uuid,
     },
   })
 

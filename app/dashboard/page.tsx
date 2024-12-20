@@ -1,12 +1,11 @@
 import React from 'react'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
-import type { Database } from '@/types/supabase'
+import { Button } from '@/components/ui/button'
+import Link from 'next/link'
 
 export default async function Dashboard() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore })
+  const supabase = createClient()
   
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
@@ -21,13 +20,13 @@ export default async function Dashboard() {
     .single()
 
   return (
-    <div className="min-h-screen ">
+    <div className="min-h-screen">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
           <h1 className="text-3xl font-bold text-white">Dashboard</h1>
           
           <div className="mt-6">
-            <div className=" bg-[#111c44] shadow overflow-hidden sm:rounded-lg">
+            <div className="bg-[#111c44] shadow overflow-hidden sm:rounded-lg">
               <div className="px-4 py-5 sm:px-6">
                 <h3 className="text-xl font-mono leading-6 font-medium text-white">
                   Account Information
@@ -40,9 +39,9 @@ export default async function Dashboard() {
                     <dd className="mt-1 text-sm text-white">{user.email}</dd>
                   </div>
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-white">Subscription Status</dt>
+                    <dt className="text-sm font-medium text-white">Profile Status</dt>
                     <dd className="mt-1 text-sm text-white">
-                      {profile?.subscription_status || 'No active subscription'}
+                      Active
                     </dd>
                   </div>
                 </dl>

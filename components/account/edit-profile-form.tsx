@@ -1,8 +1,8 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import createClient from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -24,32 +24,52 @@ interface EditProfileFormProps {
 
 export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFormProps) {
   const [loading, setLoading] = useState(false)
-  const [fullName, setFullName] = useState(user?.user_metadata?.full_name || '')
-  const [avatarUrl, setAvatarUrl] = useState(user?.user_metadata?.avatar_url || '')
+  const [fullName, setFullName] = useState('')
+  const [avatarUrl, setAvatarUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [success, setSuccess] = useState(false)
   const router = useRouter()
-  const supabase = createClientComponentClient<Database>()
+  const supabase = createClient()
+
+  useEffect(() => {
+    if (user) {
+      setFullName(user?.user_metadata?.full_name || '')
+      setAvatarUrl(user?.user_metadata?.avatar_url || '')
+    }
+  }, [user])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError(null)
-    
+    setSuccess(false)
+
     try {
       const { error: updateError } = await supabase.auth.updateUser({
         data: {
           full_name: fullName,
           avatar_url: avatarUrl,
-        },
+        }
       })
 
       if (updateError) throw updateError
 
+      // Update profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .update({
+          full_name: fullName,
+          avatar_url: avatarUrl,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', user?.id)
+
+      if (profileError) throw profileError
+
       setSuccess(true)
       setTimeout(() => {
-        onClose()
         router.refresh()
+        onClose()
       }, 1000)
     } catch (error: any) {
       setError(error.message)
@@ -58,75 +78,9 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
     }
   }
 
-  const formContent = (
-    <form onSubmit={handleSubmit} className="space-y-6">
-      {error && (
-        <Alert variant="destructive" className="bg-red-900 border-red-600">
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-      
-      {success && (
-        <Alert className="bg-green-900 border-green-600">
-          <AlertDescription>Profile updated successfully! Redirecting...</AlertDescription>
-        </Alert>
-      )}
-
-      <div className="space-y-2">
-        <Label htmlFor="email" className="text-gray-400">Email</Label>
-        <Input
-          id="email"
-          type="email"
-          value={user.email}
-          disabled
-          className="bg-[#1B2559] border-blue-800 text-gray-400"
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="fullName" className="text-gray-400">Full Name</Label>
-        <Input
-          id="fullName"
-          type="text"
-          value={fullName}
-          onChange={(e) => setFullName(e.target.value)}
-          placeholder="Enter your full name"
-          className="bg-[#1B2559] border-blue-800 text-white"
-          disabled={loading}
-        />
-      </div>
-
-      <div className="space-y-2">
-        <Label htmlFor="avatarUrl" className="text-gray-400">Avatar URL</Label>
-        <Input
-          id="avatarUrl"
-          type="url"
-          value={avatarUrl}
-          onChange={(e) => setAvatarUrl(e.target.value)}
-          placeholder="Enter your avatar URL"
-          className="bg-[#1B2559] border-blue-800 text-white"
-          disabled={loading}
-        />
-      </div>
-
-      <div className="flex justify-end space-x-2 mt-6">
-        <Button
-          variant="destructive"
-          onClick={onClose}
-          type="button"
-        >
-          Cancel
-        </Button>
-        <Button
-          type="submit"
-          className="bg-green-600 hover:bg-green-700"
-          disabled={loading}
-        >
-          {loading ? "Saving..." : "Save Changes"}
-        </Button>
-      </div>
-    </form>
-  )
+  if (!user) {
+    return null
+  }
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
@@ -142,7 +96,74 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
             <span className="sr-only">Close</span>
           </Button>
         </DialogHeader>
-        {formContent}
+
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {error && (
+            <Alert variant="destructive" className="bg-red-900 border-red-600">
+              <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+          
+          {success && (
+            <Alert className="bg-green-900 border-green-600">
+              <AlertDescription>Profile updated successfully! Redirecting...</AlertDescription>
+            </Alert>
+          )}
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="text-gray-400">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={user?.email || ''}
+              disabled
+              className="bg-[#1B2559] border-blue-800 text-gray-400"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fullName" className="text-gray-400">Full Name</Label>
+            <Input
+              id="fullName"
+              type="text"
+              value={fullName}
+              onChange={(e) => setFullName(e.target.value)}
+              placeholder="Enter your full name"
+              className="bg-[#1B2559] border-blue-800 text-white"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="avatarUrl" className="text-gray-400">Avatar URL</Label>
+            <Input
+              id="avatarUrl"
+              type="url"
+              value={avatarUrl}
+              onChange={(e) => setAvatarUrl(e.target.value)}
+              placeholder="Enter your avatar URL"
+              className="bg-[#1B2559] border-blue-800 text-white"
+              disabled={loading}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 mt-6">
+            <Button
+              variant="destructive"
+              onClick={onClose}
+              type="button"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="submit"
+              className="bg-green-600 hover:bg-green-700"
+              disabled={loading}
+            >
+              {loading ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   )

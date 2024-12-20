@@ -1,41 +1,43 @@
+"use client"
+
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
 export default function NotFound() {
   return (
-    <div className="min-h-full flex items-center justify-center bp-4">
-      <div className="flex flex-col-reverse md:flex-row items-center gap-8">
-        <div className="flex-1 animate-in slide-in-from-left duration-500">
+    <div className="min-h-screen bg-[#0f1729] flex items-center justify-center p-4">
+      <div className="flex flex-col-reverse md:flex-row items-center gap-12 max-w-7xl mx-auto">
+        <div className="flex-1">
           <img 
-            className="w-full h-screen mx-auto" 
+            className="w-full max-w-xl mx-auto" 
             src="/images/404-error-robot.svg" 
-            alt="404 Error Illustration" 
+            alt="404 Error Robot" 
           />
         </div>
-        <div className="flex-1 text-center md:text-left animate-in fade-in slide-in-from-right duration-500">
-          <h1 className="text-4xl md:text-5xl font-black text-white mb-4 text-nowrap">
+        <div className="flex-1 text-center md:text-left">
+          <h1 className="text-5xl md:text-6xl font-black text-white mb-4">
             Page Not Found
           </h1>
-          <div className="w-16 h-1 bg-primary my-4 md:my-6 mx-auto md:mx-0" />
-          <p className="text-lg text-gray-400 mb-8">
-            err:PageNotFound_010PNF236
+          <div className="w-24 h-1 bg-[#008ffb] my-6 mx-auto md:mx-0" />
+          <p className="text-xl text-gray-300 mb-8">
+            The page you're looking for has drifted into a black hole. Let's get you back on track!
           </p>
-          <div className="space-y-4 animate-in fade-in slide-in-from-bottom duration-700 delay-200">
-            <Link href="/auth/signin">
+          <div className="space-x-4">
+            <Link href="/" prefetch={false}>
               <Button 
-                className="w-full md:w-auto bg-primary hover:bg-primary/90 text-white transition-all hover:scale-105"
+                className="bg-[#008ffb] hover:bg-[#008ffb]/90 text-white px-8 py-6 text-lg"
                 size="lg"
               >
-                Sign In
+                Return Home
               </Button>
             </Link>
-            <Link href="/" className="block md:inline-block mt-4 md:mt-0 md:ml-4">
+            <Link href="/contact" prefetch={false}>
               <Button 
                 variant="outline"
-                className="w-full md:w-auto transition-all hover:scale-105"
+                className="border-[#008ffb] text-[#008ffb] hover:bg-[#008ffb]/10 px-8 py-6 text-lg"
                 size="lg"
               >
-                Go Home
+                Contact Support
               </Button>
             </Link>
           </div>

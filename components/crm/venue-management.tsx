@@ -41,15 +41,8 @@ export default function VenueManagement() {
   const [venues, setVenues] = useState<Venue[]>(mockVenues);
   const [searchTerm, setSearchTerm] = useState('');
   const [isFormVisible, setIsFormVisible] = useState(false);
-  const [isLoaded, setIsLoaded] = useState(false);
 
-  React.useEffect(() => {
-    setIsLoaded(true);
-  }, []);
-
-  const cardHoverClass = isLoaded
-    ? "transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-md hover:shadow-green-400/50"
-    : "";
+  const cardHoverClass = "opacity-0 transition-all duration-300 ease-in-out transform hover:-translate-y-1 hover:shadow-md hover:shadow-green-400/50 motion-safe:animate-fadeIn";
 
   return (
     <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
@@ -85,9 +78,10 @@ export default function VenueManagement() {
             {venues.map((venue) => (
               <motion.div
                 key={venue.id}
-                initial={{ opacity: 1, x: 0 }}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
                 whileHover={{ scale: 1.01 }}
-                exit={{ opacity: 0, x: 0 }}
                 className={`bg-[#1B2559] border-blue-800 border p-4 rounded-md mb-4 relative ${cardHoverClass}`}
               >
                 <div className="absolute top-2 right-2 space-x-2">

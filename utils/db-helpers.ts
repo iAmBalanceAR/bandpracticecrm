@@ -1,17 +1,55 @@
-import { createClientComponentClient } from '@supabase/auth-helpers-nextjs'
+import createClient from '@/utils/supabase/client'
 import type { Database } from '@/types/supabase'
 
-type GigRow = Database['public']['Tables']['gigs']['Row']
-type GigInsert = Database['public']['Tables']['gigs']['Insert']
-type GigUpdate = Database['public']['Tables']['gigs']['Update']
+export type GigStatus = 'pending' | 'confirmed' | 'completed' | 'cancelled'
 
-export type Gig = GigRow
+export interface Gig {
+  id: string
+  created_at?: string
+  updated_at?: string
+  user_id: string
+  
+  // Basic gig info
+  title: string
+  gig_status: GigStatus
+  gig_date: string
+  gig_details?: string
+  
+  // Venue information
+  venue: string
+  venue_address: string
+  venue_city: string
+  venue_state: string
+  venue_zip: string
+  
+  // Contact information
+  contact_name: string
+  contact_email?: string
+  contact_phone?: string
+  
+  // Times
+  load_in_time: string
+  sound_check_time: string
+  set_time: string
+  set_length: string
+  
+  // Crew and amenities
+  crew_hands_in: boolean
+  crew_hands_out: boolean
+  meal_included: boolean
+  hotel_included: boolean
+  
+  // Financial information
+  deposit_amount: number
+  deposit_paid: boolean
+  contract_total: number
+  open_balance: number
+}
 
 export const dbHelpers = {
-  // Get all gigs for the current user
   getGigs: async (): Promise<Gig[]> => {
-    const supabase = createClientComponentClient<Database>()
-    const { data: gigs, error } = await supabase
+    const supabase = createClient()
+    const { data, error } = await supabase
       .from('gigs')
       .select('*')
       .order('gig_date', { ascending: true })
@@ -21,36 +59,37 @@ export const dbHelpers = {
       throw error
     }
 
-    return gigs
+    return data || []
   },
 
-  // Save or update a gig
-  saveGig: async (gig: Omit<GigInsert, 'user_id'>) => {
-    const supabase = createClientComponentClient<Database>()
-    
-    // Convert date and time formats to match database schema
-    const formattedGig: GigInsert = {
-      title: gig.title,
-      gig_date: gig.gig_date,
-      venue: gig.venue || '',
-      venue_address: gig.venue_address || '',
-      venue_city: gig.venue_city || '',
-      venue_state: gig.venue_state || '',
-      venue_zip: gig.venue_zip || '',
-      contact_name: gig.contact_name || '',
-      contact_email: gig.contact_email || '',
-      contact_phone: gig.contact_phone || '',
-      load_in_time: gig.load_in_time || '',
-      set_time: gig.set_time || '',
-      set_length: gig.set_length || '',
-      gig_details: gig.gig_details || '',
-      meal_included: gig.meal_included || false,
-      hotel_included: gig.hotel_included || false,
-      deposit_amount: gig.deposit_amount || 0,
-      deposit_paid: gig.deposit_paid || false,
-      total_payout: gig.total_payout || 0,
+  getGig: async (id: string): Promise<Gig | null> => {
+    const supabase = createClient()
+    const { data, error } = await supabase
+      .from('gigs')
+      .select('*')
+      .eq('id', id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching gig:', error)
+      throw error
     }
 
+    return data
+  },
+
+  saveGig: async (gig: Partial<Gig>): Promise<Gig> => {
+    const supabase = createClient()
+    
+    // Format dates and times
+    const formattedGig = {
+      ...gig,
+      gig_date: gig.gig_date ? new Date(gig.gig_date).toISOString().split('T')[0] : undefined,
+      load_in_time: gig.load_in_time || undefined,
+      sound_check_time: gig.sound_check_time || undefined,
+      set_time: gig.set_time || undefined,
+    }
+    
     if (gig.id) {
       // Update existing gig
       const { data, error } = await supabase
@@ -68,9 +107,25 @@ export const dbHelpers = {
       return data
     } else {
       // Insert new gig
+      const { data: userData, error: userError } = await supabase.auth.getUser()
+      if (userError) throw userError
+
+      const newGig = {
+        ...formattedGig,
+        user_id: userData.user.id,
+        gig_status: 'pending' as GigStatus,
+        deposit_amount: formattedGig.deposit_amount || 0,
+        contract_total: formattedGig.contract_total || 0,
+        open_balance: formattedGig.open_balance || 0,
+        crew_hands_in: formattedGig.crew_hands_in || false,
+        crew_hands_out: formattedGig.crew_hands_out || false,
+        meal_included: formattedGig.meal_included || false,
+        hotel_included: formattedGig.hotel_included || false,
+      }
+
       const { data, error } = await supabase
         .from('gigs')
-        .insert(formattedGig)
+        .insert(newGig)
         .select()
         .single()
 
@@ -83,9 +138,8 @@ export const dbHelpers = {
     }
   },
 
-  // Delete a gig
-  deleteGig: async (id: string) => {
-    const supabase = createClientComponentClient<Database>()
+  deleteGig: async (id: string): Promise<void> => {
+    const supabase = createClient()
     const { error } = await supabase
       .from('gigs')
       .delete()

@@ -1,7 +1,6 @@
 import './globals.css'
 import type { Metadata, Viewport } from 'next'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import SupabaseClientProvider from '@/components/providers/supabase-client-provider'
 import MobileProvider from '@/components/providers/mobile-provider'
 import type { Database } from '@/types/supabase'
@@ -19,11 +18,15 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Band Practice Agent',
   description: 'Your band practice companion',
-  appleWebApp: {
-    capable: true,
-    statusBarStyle: 'default',
-    title: 'Band Practice Agent',
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+    viewportFit: 'cover',
   },
+  themeColor: '#000000',
+  metadataBase: new URL('http://localhost:3000'),
   formatDetection: {
     telephone: true,
     date: true,
@@ -40,8 +43,7 @@ interface RootLayoutProps {
 }
 
 async function getSupabaseSession() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore })
+  const supabase = createClient()
   
   try {
     const [userResponse, sessionResponse] = await Promise.all([
@@ -61,21 +63,15 @@ async function getSupabaseSession() {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const { user, session, error } = await getSupabaseSession()
-
-  if (error) {
-    console.error('Error getting user:', error)
-  }
+  const { session } = await getSupabaseSession()
 
   return (
-    <html lang="en" className="h-full antialiased">
-      <body className="min-h-full bg-black text-base selection:bg-primary selection:text-white">
+    <html lang="en" className="dark">
+      <body className="min-h-screen bg-background font-sans antialiased">
         <ClientErrorBoundary>
           <SupabaseClientProvider session={session}>
             <MobileProvider>
-              <div className="flex min-h-full flex-col">
-                {children}
-              </div>
+              {children}
             </MobileProvider>
           </SupabaseClientProvider>
         </ClientErrorBoundary>

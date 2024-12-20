@@ -1,10 +1,8 @@
 import React from 'react'
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
-import { cookies } from 'next/headers'
+import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { createBillingPortalSession } from '@/utils/stripe'
-import type { Database } from '@/types/supabase'
 
 async function handleManageSubscription(customerStripeId: string) {
   'use server'
@@ -28,8 +26,7 @@ async function handleManageSubscription(customerStripeId: string) {
 }
 
 export default async function BillingPage() {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({ cookies: () => cookieStore })
+  const supabase = createClient()
   
   const { data: { user }, error: userError } = await supabase.auth.getUser()
 
@@ -39,44 +36,43 @@ export default async function BillingPage() {
 
   const { data: profile } = await supabase
     .from('profiles')
-    .select('*')
+    .select('stripe_customer_id, subscription_status')
     .eq('id', user.id)
     .single()
 
-  if (!profile) {
-    redirect('/account')
-  }
-
-  if (!profile.stripe_customer_id) {
-    redirect('/pricing')
-  }
-
   return (
     <div className="min-h-screen bg-background py-12">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-card rounded-lg shadow p-6">
-          <h2 className="text-2xl font-bold text-card-foreground mb-6">Billing Management</h2>
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium text-muted-foreground">Subscription Status</label>
-              <p className="mt-1 text-foreground capitalize">
-                {profile.subscription_status ? (
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-green-100 text-green-800">
-                    {profile.subscription_status}
-                  </span>
-                ) : (
-                  'No active subscription'
-                )}
-              </p>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="bg-card rounded-lg shadow overflow-hidden">
+          <div className="px-4 py-5 sm:p-6">
+            <h2 className="text-2xl font-bold text-card-foreground">Billing & Subscription</h2>
+            <div className="mt-6 border-t border-border pt-6">
+              <dl className="divide-y divide-border">
+                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-sm font-medium text-card-foreground">Subscription Status</dt>
+                  <dd className="mt-1 text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
+                    {profile?.subscription_status || 'No active subscription'}
+                  </dd>
+                </div>
+
+                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
+                  <dt className="text-sm font-medium text-card-foreground">Actions</dt>
+                  <dd className="mt-1 text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
+                    {profile?.stripe_customer_id ? (
+                      <form action={handleManageSubscription.bind(null, profile.stripe_customer_id)}>
+                        <Button type="submit">
+                          Manage Subscription
+                        </Button>
+                      </form>
+                    ) : (
+                      <Button asChild>
+                        <a href="/pricing">View Plans</a>
+                      </Button>
+                    )}
+                  </dd>
+                </div>
+              </dl>
             </div>
-            <form action={async () => {
-              'use server'
-              await handleManageSubscription(profile.stripe_customer_id!)
-            }}>
-              <Button type="submit">
-                Manage Subscription in Stripe
-              </Button>
-            </form>
           </div>
         </div>
       </div>
