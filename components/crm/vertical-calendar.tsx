@@ -274,7 +274,7 @@ const VerticalCalendar = () => {
     return { year, month, days, firstDayOfMonth }
   }
 
-  const renderMonth = (date: Date) => {
+  const renderMonth = (date: Date) => {                                                                                                                             
     const { year, month, days, firstDayOfMonth } = getMonthData(date)
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -407,7 +407,7 @@ const VerticalCalendar = () => {
         orientation="vertical"
         className=""
       >
-        <CarouselContent className="-mt-1 max-h-[380px] m-auto">
+        <CarouselContent className="-mt-1 max-h-[401px] m-auto">
           {[0, 1, 2].map((_, index) => {
             const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + index, 1)
             return (
@@ -421,7 +421,7 @@ const VerticalCalendar = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-1/2 top-3 -translate-x-1/2 -translate-y-full z-10 h-8 w-8 hover:bg-transparent"
+        className="absolute left-1/2 top-4 -translate-x-1/2 -translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8 hover:text-yellow-400"
         onClick={() => {
           api?.scrollPrev()
           const newDate = new Date(currentDate)
@@ -429,12 +429,12 @@ const VerticalCalendar = () => {
           setCurrentDate(newDate)
         }}
       >
-        <ChevronUp color="white" className="h-6 w-6 text-gray-400 transition-colors hover:text-white" />
+        <ChevronUp />
       </Button>
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full z-10 hover:bg-transparent"
+        className="absolute bottom-3 left-1/2 -translate-x-1/2 translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8  hover:text-yellow-400"
         onClick={() => {
           api?.scrollNext()
           const newDate = new Date(currentDate)
@@ -442,7 +442,7 @@ const VerticalCalendar = () => {
           setCurrentDate(newDate)
         }}
       >
-        <ChevronDown color="white" size={30} />
+        <ChevronDown />
       </Button>
       <GigDetailsModal
         gig={selectedGig}

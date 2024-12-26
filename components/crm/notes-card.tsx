@@ -6,7 +6,7 @@ export default function NotesCard() {
   return (
  <CustomCard 
       title="Notes / Reminders"
-      cardColor="[#d83b34]"
+      cardColor="[#ff9920]"
     >
       <NotesAndRemindersCard />
     </CustomCard>

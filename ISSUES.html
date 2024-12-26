@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<body>
+<h2>Tailwind CSS: Inconsistent Behavior with Dynamic Color Classes</h2>
+
+<h3>Issue Description</h3>
+<p>When using Tailwind CSS with dynamic color classes, certain hex color codes work perfectly while others fail to apply, despite using identical syntax and implementation.</p>
+
+<h3>Working Example</h3>
+<pre>
+cardColor="[#008ffb]"  // Works perfectly for both text-[#008ffb] and bg-[#008ffb]
+cardColor="[#ff9920]"  // Works perfectly
+cardColor="[#d83b34]"  // Works perfectly
+</pre>
+
+<h3>Non-Working Example</h3>
+<pre>
+cardColor="[#FBCFE8]"  // Doesn't work
+cardColor="[#E0F2FE]"  // Doesn't work
+cardColor="[#1b2559]"  // Doesn't work
+cardColor="[#111c44]"  // Doesn't work
+</pre>
+
+<h3>Implementation</h3>
+<pre>
+// Component usage
+&lt;CustomCard 
+  title="Saved Venues"
+  cardColor="[#008ffb]"
+  addclassName=""
+&gt;
+
+// Component implementation
+&lt;h2 className={`text-${cardColor} text-shadow-sm text-3xl font-mono`}&gt;
+  {title} 
+&lt;/h2&gt;
+&lt;div className={`h-[1px] -mt-1 mb-4 bg-${cardColor}`}&gt;&nbsp;&lt;/div&gt;
+</pre>
+
+<h3>Observations</h3>
+<ul>
+  <li>The syntax is identical for all color codes</li>
+  <li>Some colors work for both text and background</li>
+  <li>Some colors work partially (e.g., #d1f5f0 worked for background but not text)</li>
+  <li>Case sensitivity doesn't affect the outcome</li>
+  <li>The colors that work are already being used elsewhere in the project</li>
+  <li>The issue persists even when the non-working colors are used directly in other Tailwind classes in the same project</li>
+</ul>
+
+<h3>Questions</h3>
+<ol>
+  <li>Why do some hex colors work perfectly while others fail when using identical syntax?</li>
+  <li>Is there a pattern to which colors work and which don't?</li>
+  <li>Could this be related to how Tailwind processes dynamic class names with arbitrary values?</li>
+  <li>Is there a difference in how Tailwind handles color codes in its internal color processing versus arbitrary values?</li>
+</ol>
+
+<h3>Environment</h3>
+<ul>
+  <li>Next.js</li>
+  <li>Tailwind CSS</li>
+  <li>TypeScript</li>
+  <li>shadcn/ui components</li>
+</ul>
+
+<h3>Workaround</h3>
+<p>Currently using known working colors (e.g., #008ffb) as a reliable solution, but would like to understand the root cause of this behavior.</p>
+
+</body>
+</html> 

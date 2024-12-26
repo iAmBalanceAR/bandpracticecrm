@@ -64,7 +64,7 @@ export default function NotesAndReminders() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div>
           <h3 className="text-lg mb-1 font-semibold">Notes</h3>
-          <div className="h-[400px]">
+          <div className="">
             <ScrollArea>
               <div className="pr-4">
                 <AnimatePresence>

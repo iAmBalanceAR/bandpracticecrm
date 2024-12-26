@@ -3,7 +3,7 @@
 import React, { useState } from 'react'
 import TourMapCard from "@/components/crm/tour-map-card"
 import GigCalendarCard from "@/components/crm/gig-calendar-card"
-import SuggestedVenuesCard from "@/components/crm/suggested-venues-card"
+import SavedVenuesCard from "@/components/crm/savedVenues"
 import ContactsLeadsCard from "@/components/crm/contacts-leads-card"
 import AnalyticsCard from "@/components/crm/analytics-card"
 import NotesCard from "@/components/crm/notes-card"
@@ -15,13 +15,7 @@ const [errorModalOpen, setErrorModalOpen] = useState(false)
 const [errorMessage, setErrorMessage] = useState('')
 
 
-  const [suggestedVenues, setSuggestedVenues] = React.useState([
-    { id: 1, name: "The Fillmore", type: "Venue", status: "New", priority: "High" },
-    { id: 2, name: "Red Rocks Amphitheatre", type: "Venue", status: "Active", priority: "Normal" },
-    { id: 3, name: "Madison Square Garden", type: "Venue", status: "New", priority: "High" },
-    { id: 4, name: "The Ryman Auditorium", type: "Venue", status: "Active", priority: "Normal" },
-    { id: 5, name: "Hollywood Bowl", type: "Venue", status: "New", priority: "High" },
-  ])
+
   const [contactsLeads, setContactsLeads] = React.useState([
     { id: 1, name: "John Doe", email: "johndoe@example.com", type: "Contact", status: "Active", priority: "High" },
     { id: 2, name: "Jane Smith", email: "janesmith@example.com", type: "Lead", status: "New", priority: "Normal" },
@@ -29,10 +23,6 @@ const [errorMessage, setErrorMessage] = useState('')
     { id: 4, name: "Sarah Brown", email: "sarahbrown@example.com", type: "Lead", status: "New", priority: "High" },
     { id: 5, name: "Chris Lee", email: "chrislee@example.com", type: "Contact", status: "Active", priority: "Normal" },
   ])
-
-  const dismissVenue = (id: number) => {
-    setSuggestedVenues(suggestedVenues.filter((venue: { id: number }) => venue.id !== id))
-  }
 
   const dismissContact = (id: number) => {
     setContactsLeads(contactsLeads.filter((contact: { id: number }) => contact.id !== id))
@@ -87,7 +77,7 @@ const [errorMessage, setErrorMessage] = useState('')
       date: "2023-06-14",
       type: "Invitation",
       author: "Bryan",
-      authorInitials: "BR",
+      authorInitials: "BR", 
     },
     {
       id: 3,
@@ -102,21 +92,19 @@ const [errorMessage, setErrorMessage] = useState('')
   return (
     <>
       <div className=" relative float-left max-w-[1200px] mx-auto">
-      <div className="absolute font-mono text-1xl left-4 -top-8 text-blue-300">
-           Band Practice CRM&reg; 
-            </div>
+
 {/* Start Common Heder Component  */} 
-        <header className=" flex items-center justify-between bg-[#0f1729] p-4  h-16">
+        <header className=" flex items-center justify-between  ml-8 pr-0  h-16">
             <h1 className="text-4xl  text-white ">
               <span className=" text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
                 The Lowroad Tour : Dashboard
               </span>
           </h1>
         </header>
-        <div className="clear-both border-[#d83b34] border-b-2 -mt-6 mb-4 ml-4 mr-4 h-4">&nbsp;</div>
+        <div className="clear-both border-[#d83b34] border-b-2 -mt-6 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
 {/* End Common Heder Component  */}
         <main className="clearboth p-4">
-          <div className="w-full">
+          <div className="w-full bg-[#0f1729] p-4">
             <div className="grid gap-6 grid-cols-1 lg:grid-cols-3">
               <div className="lg:col-span-2">
                 <TourMapCard />
@@ -127,7 +115,7 @@ const [errorMessage, setErrorMessage] = useState('')
             </div>  
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
-              <SuggestedVenuesCard venues={suggestedVenues} onDismiss={dismissVenue} />
+              <SavedVenuesCard  />
               <ContactsLeadsCard contacts={contactsLeads} onDismiss={dismissContact} />
             </div>
             <div className="max-w-full mx-auto mt-6">

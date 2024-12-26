@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, GripVertical, Calendar } from 'lucide-react'
+import { Plus, GripVertical, Calendar, Loader2 } from 'lucide-react'
 import { gigHelpers } from '@/utils/db/gigs'
 import { Label } from "@/components/ui/label"
 import createClient from '@/utils/supabase/client'
@@ -75,9 +75,10 @@ interface SortableStopItemProps {
   distance?: number
   onAddToCalendar: (stop: TourStop) => void
   onDelete: (stop: TourStop) => void
+  savingStop: string | null
 }
 
-function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete }: SortableStopItemProps) {
+function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete, savingStop }: SortableStopItemProps) {
   const {
     attributes,
     listeners,
@@ -135,7 +136,11 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete }: 
                 variant="ghost"
                 size="sm"
                 className="text-emerald-400 hover:text-emerald-300"
+                disabled={savingStop === stop.id}
               >
+                {savingStop === stop.id ? (
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                ) : null}
                 Add to Calendar
               </Button>
               <Button
@@ -143,6 +148,7 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete }: 
                 variant="ghost"
                 size="sm"
                 className="text-red-400 hover:text-red-300"
+                disabled={savingStop === stop.id}
               >
                 Delete
               </Button>
@@ -185,6 +191,9 @@ export default function TourManagement() {
     type: 'success'
   });
   const [pendingStop, setPendingStop] = useState<TourStop | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [savingStop, setSavingStop] = useState<string | null>(null)
+  const [calculatingRoute, setCalculatingRoute] = useState(false)
 
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -195,6 +204,7 @@ export default function TourManagement() {
 
   useEffect(() => {
     const loadGigData = async () => {
+      setLoading(true)
       try {
         // First, get all gigs and sort them by date
         const gigs = await gigHelpers.getGigs()
@@ -244,6 +254,8 @@ export default function TourManagement() {
         if (savedStopsString) {
           setTourStops(JSON.parse(savedStopsString))
         }
+      } finally {
+        setLoading(false)
       }
     }
 
@@ -745,29 +757,37 @@ export default function TourManagement() {
                   <div className="border-[#ff9920] border-b-2 -mt-2 mb-4 w-[100%] h-2"></div>
                 </h3>
                 <div className="mt-4">
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragEnd={handleDragEnd}
-                  >
-                    <SortableContext
-                      items={tourStops}
-                      strategy={verticalListSortingStrategy}
+                  {loading ? (
+                    <div className="flex flex-col items-center justify-center min-h-[200px] bg-[#111C44]/50 rounded-lg">
+                      <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+                      <p className="text-muted-foreground">Loading tour stops...</p>
+                    </div>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragEnd={handleDragEnd}
                     >
-                      <ul className="space-y-2">
-                        {tourStops.map((stop, index) => (
-                          <SortableStopItem
-                            key={stop.id}
-                            stop={stop}
-                            index={index}
-                            distance={index > 0 ? routeInfo.distances[index - 1] : undefined}
-                            onAddToCalendar={handleAddToCalendar}
-                            onDelete={handleDeleteStop}
-                          />
-                        ))}
-                      </ul>
-                    </SortableContext>
-                  </DndContext>
+                      <SortableContext
+                        items={tourStops}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <ul className="space-y-2">
+                          {tourStops.map((stop, index) => (
+                            <SortableStopItem
+                              key={stop.id}
+                              stop={stop}
+                              index={index}
+                              distance={index > 0 ? routeInfo.distances[index - 1] : undefined}
+                              onAddToCalendar={handleAddToCalendar}
+                              onDelete={handleDeleteStop}
+                              savingStop={savingStop}
+                            />
+                          ))}
+                        </ul>
+                      </SortableContext>
+                    </DndContext>
+                  )}
                 </div>
                 {routeInfo.totalMileage > 0 && (
                   <div className="mt-4 text-right text-lg font-semibold text-white">
@@ -792,6 +812,14 @@ export default function TourManagement() {
           setFeedbackModal(prev => ({ ...prev, isOpen: false }))
         }}
       />
+      {calculatingRoute && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-[#131d43] p-8 rounded-lg shadow-xl flex flex-col items-center">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+            <p className="text-white">Calculating optimal route...</p>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

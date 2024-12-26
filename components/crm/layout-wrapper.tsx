@@ -5,6 +5,7 @@ import SideMenu from "@/components/crm/side-menu"
 import { usePathname } from "next/navigation"
 import { useAuth } from "@/components/providers/auth-provider"
 import { useSupabase } from "@/components/providers/supabase-client-provider"
+import { Footer } from "@/components/ui/footer"
 
 export default function LayoutWrapper({ 
   children,
@@ -32,9 +33,12 @@ export default function LayoutWrapper({
           <div className="w-72 bg-[#1B2559] animate-pulse" />
         )}
         <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
-          <div className="max-w-[1200px] mx-auto px-4 relative">
-            <div className="pt-10">
+          <div className="max-w-[1200px] mx-auto px-4 relative flex flex-col min-h-screen">
+            <div className="flex-1 pt-0">
               {children}
+            </div>
+            <div className="w-full">
+              <Footer />
             </div>
           </div>
         </div>
@@ -48,9 +52,12 @@ export default function LayoutWrapper({
         <SideMenu sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       )}     
       <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
-        <div className="max-w-[1200px] mx-auto px-4 relative">
-          <div className="pt-10">
+        <div className="max-w-[1200px] mx-auto relative flex flex-col ">
+          <div className="flex-1 pt-4">
             {children}
+          </div>
+          <div className="w-full">
+            <Footer />
           </div>
         </div>
       </div>

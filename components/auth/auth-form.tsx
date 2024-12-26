@@ -66,14 +66,10 @@ export function AuthForm() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-center py-12 sm:px-6 lg:px-8">
-      <div className="sm:mx-auto sm:w-full sm:max-w-md">
-        <h2 className="mt-6 text-center text-2xl font-bold leading-9 tracking-tight">
-          Sign in to your account
-        </h2>
-      </div>
+    <div className="flex min-h-full flex-1 flex-col justify-centersm:px-6 lg:px-8">
 
-      <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-[480px]">
+
+      <div className=" sm:mx-auto sm:w-full sm:max-w-[480px]">
         <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
           <form className="space-y-6" onSubmit={handleSignIn}>
             {error && (
@@ -129,7 +125,7 @@ export function AuthForm() {
             </div>
           </form>
 
-          <div className="mt-6">
+          {/* <div className="mt-6">
             <div className="relative">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200" />
@@ -149,7 +145,7 @@ export function AuthForm() {
                 <span className="text-sm font-semibold leading-6">GitHub</span>
               </button>
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>

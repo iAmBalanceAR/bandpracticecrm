@@ -12,8 +12,8 @@ export default function SignIn() {
           </h2>
           <p className="mt-2 text-sm text-muted-foreground">
             Or{' '}
-            <Link href="/pricing" className="font-medium text-primary hover:text-primary/90 hover:underline">
-              start your 14-day free trial
+            <Link href="/auth/signup" className="font-medium text-primary hover:text-primary/90 hover:underline">
+              Register a new account.
             </Link>
           </p>
         </div>
