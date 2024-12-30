@@ -9,6 +9,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import type { Database } from '@/types/supabase'
 import ChangePasswordForm from '@/components/account/change-password-form'
+import { Card } from '@/components/ui/card'
 
 export default function AccountPage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
@@ -31,11 +32,18 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-card rounded-lg shadow overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <div className="flex items-center justify-between">
+    <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
+      <h1 className="text-4xl font-mono mb-4">
+        <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+          Account Settings
+        </span>
+      </h1>
+      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
+      
+      <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
+        <Card className="bg-[#1B2559] border-blue-800">
+          <div className="p-6">
+            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center space-x-4">
                 <ProfileAvatar 
                   avatarUrl={user?.user_metadata?.avatar_url}
@@ -44,60 +52,61 @@ export default function AccountPage() {
                   iconClassName="h-8 w-8"
                 />
                 <div>
-                  <h2 className="text-2xl font-bold text-card-foreground">Account Settings</h2>
-                  <p className="text-muted-foreground">Manage your account settings and preferences</p>
+                  <h2 className="text-2xl font-bold text-white">{user?.user_metadata?.full_name || user?.email}</h2>
+                  <p className="text-gray-400">{user?.email}</p>
                 </div>
               </div>
-              <Button onClick={handleSignOut} variant="destructive">
+              <Button onClick={handleSignOut} variant="destructive" className="bg-red-900 hover:bg-red-800">
                 Sign Out
               </Button>
             </div>
 
-            <div className="mt-6 border-t border-border pt-6">
-              <dl className="divide-y divide-border">
-                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-sm font-medium text-card-foreground">Profile</dt>
-                  <dd className="mt-1 flex justify-between items-center text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
-                    <span>Update your personal information</span>
-                    <Button
-                      onClick={() => setIsEditProfileOpen(true)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Edit Profile
-                    </Button>
-                  </dd>
+            <div className="space-y-6">
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Profile</h3>
+                  <p className="text-gray-400 text-sm">Update your personal information</p>
                 </div>
+                <Button
+                  onClick={() => setIsEditProfileOpen(true)}
+                  variant="outline"
+                  className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                >
+                  Edit Profile
+                </Button>
+              </div>
 
-                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-sm font-medium text-card-foreground">Password</dt>
-                  <dd className="mt-1 flex justify-between items-center text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
-                    <span>Change your password</span>
-                    <Button
-                      onClick={() => setIsChangePasswordOpen(true)}
-                      variant="outline"
-                      size="sm"
-                    >
-                      Change Password
-                    </Button>
-                  </dd>
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Password</h3>
+                  <p className="text-gray-400 text-sm">Change your password</p>
                 </div>
+                <Button
+                  onClick={() => setIsChangePasswordOpen(true)}
+                  variant="outline"
+                  className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                >
+                  Change Password
+                </Button>
+              </div>
 
-                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-sm font-medium text-card-foreground">Billing</dt>
-                  <dd className="mt-1 flex justify-between items-center text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
-                    <span>Manage your subscription and billing information</span>
-                    <Link href="/account/billing">
-                      <Button variant="outline" size="sm">
-                        Manage Billing
-                      </Button>
-                    </Link>
-                  </dd>
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Billing</h3>
+                  <p className="text-gray-400 text-sm">Manage your subscription and billing information</p>
                 </div>
-              </dl>
+                <Link href="/account/billing">
+                  <Button 
+                    variant="outline"
+                    className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                  >
+                    Manage Billing
+                  </Button>
+                </Link>
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
 
       <EditProfileForm

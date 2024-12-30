@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut } from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -22,7 +22,7 @@ interface SideMenuProps {
 export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps) {
   const { user, supabase } = useSupabase()
   const router = useRouter()
-  const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
+  const pathname = usePathname()
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -126,6 +126,12 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
               <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} text-white text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
                 <LayoutDashboard className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#00e396]`} />
                 {sidebarOpen && <span>Dashboard</span>}
+              </Button>
+            </Link>
+            <Link href="/tour-details" className="block">
+              <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} text-gray-400 text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
+                <Route className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#00e396]`} />
+                {sidebarOpen && <span>Tour Details</span>}
               </Button>
             </Link>
             <Link href="/tour-route" className="block">

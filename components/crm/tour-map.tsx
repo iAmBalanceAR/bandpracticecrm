@@ -3,8 +3,9 @@
 import React, { useEffect, useState, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-import { gigHelpers } from '@/utils/db/gigs'
+import { gigHelpers, type TourStop } from '@/utils/db/gigs'
 import { format } from 'date-fns'
+import { useTour } from '@/components/providers/tour-provider'
 
 // Custom styles to override Leaflet's z-index
 const mapStyles = `
@@ -24,16 +25,6 @@ L.Icon.Default.mergeOptions({
   iconUrl: '/images/marker-icon.png',
   shadowUrl: '/images/marker-shadow.png',
 })
-
-interface TourStop {
-  id: string
-  name: string
-  city: string
-  state: string
-  date: string
-  lat: number
-  lng: number
-}
 
 function MapWrapper() {
   const [map, setMap] = useState<L.Map | null>(null)
@@ -78,50 +69,60 @@ function MapWrapper() {
 
   // Update markers and route when tour stops change
   useEffect(() => {
-    if (!mapRef.current || tourStops.length === 0) return
+    if (map && tourStops.length > 0) {
+      // Clear existing markers and route
+      map.eachLayer((layer) => {
+        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
+          layer.remove()
+        }
+      })
 
-    // Clear existing markers and route
-    mapRef.current.eachLayer((layer) => {
-      if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-        layer.remove()
-      }
-    })
+      // Add markers for each tour stop
+      const coordinates: [number, number][] = []
+      tourStops.forEach((stop) => {
+        const { lat, lng } = stop
+        coordinates.push([lat, lng])
 
-    // Add markers for each stop
-    tourStops.forEach((stop, index) => {
-      L.marker([stop.lat, stop.lng])
-        .bindPopup(`
-          <div class="text-sm">
-            <p class="font-bold">Stop #${index + 1}</p>
-            <p class="font-semibold">${stop.name}</p>
-            <p>${stop.city}, ${stop.state}</p>
-            <p class="text-xs mt-1">${format(new Date(stop.date), 'MMM d, yyyy')}</p>
-          </div>
-        `)
-        .addTo(mapRef.current!)
-    })
-
-    // Fetch and draw route
-    if (tourStops.length > 1) {
-      fetchSequentialRoute(tourStops)
-        .then(routeData => {
-          if (mapRef.current && routeData.length > 0) {
-            L.polyline(routeData, {
-              color: '#008ffb',
-              weight: 3,
-              opacity: 0.7
-            }).addTo(mapRef.current)
-          }
+        const marker = L.marker([lat, lng], {
+          icon: L.divIcon({
+            className: 'custom-marker',
+            html: `<div class="marker-pin"></div>`,
+          })
         })
-        .catch(error => console.error('Error fetching route:', error))
+
+        marker.addTo(map)
+          .bindPopup(`
+            <div class="text-sm">
+              <div class="font-semibold">${stop.name}</div>
+              <div>${stop.city}, ${stop.state}</div>
+              <div>${format(new Date(stop.gig_date), 'MMM d, yyyy')}</div>
+            </div>
+          `)
+      })
+
+      // Draw route between stops
+      if (coordinates.length > 1) {
+        const routeLine = L.polyline(coordinates, {
+          color: '#008ffb',
+          weight: 3,
+          opacity: 0.7
+        }).addTo(map)
+
+        // Fit map bounds to include all markers
+        map.fitBounds(routeLine.getBounds(), { padding: [50, 50] })
+      } else if (coordinates.length === 1) {
+        map.setView(coordinates[0], 8)
+      }
+
+      setRoute(coordinates)
     }
+  }, [map, tourStops])
 
-    // Fit bounds to show all markers
-    const bounds = L.latLngBounds(tourStops.map(stop => [stop.lat, stop.lng]))
-    mapRef.current.fitBounds(bounds, { padding: [50, 50] })
-  }, [tourStops])
-
-  return <div ref={containerRef} className="w-auto h-[400px]" />
+  return (
+    <div className="relative h-[400px] bg-[#0f1729] rounded-lg border border-[#008ffb]">
+      <div ref={containerRef} className="h-full" />
+    </div>
+  )
 }
 
 async function fetchSequentialRoute(stops: TourStop[]): Promise<[number, number][]> {
@@ -152,48 +153,10 @@ async function fetchSequentialRoute(stops: TourStop[]): Promise<[number, number]
   return fullRoute
 }
 
-interface TourMapProps {
-  mode?: 'simple' | 'full'
-}
-
-export default function TourMap({ mode = 'simple' }: TourMapProps) {
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    setMounted(true)
-    return () => setMounted(false)
-  }, [])
-
-  if (!mounted) {
-    return null
-  }
-
-  // Simple mode just shows the map
-  if (mode === 'simple') {
-    return <MapWrapper />
-  }
-
-  // Full mode includes header and entry area
+export default function TourMap() {
   return (
-    <div className="space-y-4">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold">Tour Route Management</h2>
-      </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="md:col-span-2">
-          <MapWrapper />
-        </div>
-        
-        <div className="space-y-4">
-          <div className="bg-[#1B2559] p-4 rounded-lg shadow">
-            <h3 className="text-lg font-semibold mb-2 text-white">Current Tour Stops</h3>
-            <div className="space-y-2">
-              {/* Tour stops will be populated dynamically */}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="h-full">
+      <MapWrapper />
     </div>
   )
 }

@@ -28,6 +28,7 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import CustomSectionHeader from '@/components/common/CustomSectionHeader'
 
 const MapWithNoSSR = dynamic(
   () => import('./map-component'),
@@ -620,24 +621,16 @@ export default function TourManagement() {
   }
 
   return (
-    <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen pb-8">
-      <h1 className="text-4xl font-mono mb-4">
-        <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-          Tour Route Management
-        </span>
-      </h1>
-      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
-      
-      <div className="bg-[#131d43] text-white shadow-sm shadow-green-400 rounded-md border-blue-800 border">
-        <Card className="bg-[#111C44] border-none">
-          <CardHeader>
+    <CustomSectionHeader title="Tour Route Management" underlineColor="#131d43">
+      <Card className="bg-[#111C44] border-none">
+        <CardHeader>
             <CardTitle className="text-3xl font-bold">
               <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
                 Tour Map
               </span>
             </CardTitle>
           </CardHeader>
-          <CardContent>
+        <CardContent>
             <div className="h-[400px] rounded-lg overflow-hidden -z-[99999]">
               <MapWithNoSSR 
                 tourStops={tourStops}
@@ -647,8 +640,8 @@ export default function TourManagement() {
             </div>
           </CardContent>
         </Card>        
-        <Card className="bg-[#111C44] border-none">
-          <CardContent>
+      <Card className="bg-[#111C44] border-none">
+        <CardContent>
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl mb-6">
@@ -778,7 +771,6 @@ export default function TourManagement() {
             </div>
           </CardContent>
         </Card>
-      </div>
       <FeedbackModal
         isOpen={feedbackModal.isOpen}
         onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
@@ -792,6 +784,6 @@ export default function TourManagement() {
           setFeedbackModal(prev => ({ ...prev, isOpen: false }))
         }}
       />
-    </div>
+    </CustomSectionHeader>
   )
 }

@@ -6,6 +6,14 @@ const nextConfig = {
   swcMinify: true,
   images: {
     domains: ['localhost'],
+    remotePatterns: [
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
+        port: '',
+        pathname: '/storage/v1/object/public/**',
+      },
+    ],
   },
   webpack: (config) => {
     config.resolve.alias = {

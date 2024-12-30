@@ -3,7 +3,7 @@
 import LayoutWrapper from '@/components/crm/layout-wrapper'
 import { usePathname } from 'next/navigation'
 import { AuthProvider } from '@/components/providers/auth-provider'
-import SupabaseProvider from '@/components/providers/supabase-client-provider'
+import { TourProvider } from '@/components/providers/tour-provider'
 import { Toaster } from "@/components/ui/toaster"
 
 export default function Template({
@@ -19,11 +19,11 @@ export default function Template({
   }
 
   return (
-    <SupabaseProvider session={null}>
-      <AuthProvider>
+    <AuthProvider>
+      <TourProvider>
         <LayoutWrapper>{children}</LayoutWrapper>
         <Toaster />
-      </AuthProvider>
-    </SupabaseProvider>
+      </TourProvider>
+    </AuthProvider>
   )
 } 

@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useState, useEffect, useCallback } from "react"
-import { Trash2, Plus, Edit2, X, Calendar, Clock, Check, ChevronsUpDown } from 'lucide-react'
+import { Trash2, Plus, Edit2, X, Calendar, Clock, Check, ChevronsUpDown, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -32,7 +32,14 @@ import { useAuth } from "@/components/providers/auth-provider"
 import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation"
 import { useDebounce } from '@/hooks/use-debounce'
 import createClient, { searchVenues } from '@/utils/supabase/client'
-
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
+import CustomSectionHeader from "@/components/common/CustomSectionHeader"
 // Helper functions
 const isValidDate = (date: unknown): date is Date => {
   return date instanceof Date && !isNaN(date.getTime())
@@ -251,13 +258,19 @@ export default function GigManagement() {
       deposit_paid: formData.get("depositPaid") === "on",
       contract_total: Number(formData.get("contractTotal")),
       open_balance: Number(formData.get("openBalance")),
-      gig_status: gigStatus
+      gig_status: gigStatus,
+      updated_at: new Date().toISOString()
     }
 
     try {
       let savedGig: Gig
       if (currentGig) {
         savedGig = await gigHelpers.updateGig(currentGig.id, gigData)
+        // Connect to default tour
+        const supabase = createClient()
+        await supabase.rpc('connect_gig_to_default_tour', {
+          p_gig_id: savedGig.id
+        })
         setFeedbackModal({
           isOpen: true,
           title: 'Success',
@@ -270,6 +283,11 @@ export default function GigManagement() {
           throw new Error('Failed to create gig')
         }
         savedGig = newGig
+        // Connect to default tour
+        const supabase = createClient()
+        await supabase.rpc('connect_gig_to_default_tour', {
+          p_gig_id: savedGig.id
+        })
         setFeedbackModal({
           isOpen: true,
           title: 'Success',
@@ -435,101 +453,121 @@ export default function GigManagement() {
   )
 
   return (
-    <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
-      <h1 className="text-4xl font-mono mb-3">
-        <span className="w-[100%]  text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-          Calander Managment
-        </span>
-      </h1>
-      <div className="border-[#008ffb] border-b-2 -mt-7 mb-8 w-[100%] h-4"></div>
-      <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px]  shadow-sm shadow-green-400 rounded-md border-blue-800 border">
-        
-        {!isFormVisible && (
-          <>
+    <CustomSectionHeader title="Gig Calendar" underlineColor="#131d43">
+      <Card className="bg-[#111C44] border-none p-0 m-0">
+        <CardHeader>
+          <CardTitle className="flex justify-between items-center text-3xl font-bold">
+          <div className=" mb-6">
+            <div className="flex flex-auto  tracking-tight text-3xl">
+              <span className="inline-flex items-center justify-center gap-2 whitespace-nowrap  text-white text-shadow-sm  font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+                Booked Gigs
+              </span>
+            </div>
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
             <Button 
               onClick={handleAddNew}
-              className="mb-4 bg-green-700 text-white hover:bg-green-600 float-right"
+              className="flex flex-auto bg-green-700 text-white hover:bg-green-600  place-items-end mb-4"
             >
               <Plus className="mr-2 h-4 w-4" /> Add New Gig
             </Button>
-            <div className="tracking-tight text-3xl ">
-              <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                Booked Gigs
-              </span>
-            </div>           
-            <div className="overflow-x-auto clear-both">
-              <Table className="w-full border-l border-r border-b border-[#4A5568] text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                <TableHeader>
-                  <TableRow className="bg-black hover:bg-[#1E293B] text-white text-shadow-lg -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Gig Title
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Venue
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Date
-                    </TableHead>
-                    <TableHead className="text-white border-t border-b border-[#4A5568] text-center">
-                      Actions
-                    </TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {gigs.map((gig) => (
-                    <TableRow key={gig.id} className="hover:bg-black border-b border-[#4A5568]">
-                      <TableCell className="font-medium text-gray-200 py-2">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                          <span>{gig.title}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-200 py-2">{gig.venue}</TableCell>
-                      <TableCell className="text-gray-200 py-2 text-center">
-                        {formatDateSafely(gig.gig_date)}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <div className="flex space-x-2 justify-center">
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleEdit(gig)}
-                            className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                          >
-                            <Edit2 className="w-4 h-4" />
-                          </Button>
-                          <Button 
-                            variant="ghost" 
-                            size="sm" 
-                            onClick={() => handleDeleteClick(gig.id)}
-                            className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+          
+
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
             </div>
-          </>
-        )}
-        {isFormVisible && (
-          <div className="bg-[#111C44]  rounded-lg  mx-auto">
-            <div className="flex justify-between items-center mb-4">
-            <h1 className="text-3xl font-mono mb-3">
-            <span className="w-[100%]  text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-              {currentGig ? "Edit Gig" : "Add New Gig"}
-        </span>
-      </h1>
-              <Button variant="ghost" onClick={handleCloseForm}>
-                <X className="h-6 w-6" />
+          ) : !isAuthenticated ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">Please sign in to manage gigs</p>
+            </div>
+          ) : gigs.length === 0 ? (
+            <div className="text-center py-12">
+              <p className="text-gray-400 mb-4">No gigs found</p>
+              <Button 
+                onClick={handleAddNew}
+                className="bg-[#008ffb] hover:bg-[#0070cc]"
+              >
+                Create your first gig
               </Button>
             </div>
+          ) : (
+          <div className="overflow-x-auto">
+            <Table className="w-full border-l border-r border-b border-[#4A5568] text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+              <TableHeader>
+                <TableRow className="bg-black hover:bg-[#1E293B] text-white text-shadow-lg -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+                  <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
+                    Gig Title
+                  </TableHead>
+                  <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
+                    Venue
+                  </TableHead>
+                  <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
+                    Date
+                  </TableHead>
+                  <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
+                    Tour
+                  </TableHead>
+                  <TableHead className="text-white border-t border-b border-[#4A5568] text-center">
+                    Actions
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {gigs.map((gig) => (
+                  <TableRow key={gig.id} className="hover:bg-black border-b border-[#4A5568]">
+                    <TableCell className="font-medium text-gray-200 py-2">
+                      <div className="flex items-center">
+                        <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                        <span>{gig.title}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-gray-200 py-2">{gig.venue}</TableCell>
+                    <TableCell className="text-gray-200 py-2 text-center">
+                      {formatDateSafely(gig.gig_date)}
+                    </TableCell>
+                    <TableCell className="text-gray-200 py-2 text-center">
+                      {gig.tours?.title || 'Loading...'}
+                    </TableCell>
+                    <TableCell className="py-2">
+                      <div className="flex space-x-2 justify-center">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEdit(gig)}
+                          className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                        >
+                          <Edit2 className="w-4 h-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteClick(gig.id)}
+                          className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+          )}
+
+        <Dialog open={isFormVisible} onChange={(open) => !open && handleCloseForm()} className="relative">
+          <DialogContent className="bg-[#131d43] text-white border-blue-800 p-8 rounded-md max-w-[1200px] w-[35vw] absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
+            <DialogHeader>
+              <DialogTitle className="text-2xl font-semibold text-white">
+                {currentGig ? "Edit Gig" : "Add New Gig"}
+              </DialogTitle>
+            </DialogHeader>
             <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="flex flex-wrap -mx-2">
-                <div className="w-full md:w-1/2 px-2">
+              <div className="grid grid-cols-2 gap-6">
+                <div className="w-full">
                 <div className="mb-4">
                     <Label htmlFor="formDate">Event Date</Label>
                     <div className="flex space-x-2">
@@ -669,7 +707,7 @@ export default function GigManagement() {
                     />
                   </div>
                 </div>
-              <div className="w-full md:w-1/2 px-2">
+                <div className="w-full">
               <div className="flex mt-[81px]">
                 <div className="mb-2 flex-none mr-4">
                     <Label htmlFor="loadInTime">Load In Time</Label>
@@ -738,80 +776,9 @@ export default function GigManagement() {
                         </PopoverTrigger>
                         <PopoverContent className="w-auto p-2 bg-[#0f1729] border-[#4A5568] text-white">
                           <div className="flex space-x-2">
-                            <select
-                              value={format(soundCheckTime, "h")}
-                              onChange={(e) => handleHourChange(e.target.value, soundCheckTime, setSoundCheckTime)}
-                              className="w-20 bg-[#1B2559] rounded-md"
-                            >
-                              {[...Array(12)].map((_, i) => (
-                                <option key={i + 1} value={i + 1}>{i + 1}</option>
-                              ))}
-                            </select>
-
-                            <select
-                              value={format(soundCheckTime, "mm")}
-                              onChange={(e) => handleMinuteChange(e.target.value, soundCheckTime, setSoundCheckTime)}
-                              className="w-20 bg-[#1B2559] rounded-md"
-                            >
-                              {[...Array(60)].map((_, i) => (
-                                <option key={i} value={i.toString().padStart(2, '0')}>
-                                  {i.toString().padStart(2, '0')}
-                                </option>
-                              ))}
-                            </select>
-
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => handleAMPMToggle(soundCheckTime, setSoundCheckTime)}
-                              className="w-20 bg-[#1B2559]"
-                            >
-                              {format(soundCheckTime, "a")}
-                            </Button>
-                          </div>
-                        </PopoverContent>
-                      </Popover>
-                    </div>
-                  </div>
-                  </div>
-                  <div className="mt-[17px] ">
-                    <div className="flex">
-                          <div className="flex space-x-2 mr-4">
-                              <Checkbox className="border-white border" id="crewHandsIn" name="crewHandsIn" defaultChecked={currentGig?.crew_hands_in} />
-                              <Label className="" htmlFor="crewHandsIn">Hands On In</Label>
-                          </div>
-                            <div className="flex space-x-2">
-                              <Checkbox className="border-white border" id="crewHandsOut" name="crewHandsOut" defaultChecked={currentGig?.crew_hands_out} />
-                             <Label className=""  htmlFor="crewHandsOut">Hands On Out</Label>
-                            </div>       
-                    </div>                                       
-                  <div className="flex">
-                  <div className="mb-4 mr-4  mt-4 flex-none">
-                    <Label htmlFor="setTime">Set Time</Label>
-                      <div className="flex space-x-2">
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button 
-                              type="button"
-                              variant="outline" 
-                              className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white flex-1"
-                            >
-                              <Clock className="mr-2 h-4 w-4" />
-                              {formatTimeOrDefault(setTime)}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-2 bg-[#0f1729] border-[#4A5568] text-white">
-                            <div className="flex space-x-2">
                               <select
-                                value={format(setTime, "h")}
-                                onChange={(e) => {
-                                  const newTime = new Date(setTime)
-                                  let hours = parseInt(e.target.value)
-                                  const isPM = newTime.getHours() >= 12
-                                  if (isPM) hours = hours + 12
-                                  newTime.setHours(hours)
-                                  setSetTime(newTime)
-                                }}
+                                value={format(soundCheckTime, "h")}
+                                onChange={(e) => handleHourChange(e.target.value, soundCheckTime, setSoundCheckTime)}
                                 className="w-20 bg-[#1B2559] rounded-md"
                               >
                                 {[...Array(12)].map((_, i) => (
@@ -820,12 +787,8 @@ export default function GigManagement() {
                               </select>
 
                               <select
-                                value={format(setTime, "mm")}
-                                onChange={(e) => {
-                                  const newTime = new Date(setTime)
-                                  newTime.setMinutes(parseInt(e.target.value))
-                                  setSetTime(newTime)
-                                }}
+                                value={format(soundCheckTime, "mm")}
+                                onChange={(e) => handleMinuteChange(e.target.value, soundCheckTime, setSoundCheckTime)}
                                 className="w-20 bg-[#1B2559] rounded-md"
                               >
                                 {[...Array(60)].map((_, i) => (
@@ -838,109 +801,194 @@ export default function GigManagement() {
                               <Button
                                 variant="outline"
                                 size="sm"
-                                onClick={() => {
-                                  const newTime = new Date(setTime)
-                                  const hours = newTime.getHours()
-                                  newTime.setHours(hours >= 12 ? hours - 12 : hours + 12)
-                                  setSetTime(newTime)
-                                }}
+                                onClick={() => handleAMPMToggle(soundCheckTime, setSoundCheckTime)}
                                 className="w-20 bg-[#1B2559]"
                               >
-                                {format(setTime, "a")}
+                                {format(soundCheckTime, "a")}
                               </Button>
                             </div>
                           </PopoverContent>
-                        </Popover>   
-                      </div>                 
-                    </div>                 
-                  <div className="mb-4 mt-4 flex-auto">
-                    <Label htmlFor="setLength">Set Length (Hours)</Label>
-                    <Input 
-                      id="setLength" 
-                      name="setLength"
-                      defaultValue={getInputValue(currentGig?.set_length)}
-                      required 
-                      className="bg-[#1B2559]" 
-                    />
-                  </div>
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="depositAmount">Deposit Amount (USD)</Label>
-                    <Input 
-                      className="bg-[#1B2559]" 
-                      id="depositAmount" 
-                      name="depositAmount" 
-                      type="number" 
-                      defaultValue={getInputValue(currentGig?.deposit_amount)}
-                      required 
-                    />
-                  </div>
-                  <div className="mt-2">
-                    <div className="flex items-center space-x-2 ">
-                      <Checkbox className="border-white border" id="depositPaid" name="depositPaid" defaultChecked={currentGig?.deposit_paid} />
-                      <Label htmlFor="depositPaid">Deposit Paid</Label>
+                        </Popover>
+                      </div>
                     </div>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-4 mb-4">
-                    <div className="flex items-center space-x-2 mt-4">
-                      <Checkbox className="border-white border" id="hotelIncluded" name="hotelIncluded" defaultChecked={currentGig?.hotel_included} />
-                      <Label htmlFor="hotelIncluded">Hotel Included</Label>
                     </div>
-                    <div className="flex items-center space-x-2 mt-3">
-                      <Checkbox className="border-white border" id="mealIncluded" name="mealIncluded" defaultChecked={currentGig?.meal_included} />
-                      <Label htmlFor="mealIncluded">Meal Included</Label>
-                    </div>
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="totalPayout">Contract Total</Label>
-                    <Input id="totalPayout" name="contractTotal" type="number" defaultValue={currentGig?.contract_total} required className="bg-[#1B2559]" />
-                  </div>
-                  <div className="mb-4">
-                    <Label htmlFor="OpenBalance">Open Balance</Label>
-                    <Input id="openBalance" name="openBalance" type="number" defaultValue={currentGig?.open_balance} required className="bg-[#1B2559]" />
-                  </div>                  
-                  <div className="mb-3">
-                    <Label htmlFor="gigDetails">Gig Details</Label>
-                    <Textarea 
-                      id="gigDetails" 
-                      name="gigDetails"
-                      defaultValue={getInputValue(currentGig?.gig_details)}
-                      placeholder="Enter gig details" 
-                      className="bg-[#1B2559] h-[135px]  resize-none" 
-                    />
-                  </div>
-                  <div className="flex space-x-4 justify-end mt-6">
-                    <Button type="submit" className="bg-green-800 border border-black hover:bg-green-500 px-8 text-white">
-                      {currentGig ? "Update Gig" : "Add Gig"}
-                    </Button>
-                    <Button type="button" onClick={handleCloseForm} className="bg-red-600 hover:bg-red-700 text-white px-8">
-                      Cancel
-                    </Button>
-                  </div>
-                </div>
-                </div>
-              </div>
-            </form>      
-          </div>
-        )}
-      </div>
-      
-      <FeedbackModal
-        isOpen={feedbackModal.isOpen}
-        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
-        title={feedbackModal.title}
-        message={feedbackModal.message}
-        type={feedbackModal.type}
-      />
+                    <div className="mt-[17px] ">
+                      <div className="flex">
+                            <div className="flex space-x-2 mr-4">
+                                <Checkbox className="border-white border" id="crewHandsIn" name="crewHandsIn" defaultChecked={currentGig?.crew_hands_in} />
+                                <Label className="" htmlFor="crewHandsIn">Hands On In</Label>
+                            </div>
+                              <div className="flex space-x-2">
+                                <Checkbox className="border-white border" id="crewHandsOut" name="crewHandsOut" defaultChecked={currentGig?.crew_hands_out} />
+                               <Label className=""  htmlFor="crewHandsOut">Hands On Out</Label>
+                              </div>       
+                      </div>                                       
+                    <div className="flex">
+                    <div className="mb-4 mr-4  mt-4 flex-none">
+                      <Label htmlFor="setTime">Set Time</Label>
+                        <div className="flex space-x-2">
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <Button 
+                                type="button"
+                                variant="outline" 
+                                className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white flex-1"
+                              >
+                                <Clock className="mr-2 h-4 w-4" />
+                                {formatTimeOrDefault(setTime)}
+                              </Button>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-2 bg-[#0f1729] border-[#4A5568] text-white">
+                              <div className="flex space-x-2">
+                                <select
+                                  value={format(setTime, "h")}
+                                  onChange={(e) => {
+                                    const newTime = new Date(setTime)
+                                    let hours = parseInt(e.target.value)
+                                    const isPM = newTime.getHours() >= 12
+                                    if (isPM) hours = hours + 12
+                                    newTime.setHours(hours)
+                                    setSetTime(newTime)
+                                  }}
+                                  className="w-20 bg-[#1B2559] rounded-md"
+                                >
+                                  {[...Array(12)].map((_, i) => (
+                                    <option key={i + 1} value={i + 1}>{i + 1}</option>
+                                  ))}
+                                </select>
 
-      <FeedbackModal
-        isOpen={deleteConfirmation.isOpen}
-        onClose={deleteConfirmation.onClose}
-        title={deleteConfirmation.title}
-        message={deleteConfirmation.message}
-        type="delete"
-        onConfirm={deleteConfirmation.onConfirm}
-      />
-    </div>
-      )
+                                <select
+                                  value={format(setTime, "mm")}
+                                  onChange={(e) => {
+                                    const newTime = new Date(setTime)
+                                    newTime.setMinutes(parseInt(e.target.value))
+                                    setSetTime(newTime)
+                                  }}
+                                  className="w-20 bg-[#1B2559] rounded-md"
+                                >
+                                  {[...Array(60)].map((_, i) => (
+                                    <option key={i} value={i.toString().padStart(2, '0')}>
+                                      {i.toString().padStart(2, '0')}
+                                    </option>
+                                  ))}
+                                </select>
+
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => {
+                                    const newTime = new Date(setTime)
+                                    const hours = newTime.getHours()
+                                    newTime.setHours(hours >= 12 ? hours - 12 : hours + 12)
+                                    setSetTime(newTime)
+                                  }}
+                                  className="w-20 bg-[#1B2559]"
+                                >
+                                  {format(setTime, "a")}
+                                </Button>
+                              </div>
+                            </PopoverContent>
+                          </Popover>   
+                        </div>                 
+                      </div>                 
+                    <div className="mb-4 mt-4 flex-auto">
+                      <Label htmlFor="setLength">Set Length (Hours)</Label>
+                      <Input 
+                        id="setLength" 
+                        name="setLength"
+                        defaultValue={getInputValue(currentGig?.set_length)}
+                        required 
+                        className="bg-[#1B2559]" 
+                      />
+                    </div>
+                    </div>
+                    <div className="mb-4">
+                      <Label htmlFor="depositAmount">Deposit Amount (USD)</Label>
+                      <Input 
+                        className="bg-[#1B2559]" 
+                        id="depositAmount" 
+                        name="depositAmount" 
+                        type="number" 
+                        defaultValue={getInputValue(currentGig?.deposit_amount)}
+                        required 
+                      />
+                    </div>
+                    <div className="mt-2">
+                      <div className="flex items-center space-x-2 ">
+                        <Checkbox className="border-white border" id="depositPaid" name="depositPaid" defaultChecked={currentGig?.deposit_paid} />
+                        <Label htmlFor="depositPaid">Deposit Paid</Label>
+                      </div>
+                    </div>
+                    <div className="flex items-center space-x-2 mt-4 mb-4">
+                      <div className="flex items-center space-x-2 mt-4">
+                        <Checkbox className="border-white border" id="hotelIncluded" name="hotelIncluded" defaultChecked={currentGig?.hotel_included} />
+                        <Label htmlFor="hotelIncluded">Hotel Included</Label>
+                      </div>
+                      <div className="flex items-center space-x-2 mt-3">
+                        <Checkbox className="border-white border" id="mealIncluded" name="mealIncluded" defaultChecked={currentGig?.meal_included} />
+                        <Label htmlFor="mealIncluded">Meal Included</Label>
+                      </div>
+                    </div>
+                    <div className="mb-4">
+                      <Label htmlFor="totalPayout">Contract Total</Label>
+                      <Input id="totalPayout" name="contractTotal" type="number" defaultValue={currentGig?.contract_total} required className="bg-[#1B2559]" />
+                    </div>
+                    <div className="mb-4">
+                      <Label htmlFor="OpenBalance">Open Balance</Label>
+                      <Input id="openBalance" name="openBalance" type="number" defaultValue={currentGig?.open_balance} required className="bg-[#1B2559]" />
+                    </div>                  
+                    <div className="mb-3">
+                      <Label htmlFor="gigDetails">Gig Details</Label>
+                      <Textarea 
+                        id="gigDetails" 
+                        name="gigDetails"
+                        defaultValue={getInputValue(currentGig?.gig_details)}
+                        placeholder="Enter gig details" 
+                        className="bg-[#1B2559] h-[135px]  resize-none" 
+                      />
+                    </div>
+                    <div className="flex justify-end space-x-2 mt-6">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleCloseForm}
+                        className="bg-red-700 text-white hover:bg-red-600 border-none"
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="submit"
+                        className="bg-green-700 text-white hover:bg-green-600"
+                      >
+                        {currentGig ? 'Update Gig' : 'Create Gig'}
+                      </Button>
+                    </div>
+                  </div>
+                  </div>
+                </div>
+              </form>      
+            </DialogContent>
+          </Dialog>
+
+          <FeedbackModal
+            isOpen={feedbackModal.isOpen}
+            onClose={() => setFeedbackModal({ ...feedbackModal, isOpen: false })}
+            title={feedbackModal.title}
+            message={feedbackModal.message}
+            type={feedbackModal.type}
+          />
+
+          <FeedbackModal
+            isOpen={deleteConfirmation.isOpen}
+            onClose={deleteConfirmation.onClose}
+            title={deleteConfirmation.title}
+            message={deleteConfirmation.message}
+            type="delete"
+            onConfirm={deleteConfirmation.onConfirm}
+          />
+        
+        </CardContent>
+      </Card>
+    </CustomSectionHeader>
+  )
 }

@@ -14,6 +14,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog"
 import { X } from 'lucide-react'
+import { ImageUpload } from '@/components/account/image-upload'
 import type { Database } from '@/types/supabase'
 
 interface EditProfileFormProps {
@@ -78,15 +79,19 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
     }
   }
 
+  const handleImageUploaded = (url: string) => {
+    setAvatarUrl(url)
+  }
+
   if (!user) {
     return null
   }
 
   return (
     <Dialog open={isOpen} onClose={onClose}>
-      <DialogContent className="bg-[#111c44] text-white border-0">
+      <DialogContent className="bg-[#111c44] text-white border-0 rounded-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white">Edit Profile</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white mt-6 ml-6">Edit Profile</DialogTitle>
           <Button
             variant="ghost"
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
@@ -97,7 +102,7 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form onSubmit={handleSubmit} className="space-y-6 p-6">
           {error && (
             <Alert variant="destructive" className="bg-red-900 border-red-600">
               <AlertDescription>{error}</AlertDescription>
@@ -135,14 +140,11 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="avatarUrl" className="text-gray-400">Avatar URL</Label>
-            <Input
-              id="avatarUrl"
-              type="url"
-              value={avatarUrl}
-              onChange={(e) => setAvatarUrl(e.target.value)}
-              placeholder="Enter your avatar URL"
-              className="bg-[#1B2559] border-blue-800 text-white"
+            <Label className="text-gray-400">Profile Image</Label>
+            <ImageUpload
+              currentImageUrl={avatarUrl}
+              onImageUploaded={handleImageUploaded}
+              userId={user.id}
               disabled={loading}
             />
           </div>
@@ -157,7 +159,7 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
             </Button>
             <Button
               type="submit"
-              className="bg-green-600 hover:bg-green-700"
+              className="bg-green-600 hover:bg-green-700 text-white"
               disabled={loading}
             >
               {loading ? "Saving..." : "Save Changes"}

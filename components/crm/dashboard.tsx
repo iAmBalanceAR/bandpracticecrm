@@ -3,25 +3,20 @@
 import React, { useState } from 'react'
 import TourMapCard from "@/components/crm/tour-map-card"
 import GigCalendarCard from "@/components/crm/gig-calendar-card"
-import SuggestedVenuesCard from "@/components/crm/suggested-venues-card"
 import ContactsLeadsCard from "@/components/crm/contacts-leads-card"
 import AnalyticsCard from "@/components/crm/analytics-card"
 import NotesCard from "@/components/crm/notes-card"
 import { CustomDialog } from "@/components/ui/custom-dialog"
+import { useTour } from "@/components/providers/tour-provider" 
+import SavedVenues  from "@/components/crm/savedVenues"
+
 
 export function Dashboard() {
+  const { currentTour, isLoading } = useTour()
+  const [errorModalOpen, setErrorModalOpen] = useState(false)
+  const [errorMessage, setErrorMessage] = useState('')
 
-const [errorModalOpen, setErrorModalOpen] = useState(false)
-const [errorMessage, setErrorMessage] = useState('')
 
-
-  const [suggestedVenues, setSuggestedVenues] = React.useState([
-    { id: 1, name: "The Fillmore", type: "Venue", status: "New", priority: "High" },
-    { id: 2, name: "Red Rocks Amphitheatre", type: "Venue", status: "Active", priority: "Normal" },
-    { id: 3, name: "Madison Square Garden", type: "Venue", status: "New", priority: "High" },
-    { id: 4, name: "The Ryman Auditorium", type: "Venue", status: "Active", priority: "Normal" },
-    { id: 5, name: "Hollywood Bowl", type: "Venue", status: "New", priority: "High" },
-  ])
   const [contactsLeads, setContactsLeads] = React.useState([
     { id: 1, name: "John Doe", email: "johndoe@example.com", type: "Contact", status: "Active", priority: "High" },
     { id: 2, name: "Jane Smith", email: "janesmith@example.com", type: "Lead", status: "New", priority: "Normal" },
@@ -29,10 +24,6 @@ const [errorMessage, setErrorMessage] = useState('')
     { id: 4, name: "Sarah Brown", email: "sarahbrown@example.com", type: "Lead", status: "New", priority: "High" },
     { id: 5, name: "Chris Lee", email: "chrislee@example.com", type: "Contact", status: "Active", priority: "Normal" },
   ])
-
-  const dismissVenue = (id: number) => {
-    setSuggestedVenues(suggestedVenues.filter((venue: { id: number }) => venue.id !== id))
-  }
 
   const dismissContact = (id: number) => {
     setContactsLeads(contactsLeads.filter((contact: { id: number }) => contact.id !== id))
@@ -101,15 +92,12 @@ const [errorMessage, setErrorMessage] = useState('')
    
   return (
     <>
-      <div className=" relative float-left max-w-[1200px] mx-auto">
-      <div className="absolute font-mono text-1xl left-4 -top-8 text-blue-300">
-           Band Practice CRM&reg; 
-            </div>
+      <div>
 {/* Start Common Heder Component  */} 
         <header className=" flex items-center justify-between bg-[#0f1729] p-4  h-16">
             <h1 className="text-4xl  text-white ">
               <span className=" text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                The Lowroad Tour : Dashboard
+                {isLoading ? 'Loading...' : currentTour?.title || 'No Tour Selected'} : Dashboard
               </span>
           </h1>
         </header>
@@ -127,7 +115,7 @@ const [errorMessage, setErrorMessage] = useState('')
             </div>  
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
-              <SuggestedVenuesCard venues={suggestedVenues} onDismiss={dismissVenue} />
+              <SavedVenues />
               <ContactsLeadsCard contacts={contactsLeads} onDismiss={dismissContact} />
             </div>
             <div className="max-w-full mx-auto mt-6">

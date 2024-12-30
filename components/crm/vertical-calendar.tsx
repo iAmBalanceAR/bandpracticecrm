@@ -31,6 +31,7 @@ import { format } from "date-fns"
 import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { createPortal } from 'react-dom'
+import { useTour } from '@/components/providers/tour-provider'
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -239,13 +240,15 @@ const VerticalCalendar = () => {
   const [selectedGig, setSelectedGig] = useState<Gig | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [api, setApi] = useState<any>()
+  const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
     const loadGigs = async () => {
       try {
+        setError(null)
         const gigs = await gigHelpers.getGigs()
         const groupedGigs = gigs.reduce((acc: Record<string, Gig[]>, gig: Gig) => {
-          const date = gig.gig_date
+          const date = gig.gig_date.split('T')[0]
           if (!acc[date]) {
             acc[date] = []
           }
@@ -253,11 +256,12 @@ const VerticalCalendar = () => {
           return acc
         }, {})
         setGigsByDate(groupedGigs)
-      } catch (error) {
-        console.error('Error loading gigs:', error)
+      } catch (err: any) {
+        console.error('Error loading gigs:', err)
+        setError(err.message)
       }
     }
-    
+
     loadGigs()
   }, [])
 
@@ -407,7 +411,7 @@ const VerticalCalendar = () => {
         orientation="vertical"
         className=""
       >
-        <CarouselContent className="-mt-1 max-h-[380px] m-auto">
+        <CarouselContent className="-mt-1 h-[374px] m-auto mb-[24px]">
           {[0, 1, 2].map((_, index) => {
             const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + index, 1)
             return (
@@ -421,7 +425,7 @@ const VerticalCalendar = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute left-1/2 top-3 -translate-x-1/2 -translate-y-full z-10 h-8 w-8 hover:bg-transparent"
+        className="absolute left-1/2 top-5 -translate-x-1/2 -translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8 hover:text-yellow-400"
         onClick={() => {
           api?.scrollPrev()
           const newDate = new Date(currentDate)
@@ -434,7 +438,7 @@ const VerticalCalendar = () => {
       <Button
         variant="ghost"
         size="icon"
-        className="absolute bottom-0 left-1/2 -translate-x-1/2 translate-y-full z-10 hover:bg-transparent"
+        className="absolute bottom-5 left-1/2 -translate-x-1/2 translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8  hover:text-yellow-400"
         onClick={() => {
           api?.scrollNext()
           const newDate = new Date(currentDate)

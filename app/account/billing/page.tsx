@@ -3,6 +3,7 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { createBillingPortalSession } from '@/utils/stripe'
+import { Card } from '@/components/ui/card'
 
 async function handleManageSubscription(customerStripeId: string) {
   'use server'
@@ -41,40 +42,57 @@ export default async function BillingPage() {
     .single()
 
   return (
-    <div className="min-h-screen bg-background py-12">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-card rounded-lg shadow overflow-hidden">
-          <div className="px-4 py-5 sm:p-6">
-            <h2 className="text-2xl font-bold text-card-foreground">Billing & Subscription</h2>
-            <div className="mt-6 border-t border-border pt-6">
-              <dl className="divide-y divide-border">
-                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-sm font-medium text-card-foreground">Subscription Status</dt>
-                  <dd className="mt-1 text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
+    <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
+      <h1 className="text-4xl font-mono mb-4">
+        <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+          Billing & Subscription
+        </span>
+      </h1>
+      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
+      
+      <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
+        <Card className="bg-[#1B2559] border-blue-800">
+          <div className="p-6">
+            <div className="space-y-6">
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Subscription Status</h3>
+                  <p className="text-gray-400 text-sm">
                     {profile?.subscription_status || 'No active subscription'}
-                  </dd>
+                  </p>
                 </div>
+              </div>
 
-                <div className="py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                  <dt className="text-sm font-medium text-card-foreground">Actions</dt>
-                  <dd className="mt-1 text-sm text-muted-foreground sm:col-span-2 sm:mt-0">
-                    {profile?.stripe_customer_id ? (
-                      <form action={handleManageSubscription.bind(null, profile.stripe_customer_id)}>
-                        <Button type="submit">
-                          Manage Subscription
-                        </Button>
-                      </form>
-                    ) : (
-                      <Button asChild>
-                        <a href="/pricing">View Plans</a>
-                      </Button>
-                    )}
-                  </dd>
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Subscription Management</h3>
+                  <p className="text-gray-400 text-sm">
+                    {profile?.stripe_customer_id 
+                      ? 'Manage your current subscription'
+                      : 'View available subscription plans'}
+                  </p>
                 </div>
-              </dl>
+                {profile?.stripe_customer_id ? (
+                  <form action={handleManageSubscription.bind(null, profile.stripe_customer_id)}>
+                    <Button 
+                      type="submit"
+                      className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                    >
+                      Manage Subscription
+                    </Button>
+                  </form>
+                ) : (
+                  <Button 
+                    asChild
+                    className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                  >
+                    <a href="/pricing">View Plans</a>
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
-        </div>
+        </Card>
       </div>
     </div>
   )

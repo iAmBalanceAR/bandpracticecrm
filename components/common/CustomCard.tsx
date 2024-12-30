@@ -1,4 +1,5 @@
 import React from 'react';
+import { cn } from '@/lib/utils';
 
 interface CustomCardProps {
   title: string;  
@@ -7,23 +8,38 @@ interface CustomCardProps {
   children: React.ReactNode;
 }
 
-const CustomCard: React.FC<CustomCardProps> = ({ title, children, addclassName, cardColor }) => (
- 
-   <>
-   <div className='p-0m-0o c w-full'>
-      <h2 className={`text-${cardColor} text-shadow-sm shadow-black text-3xl font-mono`}>
+const CustomCard: React.FC<CustomCardProps> = ({ 
+  title, 
+  children, 
+  addclassName = '', 
+  cardColor = 'white' 
+}) => {
+  // Handle both bracket notation colors and regular colors
+  const textColorClass = cardColor.startsWith('[') ? 
+    `text-${cardColor}` : 
+    `text-${cardColor}`;
+
+  return (
+    <div className="p-0 m-0 w-full">
+      <h2 className={cn(
+        "text-3xl font-mono text-shadow-sm shadow-black",
+        textColorClass
+      )}>
         {title} 
       </h2>
-      <div className={`-mt-1 h-[1px] hidden mb-2 bg-${cardColor || 'slate-700'}`}>&nbsp;</div>
-      <div className={`bg-[#111C44] border text-white rounded-lg border-slate-600 ${addclassName}`}>
-      <div className="m-2 f">
-        <div className="w-full">
-          {children}
+      <div className="h-[1px] -mt-1 mb-2 bg-slate-700">&nbsp;</div>
+      <div className={cn(
+        "bg-[#111C44] border text-white rounded-lg border-slate-600",
+        addclassName
+      )}>
+        <div className="m-2">
+          <div className="w-full">
+            {children}
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  </>
-);
+  );
+};
 
 export default CustomCard; 
