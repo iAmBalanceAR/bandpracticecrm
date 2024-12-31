@@ -1,69 +1,91 @@
-'use client'
+"use client"
 
-import React from 'react'
-import { Dialog, DialogContent } from '@/components/ui/dialog'
-import { Button } from '@/components/ui/button'
-import { AlertCircle, CheckCircle2, XCircle } from 'lucide-react'
+import * as React from "react"
+import { Dialog, DialogContent } from "./dialog"
+import { Button } from "./button"
+import { Check, AlertTriangle, X } from "lucide-react"
 
 interface FeedbackModalProps {
   isOpen: boolean
   onClose: () => void
   title: string
   message: string
-  type?: 'success' | 'error' | 'warning' | 'delete'
+  type: 'success' | 'error' | 'warning' | 'delete'
   onConfirm?: () => void
 }
 
-export function FeedbackModal({ isOpen, onClose, title, message, type = 'success', onConfirm }: FeedbackModalProps) {
+export function FeedbackModal({
+  isOpen,
+  onClose,
+  title,
+  message,
+  type,
+  onConfirm
+}: FeedbackModalProps) {
   const getIcon = () => {
     switch (type) {
       case 'success':
-        return <CheckCircle2 className="h-6 w-6 text-green-500" />
-      case 'error':
-        return <XCircle className="h-6 w-6 text-red-500" />
+        return (
+          <div className="rounded-full bg-green-500/20 p-3">
+            <Check className="h-8 w-8 text-green-500" />
+          </div>
+        )
       case 'warning':
       case 'delete':
-        return <AlertCircle className="h-6 w-6 text-yellow-500" />
-      default:
-        return null
+      case 'error':
+        return (
+          <div className="rounded-full bg-red-500/20 p-3">
+            <AlertTriangle className="h-8 w-8 text-red-500" />
+          </div>
+        )
     }
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
-      <DialogContent className="bg-[#111c44] text-white border border-green-600/50 p-6">
-        <div className="flex items-start space-x-4">
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="relative max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
+        <button
+          onClick={onClose}
+          className="absolute right-4 top-4 text-gray-400 hover:text-white"
+        >
+          <X className="h-4 w-4" />
+        </button>
+        <div className="flex flex-col items-center text-center space-y-3">
           {getIcon()}
-          <div className="flex-1">
-            <h3 className="text-lg font-semibold mb-2">{title}</h3>
-            <p className="text-gray-300">{message}</p>
-          </div>
-        </div>
-        <div className="mt-6 flex justify-end space-x-4">
+          
+          <h2 className="text-xl font-semibold text-white">
+            {title}
+          </h2>
+          
+          <p className="text-gray-400">
+            {message}
+          </p>
+
           {type === 'delete' ? (
-            <>
-              <Button
-                variant="outline"
-                onClick={onClose}
-                className="border-gray-600 hover:bg-gray-800"
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={onConfirm}
-                className="bg-red-600 hover:bg-red-700"
+            <div className="flex space-x-3">
+              <Button 
+                onClick={onConfirm} 
+                className="bg-red-600 hover:bg-red-700 min-w-[100px] text-white"
               >
                 Delete
               </Button>
-            </>
+              <Button 
+                onClick={onClose} 
+                className="bg-gray-600 hover:bg-gray-700 min-w-[100px] text-white"
+              >
+                Cancel
+              </Button>
+            </div>
           ) : (
-            <Button
-              variant="default"
-              onClick={onClose}
-              className="bg-green-600 hover:bg-green-700"
+            <Button 
+              onClick={onClose} 
+              className={`mt-4 min-w-[100px] text-white ${
+                type === 'success' 
+                  ? 'bg-green-600 hover:bg-green-700' 
+                  : 'bg-red-600 hover:bg-red-700'
+              }`}
             >
-              Close
+              {type === 'success' ? 'Close' : 'Okay'}
             </Button>
           )}
         </div>

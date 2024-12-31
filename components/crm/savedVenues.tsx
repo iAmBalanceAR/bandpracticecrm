@@ -100,13 +100,13 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
         addclassName=""
       >
         <div className="rounded-md overflow-hidden">
-          <Table className="w-ful h-auto">
-            <TableHeader className="bg-[#d1f5f0] text-black">
+          <Table className="w-full">
+            <TableHeader className="bg-[#d1f5f0] text-[#111C44]">
               <TableRow>
-                <TableHead className="p-[7px] pl-4 text-left text-xs font-medium text-black">Venue</TableHead>
-                <TableHead className="p-[7px] pl-4 text-left text-xs font-medium text-black">City</TableHead>
-                <TableHead className="p-[7px] pl-4 text-left text-xs font-medium text-black">State</TableHead>
-                <TableHead className="p-[7px] pl-4 text-left text-xs font-medium text-black">Action</TableHead>
+                <TableHead className="p-2 pl-4 text-left text-xs font-medium">Venue</TableHead>
+                <TableHead className="p-2 pl-4 text-left text-xs font-medium">City</TableHead>
+                <TableHead className="p-2 pl-4 text-left text-xs font-medium">State</TableHead>
+                <TableHead className="p-2 pl-4 text-left text-xs font-medium">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

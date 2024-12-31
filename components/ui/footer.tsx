@@ -3,7 +3,7 @@ import { Twitter, Facebook, Linkedin, Github, Mail } from "lucide-react"
 export function Footer() {
   return (
     <footer className="w-full mt-6 ml-8 pb-4 text-white font-mono">
-      <div className=" w-[1200px] pl-4 m-auto">
+      <div className="w-[1200px] pl-4 m-auto">
         <div className="flex flex-col md:flex-row -mx-4">
           <div className="flex-auto  px-4 mb-6">
             <h3 className="text-sm font-semibold mb-3 text-[#008ffb]">Company</h3>

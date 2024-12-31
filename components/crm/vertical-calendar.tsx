@@ -278,7 +278,7 @@ const VerticalCalendar = () => {
     return { year, month, days, firstDayOfMonth }
   }
 
-  const renderMonth = (date: Date) => {
+  const renderMonth = (date: Date) => {                                                                                                                             
     const { year, month, days, firstDayOfMonth } = getMonthData(date)
     const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
@@ -411,7 +411,7 @@ const VerticalCalendar = () => {
         orientation="vertical"
         className=""
       >
-        <CarouselContent className="-mt-1 h-[374px] m-auto mb-[24px]">
+        <CarouselContent className="-mt-1 max-h-[401px] m-auto">
           {[0, 1, 2].map((_, index) => {
             const monthDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + index, 1)
             return (
@@ -428,12 +428,9 @@ const VerticalCalendar = () => {
         className="absolute left-1/2 top-5 -translate-x-1/2 -translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8 hover:text-yellow-400"
         onClick={() => {
           api?.scrollPrev()
-          const newDate = new Date(currentDate)
-          newDate.setMonth(newDate.getMonth() - 1)
-          setCurrentDate(newDate)
         }}
       >
-        <ChevronUp color="white" className="h-6 w-6 text-gray-400 transition-colors hover:text-white" />
+        <ChevronUp className="h-4 w-4" />
       </Button>
       <Button
         variant="ghost"
@@ -441,12 +438,9 @@ const VerticalCalendar = () => {
         className="absolute bottom-5 left-1/2 -translate-x-1/2 translate-y-full z-10 hover:bg-transparent [&_svg]:!size-8  hover:text-yellow-400"
         onClick={() => {
           api?.scrollNext()
-          const newDate = new Date(currentDate)
-          newDate.setMonth(newDate.getMonth() + 1)
-          setCurrentDate(newDate)
         }}
       >
-        <ChevronDown color="white" size={30} />
+        <ChevronDown className="h-4 w-4" />
       </Button>
       <GigDetailsModal
         gig={selectedGig}

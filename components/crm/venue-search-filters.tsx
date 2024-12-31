@@ -4,7 +4,6 @@ import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
 import { VenueSearchFilters as FilterType } from '@/app/types/venue';
 import { STATES, VENUE_TYPES, SORT_OPTIONS } from '@/lib/constants';
 
@@ -66,11 +65,11 @@ export default function VenueSearchFilters({
             <SelectTrigger id="state">
               <SelectValue placeholder="Select state" />
             </SelectTrigger>
-            <SelectContent className="w-[380px] max-h-[400px]">
-              <SelectItem value="all" className="col-span-3">All States</SelectItem>
-              <div className="grid grid-cols-3 gap-x-2">
+            <SelectContent className="w-[400px] max-h-[400px] bg-[#1B2559] rounded-lg text-white z-[10000]">
+              <SelectItem value="all" className="col-span-3 ">All States</SelectItem>
+              <div className="grid grid-cols-3 gap-x-2 ">
                 {(STATES || []).map((state) => (
-                  <SelectItem key={state.value} value={state.value} className="w-full">
+                  <SelectItem key={state.value} value={state.value} className="w-full  cursor-pointer">
                     {state.label}
                   </SelectItem>
                 ))}
@@ -98,9 +97,9 @@ export default function VenueSearchFilters({
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-[#1B2559] rounded-lg text-white z-[10000]">
               {(SORT_OPTIONS || []).map((option) => (
-                <SelectItem key={option.value} value={option.value}>
+                <SelectItem className="cursor-pointer"  key={option.value} value={option.value}>
                   {option.label}
                 </SelectItem>
               ))}
@@ -117,9 +116,9 @@ export default function VenueSearchFilters({
             <SelectTrigger>
               <SelectValue />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="asc">Ascending</SelectItem>
-              <SelectItem value="desc">Descending</SelectItem>
+            <SelectContent className=" bg-[#1B2559] rounded-lg text-white z-[10000]">
+              <SelectItem value="asc" className="cursor-pointer">Ascending</SelectItem>
+              <SelectItem value="desc" className="cursor-pointer">Descending</SelectItem>
             </SelectContent>
           </Select>
         </div>

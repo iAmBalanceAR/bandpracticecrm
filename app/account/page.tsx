@@ -32,7 +32,7 @@ export default function AccountPage() {
   }
 
   return (
-    <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
+    <div className="pl-4 pt-3 bg-[#0f1729] text-white pb-4 ">
       <h1 className="text-4xl font-mono mb-4">
         <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
           Account Settings
@@ -40,10 +40,10 @@ export default function AccountPage() {
       </h1>
       <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
       
-      <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
-        <Card className="bg-[#1B2559] border-blue-800">
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-8">
+      <div className="pr-6 pl-8  pb-4  pt-4 bg-[#131d43] text-white  shadow-sm shadow-green-400 rounded-md border-blue-800 border">
+        <Card className="border-0">
+          <div className="border-0">
+            <div className="flex items-center justify-between mb-8 border-0">
               <div className="flex items-center space-x-4">
                 <ProfileAvatar 
                   avatarUrl={user?.user_metadata?.avatar_url}

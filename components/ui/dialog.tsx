@@ -7,17 +7,23 @@ import { cn } from "@/lib/utils"
 interface DialogProps extends React.HTMLAttributes<HTMLDivElement> {
   open?: boolean
   onClose?: () => void
+  onOpenChange?: (open: boolean) => void
 }
 
 const Dialog = React.forwardRef<HTMLDivElement, DialogProps>(
-  ({ className, children, open, onClose, ...props }, ref) => {
+  ({ className, children, open, onClose, onOpenChange, ...props }, ref) => {
     if (!open) return null
+
+    const handleClose = () => {
+      onClose?.()
+      onOpenChange?.(false)
+    }
 
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div
           className="fixed inset-0 bg-black/50 backdrop-blur-sm dark:bg-black/70"
-          onClick={onClose}
+          onClick={handleClose}
         />
         <div
           ref={ref}

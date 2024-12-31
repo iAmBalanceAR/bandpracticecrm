@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import CustomSectionHeader from '@/components/common/CustomSectionHeader';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import VenueSearchMain from '@/components/crm/venues-search-main';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { VenueSearchFilters } from '@/app/types/venue';
 import VenueSearchHeader from '@/components/crm/venue-search-header';
@@ -10,200 +13,25 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
 
 export default function VenuesPage() {
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [venues, setVenues] = useState<any[]>([]);
-  const [savedVenues, setSavedVenues] = useState<any[]>([]);
-  const [totalCount, setTotalCount] = useState(0);
-  const [hasSearched, setHasSearched] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-
-  const filters: VenueSearchFilters = {
-    query: searchParams.get('query') ?? '',
-    city: searchParams.get('city') ?? '',
-    state: searchParams.get('state') ?? '',
-    venue_type: searchParams.get('venue_type') ?? '',
-    capacity: Number(searchParams.get('capacity')) || 0,
-    verified: searchParams.get('verified') === 'true',
-    featured: searchParams.get('featured') === 'true',
-    allows_underage: searchParams.get('allows_underage') === 'true',
-    sort_by: (searchParams.get('sort_by') as VenueSearchFilters['sort_by']) ?? 'title',
-    sort_order: (searchParams.get('sort_order') as 'asc' | 'desc') ?? 'asc',
-    page: currentPage,
-    per_page: 12,
-    has_bar: searchParams.get('has_bar') === 'true',
-    has_stage: searchParams.get('has_stage') === 'true',
-    has_sound_system: searchParams.get('has_sound_system') === 'true',
-    has_lighting_system: searchParams.get('has_lighting_system') === 'true',
-    has_parking: searchParams.get('has_parking') === 'true'
-  };
-
-  // Fetch saved venues
-  const fetchSavedVenues = async () => {
-    try {
-      setLoading(true);
-      const response = await fetch('/api/venues/saved/list');
-      if (!response.ok) throw new Error('Failed to fetch saved venues');
-      const data = await response.json();
-      setSavedVenues(data.venues || []);
-    } catch (error) {
-      console.error('Error fetching saved venues:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    fetchSavedVenues();
-  }, []);
-
-  const handleSearch = async (newFilters: Partial<VenueSearchFilters>) => {
-    setLoading(true);
-    const updatedFilters = { ...filters, ...newFilters, page: 1 };
-    
-    // Build query string
-    const params = new URLSearchParams();
-    Object.entries(updatedFilters).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, String(value));
-      }
-    });
-    
-    try {
-      const response = await fetch(`/api/venues/search?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch venues');
-      
-      const data = await response.json();
-      setVenues(data.venues);
-      setTotalCount(data.total);
-      setHasSearched(true);
-      setCurrentPage(1);
-      
-      // Update URL
-      router.push(`/venues?${params.toString()}`);
-    } catch (error) {
-      console.error('Error fetching venues:', error);
-      setVenues([]);
-      setTotalCount(0);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleLoadMore = async () => {
-    setLoading(true);
-    const nextPage = currentPage + 1;
-    
-    // Build query string with next page
-    const params = new URLSearchParams();
-    Object.entries({ ...filters, page: nextPage }).forEach(([key, value]) => {
-      if (value) {
-        params.set(key, String(value));
-      }
-    });
-    
-    try {
-      const response = await fetch(`/api/venues/search?${params.toString()}`);
-      if (!response.ok) throw new Error('Failed to fetch more venues');
-      
-      const data = await response.json();
-      setVenues([...venues, ...data.venues]);
-      setTotalCount(data.total);
-      setCurrentPage(nextPage);
-    } catch (error) {
-      console.error('Error fetching more venues:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Only fetch initial results if there are search params
-  useEffect(() => {
-    if (searchParams.toString()) {
-      handleSearch(filters);
-    }
-  }, []);
 
   return (
-    <div className="pl-4 pt-3 pr-4 bg-[#0f1729] text-white min-h-screen rounded-md mb-4">
-      <h1 className="text-4xl font-mono mb-3">
-        <span className="w-[100%] text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-          Venue Database Search
-        </span>
-      </h1>
-      <div className="border-[#008ffb] border-b-2 -mt-7 mb-8 w-[100%] h-4"></div>
-      
-      <div className="bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
-        <div className="mx-auto max-w-7xl px-2 sm:px-3 lg:px-4 py-4">
-          <div className="flex justify-center mb-8">
-            <Tabs defaultValue="search" className="w-full">
-              <div className="flex justify-center">
-                <TabsList className="w-full max-w-lg">
-                  <TabsTrigger value="search" className="flex-1">Search Venues</TabsTrigger>
-                  <TabsTrigger value="saved" className="flex-1">Saved Venues</TabsTrigger>
-                </TabsList>
-              </div>
-              <TabsContent value="search">
-                <VenueSearchHeader
-                  query={filters.query}
-                  onSearch={(query) => handleSearch({ query })}
-                />
-                <div className="flex flex-col lg:flex-row gap-8">
-                  <div className="w-full lg:w-64 flex-none">
-                    <VenueSearchFiltersComponent
-                      filters={filters}
-                      onFilterChange={handleSearch}
-                    />
-                  </div>
-                  <div className="flex-1">
-                    {!hasSearched ? (
-                      <div className="text-center py-12">
-                        <h2 className="text-xl text-gray-400">
-                          Enter a search term or apply filters to find venues
-                        </h2>
-                      </div>
-                    ) : (
-                      <VenueGrid
-                        venues={venues}
-                        loading={loading}
-                        totalCount={totalCount}
-                        page={currentPage}
-                        perPage={filters.per_page}
-                        onLoadMore={handleLoadMore}
-                        onVenueSaved={fetchSavedVenues}
-                      />
-                    )}
-                  </div>
-                </div>
-              </TabsContent>
-              <TabsContent value="saved">
-                <div className="py-8">
-                  <h2 className="text-2xl font-bold mb-6">Saved Venues</h2>
-                  {loading ? (
-                    <div className="flex justify-center items-center py-12">
-                      <div className="flex flex-col items-center space-y-4">
-                        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
-                        <p className="text-muted-foreground">Loading saved venues...</p>
-                      </div>
-                    </div>
-                  ) : (
-                    <VenueGrid
-                      venues={savedVenues}
-                      loading={loading}
-                      totalCount={savedVenues.length}
-                      page={1}
-                      perPage={savedVenues.length}
-                      onLoadMore={() => {}}
-                      onVenueSaved={fetchSavedVenues}
-                    />
-                  )}
-                </div>
-              </TabsContent>
-            </Tabs>
+    <CustomSectionHeader title="Lead Management" underlineColor="#008ffb">
+    <Card className="bg-[#111C44]  min-h-[500px] border-none p-0 m-0">
+    <CardHeader className="pb-0 mb-0">
+      <CardTitle className="flex justify-between items-center text-3xl font-bold">
+        <div className="">
+          <div className="flex flex-auto tracking-tight text-3xl">
+            <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+              Leads
+            </span>
           </div>
         </div>
-      </div>
-    </div>
-  );
+      </CardTitle>
+    </CardHeader>
+    <CardContent>
+      <VenueSearchMain />
+    </CardContent>
+    </Card>
+    </CustomSectionHeader>
+ );
 } 

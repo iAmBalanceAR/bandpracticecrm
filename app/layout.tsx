@@ -5,6 +5,8 @@ import SupabaseClientProvider from '@/components/providers/supabase-client-provi
 import MobileProvider from '@/components/providers/mobile-provider'
 import type { Database } from '@/types/supabase'
 import { ClientErrorBoundary } from '@/components/error/client-error-boundary'
+import 'leaflet/dist/leaflet.css';
+import { ThemeProvider } from '@/lib/providers/theme-provider';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -66,12 +68,18 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   const { session } = await getSupabaseSession()
 
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen bg-background font-sans antialiased">
+    <html lang="en" suppressHydrationWarning>
+      <body className=" bg-background font-sans antialiased">
         <ClientErrorBoundary>
           <SupabaseClientProvider session={session}>
             <MobileProvider>
-              {children}
+              <ThemeProvider
+                defaultTheme="system"
+                storageKey="ui-theme"
+                enableSystem
+              >
+                {children}
+              </ThemeProvider>
             </MobileProvider>
           </SupabaseClientProvider>
         </ClientErrorBoundary>
