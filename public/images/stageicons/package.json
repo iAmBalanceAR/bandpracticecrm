@@ -1,0 +1,11 @@
+{
+  "name": "stage-icons-downloader",
+  "version": "1.0.0",
+  "description": "Downloads stage equipment SVG icons",
+  "main": "download_icons.js",
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.12",
+    "node-fetch": "^2.6.1",
+    "package.json": "^2.0.1"
+  }
+}

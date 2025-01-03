@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, GripVertical, Calendar, Loader2 } from 'lucide-react'
+import { Plus, GripVertical, Calendar, Loader2, FileDown } from 'lucide-react'
 import { gigHelpers } from '@/utils/db/gigs'
 import { Label } from "@/components/ui/label"
 import createClient from '@/utils/supabase/client'
@@ -462,6 +462,7 @@ export default function TourManagement() {
 
   const handleAddToCalendar = async (stop: TourStop) => {
     try {
+      setSavingStop(stop.id);
       const gigData = {
         title: stop.name,
         venue: stop.name,
@@ -485,36 +486,96 @@ export default function TourManagement() {
         deposit_paid: false,
         contract_total: 0,
         open_balance: 0,
-        gig_details: '', // Add the required field
-        gig_status: 'pending' as const, // Add the required field
-        user_id: '', // Will be set by backend
-        payment_amount: 0,
-        payment_status: 'Pending' as const,
-        notes: null
+        gig_details: '',
+        gig_status: 'pending' as const,
+        user_id: '' // Will be set by backend
       }
 
-      await gigHelpers.createGig(gigData)
+      // Create the gig
+      const newGig = await gigHelpers.createGig(gigData);
+
+      // Get the current default tour and user ID
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      const { data: defaultTour } = await supabase
+        .from('tours')
+        .select('id')
+        .eq('is_default', true)
+        .single();
+
+      if (defaultTour && user) {
+        // Connect the gig to the default tour with user_id
+        const { error: connectError } = await supabase
+          .from('tourconnect')
+          .insert([{
+            gig_id: newGig.id,
+            tour_id: defaultTour.id,
+            user_id: user.id
+          }]);
+
+        if (connectError) {
+          console.error('Error connecting gig to tour:', connectError);
+          throw connectError;
+        }
+      }
       
+      // Mark the stop as saved in the UI
       setTourStops(prevStops => 
         prevStops.map(s => 
           s.id === stop.id ? { ...s, savedToGigs: true } : s
         )
-      )
+      );
 
       setFeedbackModal({
         isOpen: true,
         title: 'Success',
         message: 'Successfully added to calendar!',
         type: 'success'
-      })
+      });
+
+      // Reload gig data to refresh the view
+      const loadGigData = async () => {
+        const gigs = await gigHelpers.getGigs();
+        const sortedGigs = gigs.sort((a, b) => 
+          new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime()
+        );
+
+        const gigStops = await Promise.all(sortedGigs.map(async (gig) => {
+          const coordinates = await getCoordinates(
+            `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`
+          );
+          return {
+            id: gig.id,
+            name: gig.venue,
+            lat: coordinates[0],
+            lng: coordinates[1],
+            city: gig.venue_city,
+            state: gig.venue_state,
+            address: gig.venue_address,
+            zip: gig.venue_zip,
+            savedToGigs: true,
+            gig_date: gig.gig_date
+          };
+        }));
+
+        setTourStops(prevStops => {
+          const unsavedStops = prevStops.filter(s => !s.savedToGigs);
+          return [...gigStops, ...unsavedStops];
+        });
+      };
+
+      await loadGigData();
+
     } catch (error) {
-      console.error('Error adding to calendar:', error)
+      console.error('Error adding to calendar:', error);
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
         message: 'Failed to add to calendar. Please try again.',
         type: 'error'
-      })
+      });
+    } finally {
+      setSavingStop(null);
     }
   }
 
@@ -791,8 +852,17 @@ export default function TourManagement() {
                   )}
                 </div>
                 {routeInfo.totalMileage > 0 && (
-                  <div className="mt-4 text-right text-lg font-semibold text-white">
-                    Total Mileage: <span className="text-[#008ffb]">{routeInfo.totalMileage.toFixed(1)} miles</span>
+                  <div className="mt-4 text-right">
+                    <div className="text-lg font-semibold text-white mb-2">
+                      Total Mileage: <span className="text-[#008ffb]">{routeInfo.totalMileage.toFixed(1)} miles</span>
+                    </div>
+                    <Button
+                      onClick={() => window.location.href = '/tour-route/exports'}
+                      className="bg-[#008ffb] hover:bg-[#0070cc] text-white"
+                    >
+                      <FileDown className="w-4 h-4 mr-2" />
+                      Export Tour Data
+                    </Button>
                   </div>
                 )}
               </div>

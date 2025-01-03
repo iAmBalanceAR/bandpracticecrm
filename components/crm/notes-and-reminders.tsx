@@ -130,16 +130,10 @@ export default function NotesAndReminders() {
     ? "transition-all duration-300 ease-in-out transform hover:-translate-y-2 hover:shadow-md hover:shadow-green-400/50 hover:z-10"
     : ""
     return (
-      <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
-      <h1 className="text-4xl font-mono mb-6">
-        <span className="w-[100%]  text-white text-shadow-smfont-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-        Notes &amp; Reminders
-        </span>
-      </h1>
-      <div className="border-[#d83b34] border-b-2 -mt-10 mb-6 w-[100%] h-4"></div>
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-      
-      <Card className="bg-[#111C44] text-white shadow-sm border-[#1E293B] border shadow-green-400">
+<>
+<div className="grid grid-cols-2 gap-4">
+  <div className="col-span-1 bg-[#111C44] rounded-lg text-white shadow-sm border-[#1E293B] border shadow-green-400">
+      <Card className="border-0">
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <span>Notes</span>
@@ -170,7 +164,7 @@ export default function NotesAndReminders() {
               className="bg-[#1B2559]"
             />
           </div>
-          <ScrollArea className="min-h-[300px] mt-4">
+          <ScrollArea className=" mt-4">
             <AnimatePresence>
               {notes.map((note: { id: string; title: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; content: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; date: string | number | Date }) => (
                   <motion.div
@@ -195,15 +189,16 @@ export default function NotesAndReminders() {
                     <Calendar className="w-3 h-3 float-left mt-0 mr-1" />
                     <span className="pr-2">{format(note.date, "MMMM dd, yyyy")}</span>
                   </div>
-                  <div className='clear-both pb-2'></div>
+                  <div className='clear-both'></div>
                 </motion.div>
               ))}
             </AnimatePresence>
           </ScrollArea>
         </CardContent>
       </Card>
-
-      <Card className="bg-[#111C44] text-white shadow-sm border-[#1E293B] border shadow-green-400">
+</div>
+<div className="col-span-1 bg-[#111C44] text-white shadow-sm rounded-lg border-[#1E293B] border shadow-green-400">
+      <Card className='border-0'>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
             <span>Reminders</span>
@@ -302,7 +297,7 @@ export default function NotesAndReminders() {
               </Popover>
             </div>
           </div>
-          <ScrollArea className="h-[300px] mt-4">
+          <ScrollArea className=" mt-4">
             <AnimatePresence>
               {reminders.map((reminder: { id: string; completed: any; text: string | number | bigint | boolean | ReactElement<any, string | JSXElementConstructor<any>> | Iterable<ReactNode> | ReactPortal | Promise<AwaitedReactNode> | null | undefined; date: string | number | Date }) => (
                 <motion.div
@@ -357,7 +352,8 @@ export default function NotesAndReminders() {
           </ScrollArea>
         </CardContent>
       </Card>
-    </div>
-    </div>
+  </div>
+  </div>
+  </>
   )
 }

@@ -21,6 +21,7 @@ export default function TourMapCard() {
     addclassName="md:col-span-2"
   >
         <TourMap mode="simple" />
+        
     </CustomCard>
   )
 }

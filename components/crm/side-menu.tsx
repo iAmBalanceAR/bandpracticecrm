@@ -3,6 +3,7 @@ import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, 
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
+import Image from 'next/image'
 import { useSupabase } from '../providers/supabase-client-provider'
 import { useRouter } from 'next/navigation'
 import { ProfileAvatar } from '@/components/account/profile-avatar'
@@ -41,10 +42,18 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
               href="/" 
               className={`flex items-center hover:opacity-80 transition-opacity ${!sidebarOpen ? 'justify-center' : ''}`}
             >
-              <div className={`flex justify-center ${!sidebarOpen ? 'w-full' : ''}`}>
-                <Music className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#008ffb]`} />
+              <div className={` justify-center  ${!sidebarOpen ? 'flex w-full  ' : ''}`}>
+                <Music className={`${sidebarOpen ? 'hidden !h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#008ffb]`} />
               </div>
-              {sidebarOpen && <span className="text-xl font-bold text-white whitespace-nowrap">Band Practice</span>}
+              {sidebarOpen && (
+                <Image 
+                  src="/images/logo-top-nav.png" 
+                  alt="Band Practice" 
+                  width={200} 
+                  height={45}
+                  className="object-contain"
+                />
+              )}
             </Link>
             <Button variant="ghost" size="icon" onClick={() => setSidebarOpen(!sidebarOpen)}>
               {sidebarOpen ? <ChevronLeft className="h-7 w-7 text-white" /> : <ChevronRight className="h-7 w-7 text-white" />}

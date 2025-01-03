@@ -28,9 +28,6 @@ export interface Gig {
   deposit_paid: boolean
   contract_total: number
   open_balance: number
-  payment_amount: number
-  payment_status: 'Pending' | 'Paid' | 'Cancelled'
-  notes: string | null
   created_at: string
   updated_at: string
   user_id: string
@@ -65,7 +62,7 @@ export const gigHelpers = {
       throw new Error('No authenticated user')
     }
 
-    // First get the default tour ID if no specific tourId is provided
+    // Always get the default tour ID if no specific tourId is provided
     if (!tourId) {
       const { data: defaultTour } = await supabase
         .from('tours')
@@ -79,45 +76,26 @@ export const gigHelpers = {
       }
     }
 
-    let query = supabase
+    // Get all gigs with their tour connections
+    const { data, error } = await supabase
       .from('gigs')
       .select(`
         *,
-        tours:tourconnect(
+        tours:tourconnect!inner(
           tour:tours(
             id,
-            title
+            title,
+            is_default
           )
         )
       `)
       .eq('user_id', user.id)
+      .eq('tourconnect.tour_id', tourId)
       .order('gig_date', { ascending: true })
-
-    if (tourId) {
-      // Filter by tour through the tourconnect junction table
-      query = query.eq('tourconnect.tour_id', tourId)
-    }
-
-    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching gigs:', error)
       throw error
-    }
-
-    // Ensure all gigs have a tour connection
-    for (const gig of data || []) {
-      if (!gig.tours?.[0]?.tour) {
-        // If no tour connection exists, connect to default tour
-        const { error: connectError } = await supabase
-          .rpc('connect_gig_to_default_tour', {
-            p_gig_id: gig.id
-          })
-
-        if (connectError) {
-          console.error('Error connecting gig to default tour:', connectError)
-        }
-      }
     }
 
     // Transform the data to match the expected interface
@@ -150,7 +128,7 @@ export const gigHelpers = {
     return data
   },
 
-  async createGig(gig: Omit<Gig, 'id' | 'created_at' | 'updated_at'>): Promise<Gig> {
+  async createGig(gig: NewGig): Promise<Gig> {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -158,7 +136,8 @@ export const gigHelpers = {
       throw new Error('No authenticated user')
     }
 
-    const { data, error } = await supabase
+    // First create the gig
+    const { data: newGig, error: gigError } = await supabase
       .from('gigs')
       .insert([{
         ...gig,
@@ -168,12 +147,35 @@ export const gigHelpers = {
       .select()
       .single()
 
-    if (error) {
-      console.error('Error creating gig:', error)
-      throw error
+    if (gigError) {
+      console.error('Error creating gig:', gigError)
+      throw gigError
     }
 
-    return data
+    // Get the current default tour
+    const { data: defaultTour } = await supabase
+      .from('tours')
+      .select('id')
+      .eq('user_id', user.id)
+      .eq('is_default', true)
+      .single()
+
+    if (defaultTour) {
+      // Connect the gig to the default tour
+      const { error: connectError } = await supabase
+        .from('tourconnect')
+        .insert([{
+          gig_id: newGig.id,
+          tour_id: defaultTour.id
+        }])
+
+      if (connectError) {
+        console.error('Error connecting gig to default tour:', connectError)
+        // Don't throw here - the gig was created successfully
+      }
+    }
+
+    return newGig
   },
 
   async updateGig(id: string, gig: Partial<Omit<Gig, 'id' | 'created_at' | 'updated_at'>>): Promise<Gig> {
@@ -220,6 +222,31 @@ export const gigHelpers = {
     }
   },
 
+  // Helper function to get coordinates from an address
+  async getCoordinates(address: string): Promise<[number, number]> {
+    const params = new URLSearchParams({
+      format: 'json',
+      q: address,
+      addressdetails: '1',
+      limit: '1'
+    })
+
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
+        headers: { 'User-Agent': 'BandPracticeTourManager/1.0' }
+      })
+      const data = await response.json()
+
+      if (data && data[0]) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+      }
+    } catch (error) {
+      console.error('Error geocoding address:', error)
+    }
+
+    return [0, 0] // Return default coordinates if geocoding fails
+  },
+
   async getGigsWithCoordinates(tourId?: string): Promise<{ tourStops: TourStop[] }> {
     const supabase = createClient()
     const { data: { user } } = await supabase.auth.getUser()
@@ -228,98 +255,65 @@ export const gigHelpers = {
       throw new Error('No authenticated user')
     }
 
-    let query = supabase
-      .from('gigs')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('gig_date', { ascending: true })
+    // Always get the default tour ID if no specific tourId is provided
+    if (!tourId) {
+      const { data: defaultTour } = await supabase
+        .from('tours')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .single()
 
-    if (tourId) {
-      query = query.eq('tour_id', tourId)
+      if (defaultTour) {
+        tourId = defaultTour.id
+      }
     }
 
-    const { data: gigs, error } = await query
+    // Get all gigs with their tour connections
+    const { data: gigs, error } = await supabase
+      .from('gigs')
+      .select(`
+        *,
+        tours:tourconnect!inner(
+          tour:tours(
+            id,
+            title,
+            is_default
+          )
+        )
+      `)
+      .eq('user_id', user.id)
+      .eq('tourconnect.tour_id', tourId)
+      .order('gig_date', { ascending: true })
 
     if (error) {
       console.error('Error fetching gigs:', error)
       throw error
     }
 
-    // For each gig, get venue coordinates
-    const tourStops = await Promise.all((gigs || []).map(async (gig) => {
-      // First try to get venue from venues table
-      const { data: venueData } = await supabase
-        .from('venues')
-        .select('latitude, longitude, title')
-        .eq('title', gig.venue)
-        .single()
-
-      if (venueData?.latitude && venueData?.longitude) {
-        return {
-          id: gig.id,
-          name: gig.venue,
-          city: gig.venue_city,
-          state: gig.venue_state,
-          address: gig.venue_address,
-          zip: gig.venue_zip,
-          gig_date: gig.gig_date,
-          savedToGigs: true,
-          lat: parseFloat(venueData.latitude),
-          lng: parseFloat(venueData.longitude)
-        }
-      }
-
-      // If venue not found or missing coordinates, geocode the address
-      const address = `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`
-      const params = new URLSearchParams({
-        format: 'json',
-        q: address,
-        addressdetails: '1',
-        limit: '1'
-      })
-
-      try {
-        const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-          headers: { 'User-Agent': 'BandPracticeTourManager/1.0' }
-        })
-        const data = await response.json()
-
-        if (data && data[0]) {
-          // Update venue in database with new coordinates
-          await supabase
-            .from('venues')
-            .upsert({
-              title: gig.venue,
-              address: gig.venue_address,
-              city: gig.venue_city,
-              state: gig.venue_state,
-              zip: gig.venue_zip,
-              latitude: data[0].lat,
-              longitude: data[0].lon
-            })
-
-          return {
-            id: gig.id,
-            name: gig.venue,
-            city: gig.venue_city,
-            state: gig.venue_state,
-            address: gig.venue_address,
-            zip: gig.venue_zip,
-            gig_date: gig.gig_date,
-            savedToGigs: true,
-            lat: parseFloat(data[0].lat),
-            lng: parseFloat(data[0].lon)
-          }
-        }
-      } catch (error) {
-        console.error('Error geocoding venue:', error)
-      }
-
-      return null
+    // Transform gigs into tour stops
+    const tourStops: TourStop[] = (gigs || []).map(gig => ({
+      id: gig.id,
+      name: gig.venue,
+      lat: 0, // Will be set by geocoding
+      lng: 0, // Will be set by geocoding
+      city: gig.venue_city,
+      state: gig.venue_state,
+      address: gig.venue_address,
+      zip: gig.venue_zip,
+      savedToGigs: true,
+      gig_date: gig.gig_date
     }))
 
-    return {
-      tourStops: tourStops.filter((stop): stop is TourStop => stop !== null)
+    // Get coordinates for each stop
+    for (const stop of tourStops) {
+      const coordinates = await this.getCoordinates(
+        `${stop.address}, ${stop.city}, ${stop.state} ${stop.zip}`
+      )
+      stop.lat = coordinates[0]
+      stop.lng = coordinates[1]
     }
+
+    return { tourStops }
   }
 } 

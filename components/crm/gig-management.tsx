@@ -168,9 +168,6 @@ interface Gig {
   deposit_paid: boolean;
   contract_total: number;
   open_balance: number;
-  payment_amount: number;
-  payment_status: 'Pending' | 'Paid' | 'Cancelled';
-  notes: string | null;
   user_id: string;
   gig_status: GigStatus;
   created_at?: string;
@@ -280,7 +277,7 @@ export default function GigManagement() {
           savedGigs.map(async (gig) => ({
             ...gig,
             tourInfo: await fetchTourInfo(gig.id)
-          }))
+          } as GigWithTour))
         );
         
         setGigs(gigsWithTours);
@@ -348,39 +345,80 @@ export default function GigManagement() {
         sound_check_time: format(soundCheckTime, "HH:mm:ss"),
         set_time: format(setTime, "HH:mm:ss"),
         set_length: formData.get("setLength") as string,
-        gig_details: formData.get("gigDetails") as string || null,
+        gig_details: formData.get("gigDetails") as string || undefined,
         crew_hands_in: formData.get("crewHandsIn") === "on",
         crew_hands_out: formData.get("crewHandsOut") === "on",
         meal_included: formData.get("mealIncluded") === "on",
         hotel_included: formData.get("hotelIncluded") === "on",
-        deposit_amount: Number(formData.get("depositAmount")) || null,
+        deposit_amount: Number(formData.get("depositAmount")) || undefined,
         deposit_paid: formData.get("depositPaid") === "on",
         contract_total: Number(formData.get("contractTotal")),
         open_balance: Number(formData.get("openBalance")),
-        payment_amount: 0,
-        payment_status: 'Pending' as const,
-        notes: null,
         user_id: '',  // This will be set by the backend
         gig_status: gigStatus
       }
 
-      let result;
+      let result: GigWithTour;
       if (currentGig) {
-        result = await gigHelpers.updateGig(currentGig.id, gigData)
-      } else {
-        result = await gigHelpers.createGig(gigData)
+        // First update the gig data
+        const cleanedGigData = {
+          title: gigData.title,
+          venue: gigData.venue,
+          venue_address: gigData.venue_address,
+          venue_city: gigData.venue_city,
+          venue_state: gigData.venue_state,
+          venue_zip: gigData.venue_zip,
+          contact_name: gigData.contact_name,
+          contact_email: gigData.contact_email,
+          contact_phone: gigData.contact_phone,
+          gig_date: gigData.gig_date,
+          load_in_time: gigData.load_in_time,
+          sound_check_time: gigData.sound_check_time,
+          set_time: gigData.set_time,
+          set_length: gigData.set_length,
+          gig_details: gigData.gig_details,
+          crew_hands_in: gigData.crew_hands_in,
+          crew_hands_out: gigData.crew_hands_out,
+          meal_included: gigData.meal_included,
+          hotel_included: gigData.hotel_included,
+          deposit_amount: gigData.deposit_amount,
+          deposit_paid: gigData.deposit_paid,
+          contract_total: gigData.contract_total,
+          open_balance: gigData.open_balance,
+          gig_status: gigData.gig_status
+        };
+        const updateResult = await gigHelpers.updateGig(currentGig.id, cleanedGigData);
         
-        // Connect the new gig to the default tour if one exists
-        if (result) {
-          const { error: connectError } = await supabase
-            .rpc('connect_gig_to_default_tour', { 
-              p_gig_id: result.id 
-            });
-
-          if (connectError) {
-            console.error('Error connecting gig to default tour:', connectError);
-            // Don't show error to user since this is optional
+        result = {
+          ...updateResult,
+          tourInfo: currentGig.tourInfo
+        };
+      } else {
+        // Create new gig
+        const createResult = await gigHelpers.createGig(gigData);
+        
+        // Set the result first
+        result = {
+          ...createResult,
+          tourInfo: null
+        };
+        
+        // Then try to connect to default tour if we have a valid ID
+        if (result && result.id) {
+          try {
+            const { error: connectError } = await supabase
+              .rpc('connect_gig_to_default_tour', { 
+                p_gig_id: result.id 
+              });
+              
+            if (connectError) {
+              console.error('Error connecting to default tour:', connectError);
+            }
+          } catch (error) {
+            console.error('Error in tour connection:', error);
           }
+        } else {
+          throw new Error('Failed to create gig - no ID returned');
         }
       }
 

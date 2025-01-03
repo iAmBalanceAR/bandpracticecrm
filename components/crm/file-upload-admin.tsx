@@ -113,23 +113,8 @@ export default function FileUploadAdmin() {
     })
 
   return (
-  <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
-    <h1 className="text-4xl font-mono mb-4">
-        <span className="w-[100%]  text-white text-shadow-smfont-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-        Files and Images Upload Admin
-        </span>
-      </h1>
-      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
-      <Card className="bg-[#131d43]">
-      <CardHeader>
-        <CardTitle className="text-2xl">
-          <h1 className="font-mono text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-            File(s) Manager
-          </h1>
-          </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div {...getRootProps()} className="text-white border-2 border-dashed border-gray-600 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-green-400 transition-colors">
+<>
+      <div {...getRootProps()} className="text-white border-2 border-dashed border-gray-600 rounded-lg p-8 mb-4 text-center cursor-pointer hover:border-green-400 transition-colors">
           <input {...getInputProps()} />
           {isDragActive ? (
             <p>Drop the files here ...</p>
@@ -224,8 +209,6 @@ export default function FileUploadAdmin() {
             </TableBody>
           </Table>
         </div>
-      </CardContent>
-    </Card>
-  </div>
+ </>
   )
 }

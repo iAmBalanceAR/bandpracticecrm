@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { VenueSearchFilters } from '@/app/types/venue';
 import VenueSearchHeader from '@/components/crm/venue-search-header';
@@ -16,8 +16,7 @@ export default function VenuesSearchMain() {
     const [totalCount, setTotalCount] = useState(0);
     const [hasSearched, setHasSearched] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
-  
-    const filters: VenueSearchFilters = {
+    const [localFilters, setLocalFilters] = useState<VenueSearchFilters>({
       query: searchParams.get('query') ?? '',
       city: searchParams.get('city') ?? '',
       state: searchParams.get('state') ?? '',
@@ -35,7 +34,7 @@ export default function VenuesSearchMain() {
       has_sound_system: searchParams.get('has_sound_system') === 'true',
       has_lighting_system: searchParams.get('has_lighting_system') === 'true',
       has_parking: searchParams.get('has_parking') === 'true'
-    };
+    });
   
     // Fetch saved venues
     const fetchSavedVenues = async () => {
@@ -55,10 +54,21 @@ export default function VenuesSearchMain() {
     useEffect(() => {
       fetchSavedVenues();
     }, []);
+
+    const updateUrl = useCallback((filters: VenueSearchFilters) => {
+      const params = new URLSearchParams();
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          params.set(key, String(value));
+        }
+      });
+      router.push(`/venues?${params.toString()}`);
+    }, [router]);
   
     const handleSearch = async (newFilters: Partial<VenueSearchFilters>) => {
       setLoading(true);
-      const updatedFilters = { ...filters, ...newFilters, page: 1 };
+      const updatedFilters = { ...localFilters, ...newFilters, page: 1 };
+      setLocalFilters(updatedFilters);
       
       // Build query string
       const params = new URLSearchParams();
@@ -78,8 +88,8 @@ export default function VenuesSearchMain() {
         setHasSearched(true);
         setCurrentPage(1);
         
-        // Update URL
-        router.push(`/venues?${params.toString()}`);
+        // Update URL after data is loaded
+        updateUrl(updatedFilters);
       } catch (error) {
         console.error('Error fetching venues:', error);
         setVenues([]);
@@ -95,7 +105,7 @@ export default function VenuesSearchMain() {
       
       // Build query string with next page
       const params = new URLSearchParams();
-      Object.entries({ ...filters, page: nextPage }).forEach(([key, value]) => {
+      Object.entries({ ...localFilters, page: nextPage }).forEach(([key, value]) => {
         if (value) {
           params.set(key, String(value));
         }
@@ -119,7 +129,7 @@ export default function VenuesSearchMain() {
     // Only fetch initial results if there are search params
     useEffect(() => {
       if (searchParams.toString()) {
-        handleSearch(filters);
+        handleSearch(localFilters);
       }
     }, []);
 
@@ -135,13 +145,13 @@ export default function VenuesSearchMain() {
             </div>
             <TabsContent value="search">
               <VenueSearchHeader
-                query={filters.query}
+                query={localFilters.query}
                 onSearch={(query) => handleSearch({ query })}
               />
               <div className="flex flex-col lg:flex-row gap-8">
                 <div className="w-full lg:w-64 flex-none">
                   <VenueSearchFiltersComponent
-                    filters={filters}
+                    filters={localFilters}
                     onFilterChange={handleSearch}
                   />
                 </div>
@@ -153,15 +163,22 @@ export default function VenuesSearchMain() {
                       </h2>
                     </div>
                   ) : (
-                    <VenueGrid
-                      venues={venues}
-                      loading={loading}
-                      totalCount={totalCount}
-                      page={currentPage}
-                      perPage={filters.per_page}
-                      onLoadMore={handleLoadMore}
-                      onVenueSaved={fetchSavedVenues}
-                    />
+                    <>
+                      <div className="flex justify-end mb-4">
+                        <span className="text-sm text-gray-400">
+                          {totalCount} {totalCount === 1 ? 'venue' : 'venues'} found
+                        </span>
+                      </div>
+                      <VenueGrid
+                        venues={venues}
+                        loading={loading}
+                        totalCount={totalCount}
+                        page={currentPage}
+                        perPage={localFilters.per_page}
+                        onLoadMore={handleLoadMore}
+                        onVenueSaved={fetchSavedVenues}
+                      />
+                    </>
                   )}
                 </div>
               </div>

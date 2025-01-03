@@ -12,6 +12,7 @@ interface FeedbackModalProps {
   message: string
   type: 'success' | 'error' | 'warning' | 'delete'
   onConfirm?: () => void
+  className?: string
 }
 
 export function FeedbackModal({
@@ -20,7 +21,8 @@ export function FeedbackModal({
   title,
   message,
   type,
-  onConfirm
+  onConfirm,
+  className
 }: FeedbackModalProps) {
   const getIcon = () => {
     switch (type) {

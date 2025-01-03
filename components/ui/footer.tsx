@@ -1,5 +1,5 @@
 import { Twitter, Facebook, Linkedin, Github, Mail } from "lucide-react"
-
+import Image from "next/image"
 export function Footer() {
   return (
     <footer className="w-full mt-6 ml-8 pb-4 text-white font-mono">
@@ -38,9 +38,15 @@ export function Footer() {
             </ul>
           </div>
           <div className="flex-auto px-4 mb-6 ml-16">
-            <h3 className="text-sm font-semibold mb-3 text-[#008ffb]">Band Practice CRM</h3>
+          <Image 
+                  src="/images/logo-top-nav.png" 
+                  alt="Band Practice" 
+                  width={200} 
+                  height={45}
+                  className="object-contain"
+                />
             <ul className="space-y-2 text-sm">
-              <li className="flex space-x-4 mt-4">
+              <li className="flex space-x-4 mt-4 ml-4">
                 <a href="mailto:contact@bandpracticecrm.com" className="hover:text-[#008ffb] transition-colors">
                   <Mail className="h-5 w-5" />
                 </a>

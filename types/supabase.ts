@@ -40,6 +40,7 @@ export interface Database {
           updated_at: string
         }
         Insert: {
+          gig_status: string
           id?: string
           user_id?: string
           title: string

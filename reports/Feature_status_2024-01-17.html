@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tour Report Export Feature Status</title>
+    <style>
+        body {
+            font-family: system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+        }
+        h1, h2, h3 {
+            color: #1a365d;
+        }
+        .section {
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8fafc;
+            border-radius: 8px;
+        }
+        code {
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: monospace;
+        }
+        .warning {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 15px;
+            margin: 15px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Tour Report Export Feature Status Report</h1>
+    <p><strong>Date:</strong> January 17, 2024</p>
+
+    <div class="section">
+        <h2>Feature Overview</h2>
+        <p>The Tour Report Export feature allows users to generate comprehensive PDF reports for tours, including gig details, maps, driving directions, and financial summaries. The feature is implemented in the <code>/app/tour-route/exports</code> directory.</p>
+    </div>
+
+    <div class="section">
+        <h2>Core Components</h2>
+        <h3>1. Report Generator Component (<code>tour-report-generator.tsx</code>)</h3>
+        <ul>
+            <li>Main interface for report generation</li>
+            <li>Handles user options selection (map, directions, financials, contact info)</li>
+            <li>Two-step process: Generate Preview → Download PDF</li>
+            <li>Uses Shadcn UI components for consistent styling</li>
+        </ul>
+
+        <h3>2. Report Preview Component (<code>report-preview.tsx</code>)</h3>
+        <ul>
+            <li>Live preview of report content</li>
+            <li>Sections:
+                <ul>
+                    <li>Tour Information (title, dates, total mileage)</li>
+                    <li>Interactive Map (using Leaflet)</li>
+                    <li>Gig Schedule with venue details</li>
+                    <li>Driving Directions (when enabled)</li>
+                    <li>Financial Summary (when enabled)</li>
+                </ul>
+            </li>
+            <li>Uses Lucide icons for visual enhancement</li>
+        </ul>
+
+        <h3>3. Report Generator Utility (<code>report-generator.ts</code>)</h3>
+        <ul>
+            <li>Handles data collection and PDF generation</li>
+            <li>Uses jsPDF for PDF creation</li>
+            <li>Integrates with OSRM for route calculations</li>
+            <li>Manages map image capture using html2canvas</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Technologies Used</h2>
+        <ul>
+            <li><strong>PDF Generation:</strong> jsPDF</li>
+            <li><strong>Map Rendering:</strong> Leaflet.js</li>
+            <li><strong>Route Calculation:</strong> OSRM (Open Source Routing Machine)</li>
+            <li><strong>Map Capture:</strong> html2canvas</li>
+            <li><strong>UI Components:</strong> Shadcn UI, Tailwind CSS</li>
+            <li><strong>Icons:</strong> Lucide Icons</li>
+            <li><strong>Data Management:</strong> Supabase integration</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Implementation Details</h2>
+        <h3>Data Flow</h3>
+        <ol>
+            <li>User selects report options</li>
+            <li>System fetches tour data from Supabase</li>
+            <li>Route calculations performed using OSRM API</li>
+            <li>Preview generated and displayed</li>
+            <li>On PDF download:
+                <ul>
+                    <li>Map captured as image</li>
+                    <li>PDF generated with all sections</li>
+                    <li>File downloaded with tour name</li>
+                </ul>
+            </li>
+        </ol>
+
+        <h3>Key Features</h3>
+        <ul>
+            <li>Interactive preview before PDF generation</li>
+            <li>Configurable report sections</li>
+            <li>Automatic route calculation and mileage tracking</li>
+            <li>Venue contact information integration</li>
+            <li>Financial summary calculations</li>
+            <li>Turn-by-turn directions with estimated times</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Known Issues and Future Improvements</h2>
+        <div class="warning">
+            <h3>Critical Issues</h3>
+            <ul>
+                <li>Map component interference with main dashboard map (needs investigation)</li>
+                <li>Detailed street view not loading in PDF export</li>
+            </ul>
+        </div>
+
+        <h3>Planned Improvements</h3>
+        <ul>
+            <li>Enhanced PDF styling and layout</li>
+            <li>Cover page addition</li>
+            <li>Better page breaks and formatting</li>
+            <li>Table of contents for longer reports</li>
+            <li>Improved map styling and detail level</li>
+        </ul>
+
+        <h3>Technical Debt</h3>
+        <ul>
+            <li>Proper TypeScript definitions for jsPDF integration</li>
+            <li>Optimization of route calculation requests</li>
+            <li>Better error handling for API failures</li>
+            <li>Component test coverage</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>Usage Notes</h2>
+        <ul>
+            <li>Feature accessible from tour route page</li>
+            <li>Requires active tour selection</li>
+            <li>PDF generation may take a few moments for tours with many stops</li>
+            <li>Internet connection required for route calculations</li>
+            <li>Map capture works best with stable internet connection</li>
+        </ul>
+    </div>
+</body>
+</html> 

@@ -1,30 +1,10 @@
 export interface Venue {
-  latitude: number;
-  longitude: number;
   id: string;
   title: string;
-  description?: string;
+  address: string;
   city: string;
   state: string;
-  address?: string;
-  zip_code?: string;
-  capacity?: number;
-  venue_type?: string;
-  primary_image_url?: string;
-  gallery_image_urls?: string[];
-  contact_name?: string;
-  contact_email?: string;
-  contact_phone?: string;
-  website_url?: string;
-  social_media?: {
-    facebook?: string;
-    twitter?: string;
-    instagram?: string;
-  };
-  amenities?: string[];
-  verified: boolean;
-  featured: boolean;
-  allows_underage: boolean;
+  zip: string;
   created_at: string;
   updated_at: string;
 }
@@ -51,8 +31,9 @@ export interface VenueSearchFilters {
   has_parking: boolean;
   verified: boolean;
   featured: boolean;
-  sort_by: string;
+  sort_by: 'title' | 'capacity' | 'city' | 'state';
   sort_order: 'asc' | 'desc';
   page: number;
   per_page: number;
+  range_miles?: number;
 } 
