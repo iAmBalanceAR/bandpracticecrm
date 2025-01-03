@@ -74,7 +74,7 @@ export default function LeadsLayout() {
             
             <TabsContent value="all" className="mt-4">
               <div className="grid gap-4">
-                {/* All leads grid/list will go here */}
+                <LeadList />
               </div>
             </TabsContent>
             

@@ -1,6 +1,6 @@
 'use client';
 
-import { Lead } from '@/app/types/lead';
+import { Lead, Communication, Reminder, LeadNote, Attachment } from '@/app/types/lead';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card } from '@/components/ui/card';
 import LeadOverview from './tabs/lead-overview';
@@ -11,10 +11,10 @@ import LeadAttachments from '@/app/leads/[id]/components/tabs/lead-attachments';
 
 interface LeadTabsProps {
   lead: Lead & {
-    communications: any[];
-    reminders: any[];
-    lead_notes: any[];
-    attachments: any[];
+    communications: Communication[];
+    reminders: Reminder[];
+    lead_notes: LeadNote[];
+    attachments: Attachment[];
   };
 }
 

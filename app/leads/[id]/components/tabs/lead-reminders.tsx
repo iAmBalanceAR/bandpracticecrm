@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Lead, Reminder, LeadPriority } from '@/app/types/lead';
+import { Lead, Reminder } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,10 +16,9 @@ import {
 import { Label } from '@/components/ui/label';
 import { format, formatDistanceToNow } from 'date-fns';
 import createClient from '@/utils/supabase/client';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { Calendar, CheckCircle2, Circle } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 interface LeadRemindersProps {
   lead: Lead & {
@@ -27,14 +26,21 @@ interface LeadRemindersProps {
   };
 }
 
-const priorityColors: Record<LeadPriority, string> = {
-  low: 'text-blue-500',
-  medium: 'text-yellow-500',
-  high: 'text-red-500'
+type FeedbackModalState = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'delete';
 };
 
 export default function LeadReminders({ lead }: LeadRemindersProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -42,29 +48,40 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      lead_id: lead.id,
-      title: formData.get('title') as string,
-      description: formData.get('description') as string,
-      due_date: new Date(formData.get('due_date') as string).toISOString(),
-      priority: formData.get('priority') as LeadPriority,
-      status: 'pending' as const,
-    };
-
     try {
-      const { error } = await supabase
+      const formData = new FormData(e.currentTarget);
+      const { data, error } = await supabase
         .from('reminders')
-        .insert([data]);
+        .insert([
+          {
+            lead_id: lead.id,
+            title: formData.get('title'),
+            description: formData.get('description'),
+            due_date: formData.get('due_date'),
+            priority: formData.get('priority') || 'medium',
+            status: 'pending'
+          }
+        ])
+        .select();
 
       if (error) throw error;
 
-      toast.success('Reminder added successfully');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'Reminder added successfully',
+        type: 'success'
+      });
       router.refresh();
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error('Error adding reminder:', error);
-      toast.error('Failed to add reminder');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to add reminder',
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -83,11 +100,21 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
 
       if (error) throw error;
 
-      toast.success('Reminder status updated');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'Reminder status updated',
+        type: 'success'
+      });
       router.refresh();
     } catch (error) {
       console.error('Error updating reminder:', error);
-      toast.error('Failed to update reminder');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to update reminder',
+        type: 'error'
+      });
     }
   };
 
@@ -104,16 +131,16 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
               <Input
                 id="title"
                 name="title"
-                placeholder="Reminder title"
+                placeholder="Enter reminder title"
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="due_date">Due Date</Label>
               <Input
+                type="datetime-local"
                 id="due_date"
                 name="due_date"
-                type="datetime-local"
                 required
               />
             </div>
@@ -124,13 +151,14 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
             <Textarea
               id="description"
               name="description"
-              placeholder="Add details about the reminder..."
+              placeholder="Add reminder details..."
+              required
             />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="priority">Priority</Label>
-            <Select name="priority" required defaultValue="medium">
+            <Select name="priority" defaultValue="medium">
               <SelectTrigger>
                 <SelectValue placeholder="Select priority" />
               </SelectTrigger>
@@ -155,92 +183,60 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
               No reminders yet. Add your first reminder above.
             </p>
           ) : (
-            <>
-              <div className="space-y-2">
-                <h4 className="font-medium">Pending</h4>
-                {lead.reminders
-                  .filter(reminder => reminder.status === 'pending')
-                  .sort((a, b) => new Date(a.due_date).getTime() - new Date(b.due_date).getTime())
-                  .map((reminder) => (
-                    <div
-                      key={reminder.id}
-                      className="flex items-start gap-4 p-4 border rounded-lg"
-                    >
-                      <button
-                        onClick={() => toggleReminderStatus(reminder)}
-                        className="mt-1"
-                      >
-                        <Circle className="h-5 w-5 text-muted-foreground" />
-                      </button>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium">{reminder.title}</h4>
-                            {reminder.description && (
-                              <p className="text-muted-foreground mt-1">
-                                {reminder.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            <div className="flex items-center gap-1">
-                              <Calendar className="h-4 w-4" />
-                              {format(new Date(reminder.due_date), 'PPp')}
-                            </div>
-                            <div className={cn(
-                              'text-right mt-1 font-medium',
-                              priorityColors[reminder.priority]
-                            )}>
-                              {reminder.priority}
-                            </div>
-                          </div>
-                        </div>
+            lead.reminders
+              .sort((a, b) => {
+                const dateA = new Date(a.due_date).getTime();
+                const dateB = new Date(b.due_date).getTime();
+                return dateA - dateB;
+              })
+              .map((reminder) => (
+                <div
+                  key={reminder.id}
+                  className={cn(
+                    "flex gap-4 p-4 border rounded-lg cursor-pointer transition-colors",
+                    reminder.status === 'completed' && "opacity-50"
+                  )}
+                  onClick={() => toggleReminderStatus(reminder)}
+                >
+                  <div className="flex-1">
+                    <div className="flex items-center justify-between mb-2">
+                      <div className="font-medium flex items-center gap-2">
+                        <div
+                          className={cn(
+                            "w-2 h-2 rounded-full",
+                            reminder.priority === 'high' && "bg-red-500",
+                            reminder.priority === 'medium' && "bg-yellow-500",
+                            reminder.priority === 'low' && "bg-green-500"
+                          )}
+                        />
+                        {reminder.title}
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        {format(new Date(reminder.due_date), "MMM d, yyyy h:mm a")}
                       </div>
                     </div>
-                  ))}
-              </div>
-
-              <div className="space-y-2">
-                <h4 className="font-medium">Completed</h4>
-                {lead.reminders
-                  .filter(reminder => reminder.status === 'completed')
-                  .sort((a, b) => new Date(b.completed_at!).getTime() - new Date(a.completed_at!).getTime())
-                  .map((reminder) => (
-                    <div
-                      key={reminder.id}
-                      className="flex items-start gap-4 p-4 border rounded-lg opacity-60"
-                    >
-                      <button
-                        onClick={() => toggleReminderStatus(reminder)}
-                        className="mt-1"
-                      >
-                        <CheckCircle2 className="h-5 w-5 text-green-500" />
-                      </button>
-                      <div className="flex-1">
-                        <div className="flex items-start justify-between">
-                          <div>
-                            <h4 className="font-medium line-through">
-                              {reminder.title}
-                            </h4>
-                            {reminder.description && (
-                              <p className="text-muted-foreground mt-1 line-through">
-                                {reminder.description}
-                              </p>
-                            )}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            <div>Completed {formatDistanceToNow(new Date(reminder.completed_at!), { addSuffix: true })}</div>
-                            <div className="text-right mt-1">Due {format(new Date(reminder.due_date), 'PP')}</div>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-              </div>
-            </>
+                    <p className="text-muted-foreground">
+                      {reminder.description}
+                    </p>
+                    {reminder.status === 'completed' && reminder.completed_at && (
+                      <p className="text-sm text-muted-foreground mt-2">
+                        Completed {formatDistanceToNow(new Date(reminder.completed_at), { addSuffix: true })}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              ))
           )}
         </div>
       </CardContent>
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+      />
     </>
   );
 } 

@@ -46,6 +46,29 @@ interface Note {
   isEditing: boolean;
 }
 
+interface LeadData {
+  title: string;
+  type: LeadType;
+  status: LeadStatus;
+  priority: LeadPriority;
+  company: string;
+  description: string;
+  venue_id?: string;
+  contact_info: {
+    name: string;
+    email: string;
+    phone: string;
+  };
+  tags: string[];
+  last_contact_date: string;
+  created_by_email: string;
+}
+
+interface LeadResponse {
+  id: string;
+  [key: string]: any;
+}
+
 const statusOptions: LeadStatus[] = ['new', 'contacted', 'in_progress', 'negotiating', 'won', 'lost', 'archived'];
 const priorityOptions: LeadPriority[] = ['low', 'medium', 'high'];
 const typeOptions: LeadType[] = ['venue', 'artist', 'promoter', 'sponsor', 'other'];
@@ -111,61 +134,64 @@ export default function NewLeadDialog({ children }: NewLeadDialogProps) {
     const formData = new FormData(e.currentTarget);
     
     try {
-      const { data: lead, error: leadError } = await supabase
-        .from('leads')
-        .insert([{
-          title: formData.get('title') as string,
-          type: formData.get('type') as LeadType,
-          status: formData.get('status') as LeadStatus,
-          priority: formData.get('priority') as LeadPriority,
-          company: formData.get('company') as string,
-          description: formData.get('description') as string,
-          venue_id: selectedVenue?.id,
-          contact_info: {
-            name: formData.get('contact_name') as string,
-            email: formData.get('contact_email') as string,
-            phone: formData.get('contact_phone') as string,
-          },
-          tags: [],
-          last_contact_date: new Date().toISOString(),
-          created_by: user?.id,
-          assigned_to: user?.id,
-        }])
-        .select()
-        .single();
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.email) {
+        throw new Error('User email not found');
+      }
+
+      const leadData: LeadData = {
+        title: formData.get('title') as string,
+        type: formData.get('type') as LeadType,
+        status: formData.get('status') as LeadStatus,
+        priority: formData.get('priority') as LeadPriority,
+        company: formData.get('company') as string,
+        description: formData.get('description') as string,
+        venue_id: selectedVenue?.id,
+        contact_info: {
+          name: formData.get('contact_name') as string,
+          email: formData.get('contact_email') as string,
+          phone: formData.get('contact_phone') as string,
+        },
+        tags: [],
+        last_contact_date: new Date().toISOString(),
+        created_by_email: session.user.email
+      };
+
+      const { data, error: leadError } = await supabase
+        .rpc('create_lead', { 
+          lead_data: leadData
+        });
 
       if (leadError) throw leadError;
 
-      // Add initial notes
+      const lead = data as LeadResponse;
+
+      // Add initial notes if any
       if (initialNotes.length > 0) {
         const { error: notesError } = await supabase
-          .from('lead_notes')
-          .insert(
-            initialNotes.map(note => ({
-              lead_id: lead.id,
+          .rpc('create_lead_notes', {
+            p_lead_id: lead.id,
+            p_notes: initialNotes.map(note => ({
               content: note.content,
-              is_private: note.is_private,
-              created_by: 'user',
+              is_private: note.is_private
             }))
-          );
+          });
 
         if (notesError) throw notesError;
       }
 
-      // Add reminders
+      // Add reminders if any
       if (initialReminders.length > 0) {
         const { error: remindersError } = await supabase
-          .from('reminders')
-          .insert(
-            initialReminders.map(reminder => ({
-              lead_id: lead.id,
+          .rpc('create_lead_reminders', {
+            p_lead_id: lead.id,
+            p_reminders: initialReminders.map(reminder => ({
               title: reminder.title,
               description: reminder.description,
               due_date: reminder.due_date.toISOString(),
-              priority: reminder.priority,
-              status: 'pending',
+              priority: reminder.priority
             }))
-          );
+          });
 
         if (remindersError) throw remindersError;
       }
@@ -177,14 +203,31 @@ export default function NewLeadDialog({ children }: NewLeadDialogProps) {
         type: 'success'
       });
       setOpen(false);
-      router.refresh();
-      router.push(`/leads/${lead.id}`);
-    } catch (error) {
+
+      // Verify the lead exists before redirecting
+      const { data: verifyLead, error: verifyError } = await supabase
+        .from('leads')
+        .select('id')
+        .eq('id', lead.id)
+        .single();
+
+      if (verifyError || !verifyLead) {
+        console.error('Error verifying lead:', verifyError);
+        router.refresh();
+        return;
+      }
+
+      // Wait a moment before redirecting
+      setTimeout(() => {
+        router.refresh();
+        router.push(`/leads/${lead.id}`);
+      }, 1000);
+    } catch (error: any) {
       console.error('Error creating lead:', error);
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
-        message: 'Failed to create lead',
+        message: error.message || 'Failed to create lead',
         type: 'warning'
       });
     } finally {

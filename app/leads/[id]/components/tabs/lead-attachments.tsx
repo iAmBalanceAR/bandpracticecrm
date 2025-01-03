@@ -40,7 +40,7 @@ function formatBytes(bytes: number, decimals = 2) {
 
 interface LeadAttachmentsProps {
   lead: Lead & {
-    attachments: Attachment[];
+    attachments: Partial<Attachment>[];
   };
 }
 
@@ -59,52 +59,54 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setIsUploading(true);
+
     try {
-      // Upload file to Supabase Storage
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Math.random().toString(36).slice(2)}.${fileExt}`;
+      const formData = new FormData(e.currentTarget);
+      const file = formData.get('file') as File;
+      const fileName = file.name;
+      const fileType = file.type;
       const filePath = `leads/${lead.id}/${fileName}`;
 
-      const { error: uploadError, data: uploadData } = await supabase.storage
+      // Upload file to storage
+      const { error: uploadError } = await supabase.storage
         .from('attachments')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Get public URL
-      const { data: { publicUrl } } = supabase.storage
-        .from('attachments')
-        .getPublicUrl(filePath);
-
       // Create attachment record
-      const { error: dbError } = await supabase
+      const { data, error: dbError } = await supabase
         .from('attachments')
-        .insert([{
-          lead_id: lead.id,
-          type: uploadType,
-          file_name: file.name,
-          file_url: publicUrl,
-          file_size: file.size,
-          file_type: file.type,
-        }]);
+        .insert([
+          {
+            lead_id: lead.id,
+            file_name: fileName,
+            file_type: fileType,
+            file_path: filePath,
+            date: new Date().toISOString()
+          }
+        ])
+        .select(`
+          id,
+          file_name,
+          file_type,
+          file_path,
+          date
+        `);
 
       if (dbError) throw dbError;
 
-      toast.success('File uploaded successfully');
+      toast.success('Attachment added successfully');
       router.refresh();
+      (e.target as HTMLFormElement).reset();
     } catch (error) {
-      console.error('Error uploading file:', error);
-      toast.error('Failed to upload file');
+      console.error('Error adding attachment:', error);
+      toast.error('Failed to add attachment');
     } finally {
       setIsUploading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
@@ -168,7 +170,7 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                onChange={handleFileChange}
+                onChange={handleSubmit}
                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
               />
               <Button

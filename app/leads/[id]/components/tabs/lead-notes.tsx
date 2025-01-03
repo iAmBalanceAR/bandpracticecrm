@@ -21,7 +21,7 @@ import { MoreVertical, Lock, Unlock } from 'lucide-react';
 
 interface LeadNotesProps {
   lead: Lead & {
-    lead_notes: LeadNote[];
+    lead_notes: Partial<LeadNote>[];
   };
 }
 
@@ -35,17 +35,18 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      lead_id: lead.id,
-      content: formData.get('content') as string,
-      is_private: isPrivate,
-    };
-
     try {
-      const { error } = await supabase
+      const formData = new FormData(e.currentTarget);
+      const { data, error } = await supabase
         .from('lead_notes')
-        .insert([data]);
+        .insert([
+          {
+            lead_id: lead.id,
+            content: formData.get('content'),
+            is_private: isPrivate
+          }
+        ])
+        .select();
 
       if (error) throw error;
 
@@ -118,13 +119,17 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
         </form>
 
         <div className="space-y-4">
-          {lead.lead_notes.length === 0 ? (
+          {!lead.lead_notes?.length ? (
             <p className="text-center text-muted-foreground py-4">
               No notes yet. Add your first note above.
             </p>
           ) : (
             lead.lead_notes
-              .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+              .sort((a, b) => {
+                const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
+                const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
+                return dateB - dateA;
+              })
               .map((note) => (
                 <div
                   key={note.id}
@@ -133,7 +138,7 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
                   <div className="flex items-start justify-between">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <span>
-                        {formatDistanceToNow(new Date(note.created_at), {
+                        {note.created_at && formatDistanceToNow(new Date(note.created_at), {
                           addSuffix: true,
                         })}
                       </span>
@@ -151,12 +156,14 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuItem
-                          onClick={() => handleDelete(note.id)}
-                          className="text-red-600"
-                        >
-                          Delete Note
-                        </DropdownMenuItem>
+                        {note.id && (
+                          <DropdownMenuItem
+                            onClick={() => handleDelete(note.id as string)}
+                            className="text-red-600"
+                          >
+                            Delete Note
+                          </DropdownMenuItem>
+                        )}
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>

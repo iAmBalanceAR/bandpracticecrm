@@ -63,12 +63,12 @@ export default function LeadOverview({ lead }: LeadOverviewProps) {
         </dl>
       </div>
 
-      {lead.tags.length > 0 && (
+      {lead.tags?.length > 0 && (
         <div>
           <h3 className="text-lg font-semibold mb-2">Tags</h3>
           <div className="flex flex-wrap gap-2">
             {lead.tags.map((tag) => (
-              <Badge key={tag} variant="secondary">
+              <Badge key={tag} variant="outline">
                 {tag}
               </Badge>
             ))}

@@ -322,4 +322,37 @@ begin
   
   return;
 end;
-$$; 
+$$;
+
+-- Enable RLS on leads table
+alter table leads enable row level security;
+
+-- Create RLS policies for leads table
+create policy "Users can view their own leads"
+  on leads for select
+  using (auth.uid() = created_by);
+
+create policy "Users can insert their own leads"
+  on leads for insert
+  with check (auth.uid() = created_by);
+
+create policy "Users can update their own leads"
+  on leads for update
+  using (auth.uid() = created_by);
+
+create policy "Users can delete their own leads"
+  on leads for delete
+  using (auth.uid() = created_by);
+
+-- Create indexes for leads table
+create index leads_created_by_idx on leads(created_by);
+create index leads_status_idx on leads(status);
+create index leads_updated_at_idx on leads(updated_at);
+
+-- Create last_updated trigger for leads
+create trigger update_leads_last_updated
+  before update on leads
+  for each row
+  execute function update_last_updated_column();
+
+-- ... existing code ... 

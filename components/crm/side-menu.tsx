@@ -207,12 +207,12 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
                 {sidebarOpen && <span>Data Tracking</span>}
               </Button>
             </Link>
-            <Link href="/notes-reminders" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/notes-reminders' ? 'bg-[#1B2559]' : ''}`}>
+            {/* <Link href="/notes-reminders" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/notes-reminders' ? 'bg-[#1B2559]' : ''}`}>
               <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} ${pathname === '/notes-reminders' ? 'text-white' : 'text-gray-400 hover:text-white'} text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
                 <MessageSquare className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#ff9920]`} />
                 {sidebarOpen && <span>Notes &amp; Reminders</span>}
               </Button>
-            </Link>
+            </Link> */}
             <Link href="/file-uploads" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/file-uploads' ? 'bg-[#1B2559]' : ''}`}>
               <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} ${pathname === '/file-uploads' ? 'text-white' : 'text-gray-400 hover:text-white'} text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
                 <Upload className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#ff9920]`} />

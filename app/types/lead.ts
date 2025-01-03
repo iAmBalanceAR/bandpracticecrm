@@ -11,7 +11,7 @@ export interface Lead {
   type: LeadType;
   status: LeadStatus;
   priority: LeadPriority;
-  assigned_to: string; // user_id
+  assigned_to?: string;
   company?: string;
   contact_info: {
     name?: string;
@@ -19,7 +19,7 @@ export interface Lead {
     phone?: string;
     website?: string;
   };
-  venue_id?: string; // Reference to venues table
+  venue_id?: string;
   description?: string;
   expected_value?: number;
   last_contact_date: string;
@@ -27,7 +27,7 @@ export interface Lead {
   tags: string[];
   created_at: string;
   updated_at: string;
-  created_by: string;
+  created_by?: string;
 }
 
 export interface Communication {

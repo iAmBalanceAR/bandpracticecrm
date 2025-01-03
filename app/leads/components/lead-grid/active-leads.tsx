@@ -8,32 +8,67 @@ import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { Building2, Mail, Phone, Calendar } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function ActiveLeads() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const supabase = createClient();
 
-  useEffect(() => {
-    async function fetchActiveLeads() {
-      setIsLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('leads')
-          .select('*')
-          .in('status', ['new', 'contacted', 'in_progress', 'negotiating'])
-          .order('updated_at', { ascending: false });
+  const fetchActiveLeads = async () => {
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('leads')
+        .select('*')
+        .eq('status', 'active')
+        .order('updated_at', { ascending: false });
 
-        if (error) throw error;
-        setLeads(data || []);
-      } catch (error) {
-        console.error('Error fetching active leads:', error);
-      } finally {
-        setIsLoading(false);
-      }
+      if (error) throw error;
+
+      setLeads((data || []) as Lead[]);
+    } catch (error) {
+      console.error('Error fetching active leads:', error);
+      toast.error('Failed to fetch active leads');
+    } finally {
+      setIsLoading(false);
     }
+  };
 
+  // Initial fetch
+  useEffect(() => {
     fetchActiveLeads();
+  }, []);
+
+  // Subscribe to realtime changes
+  useEffect(() => {
+    const channel = supabase
+      .channel('leads_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'leads',
+          filter: 'status=eq.active'
+        }, 
+        (payload: any) => {
+          if (payload.eventType === 'INSERT' && payload.new.status === 'active') {
+            setLeads(prev => [payload.new as Lead, ...prev]);
+          } else if (payload.eventType === 'DELETE') {
+            setLeads(prev => prev.filter(lead => lead.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE') {
+            setLeads(prev => prev.map(lead => 
+              lead.id === payload.new.id ? (payload.new as Lead) : lead
+            ));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      console.log('Cleaning up realtime subscription...');
+      supabase.removeChannel(channel);
+    };
   }, []);
 
   if (isLoading) {
@@ -80,32 +115,6 @@ export default function ActiveLeads() {
                 >
                   {lead.status.replace('_', ' ')}
                 </Badge>
-              </div>
-              
-              {lead.company && (
-                <div className="flex items-center gap-2 text-gray-300 mb-2">
-                  <Building2 className="h-4 w-4" />
-                  <span className="truncate">{lead.company}</span>
-                </div>
-              )}
-              
-              {lead.contact_info?.email && (
-                <div className="flex items-center gap-2 text-gray-300 mb-2">
-                  <Mail className="h-4 w-4" />
-                  <span className="truncate">{lead.contact_info.email}</span>
-                </div>
-              )}
-              
-              {lead.contact_info?.phone && (
-                <div className="flex items-center gap-2 text-gray-300 mb-2">
-                  <Phone className="h-4 w-4" />
-                  <span>{lead.contact_info.phone}</span>
-                </div>
-              )}
-              
-              <div className="flex items-center gap-2 text-gray-400 mt-3 text-sm">
-                <Calendar className="h-4 w-4" />
-                <span>Last contact: {format(new Date(lead.last_contact_date), 'MMM d, yyyy')}</span>
               </div>
             </CardContent>
           </Card>

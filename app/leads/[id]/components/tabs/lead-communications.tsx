@@ -15,13 +15,13 @@ import {
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
 import createClient from '@/utils/supabase/client';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Mail, Phone, MessageSquare, Calendar } from 'lucide-react';
+import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 interface LeadCommunicationsProps {
   lead: Lead & {
-    communications: Communication[];
+    communications: Partial<Communication>[];
   };
 }
 
@@ -30,10 +30,23 @@ const communicationIcons = {
   call: <Phone className="h-4 w-4" />,
   meeting: <Calendar className="h-4 w-4" />,
   note: <MessageSquare className="h-4 w-4" />,
+} as const;
+
+type FeedbackModalState = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'delete';
 };
 
 export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
   const [isLoading, setIsLoading] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -41,33 +54,45 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
     e.preventDefault();
     setIsLoading(true);
 
-    const formData = new FormData(e.currentTarget);
-    const data = {
-      lead_id: lead.id,
-      type: formData.get('type') as Communication['type'],
-      content: formData.get('content') as string,
-      date: new Date().toISOString(),
-    };
-
     try {
-      const { error } = await supabase
+      const formData = new FormData(e.currentTarget);
+      const { data, error } = await supabase
         .from('communications')
-        .insert([data]);
+        .insert([
+          {
+            lead_id: lead.id,
+            type: formData.get('type') as Communication['type'],
+            content: formData.get('content'),
+            date: new Date().toISOString(),
+            sentiment: formData.get('sentiment') || 'neutral'
+          }
+        ])
+        .select(`
+          id,
+          type,
+          content,
+          date,
+          sentiment
+        `);
 
       if (error) throw error;
 
-      // Update last_contact_date on the lead
-      await supabase
-        .from('leads')
-        .update({ last_contact_date: data.date })
-        .eq('id', lead.id);
-
-      toast.success('Communication added successfully');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'Communication added successfully',
+        type: 'success'
+      });
       router.refresh();
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error('Error adding communication:', error);
-      toast.error('Failed to add communication');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to add communication',
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
@@ -119,14 +144,18 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
             </p>
           ) : (
             lead.communications
-              .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+              .sort((a, b) => {
+                const dateA = a.date ? new Date(a.date).getTime() : 0;
+                const dateB = b.date ? new Date(b.date).getTime() : 0;
+                return dateB - dateA;
+              })
               .map((communication) => (
                 <div
                   key={communication.id}
                   className="flex gap-4 p-4 border rounded-lg"
                 >
                   <div className="mt-1">
-                    {communicationIcons[communication.type]}
+                    {communication.type && communicationIcons[communication.type]}
                   </div>
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
@@ -134,7 +163,7 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
                         {communication.type}
                       </div>
                       <div className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(communication.date), {
+                        {communication.date && formatDistanceToNow(new Date(communication.date), {
                           addSuffix: true,
                         })}
                       </div>
@@ -148,6 +177,14 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
           )}
         </div>
       </CardContent>
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+      />
     </>
   );
 } 

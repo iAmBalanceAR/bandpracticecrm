@@ -18,6 +18,8 @@ import { Calendar as CalendarIcon } from 'lucide-react';
 import { LeadStatus, LeadPriority, LeadType } from '@/app/types/lead';
 import { create } from 'zustand';
 
+type FilterKey = 'status' | 'priority' | 'type' | 'assignedTo' | 'tags';
+
 interface FiltersState {
   query: string;
   status: LeadStatus[];
@@ -26,8 +28,11 @@ interface FiltersState {
   assignedTo: string[];
   tags: string[];
   dateRange: { start: Date; end: Date } | null;
-  setFilter: (key: string, value: any) => void;
-  toggleFilter: (key: string, value: any) => void;
+  setFilter: <K extends keyof Omit<FiltersState, 'setFilter' | 'toggleFilter' | 'reset'>>(
+    key: K,
+    value: FiltersState[K]
+  ) => void;
+  toggleFilter: (key: FilterKey, value: string) => void;
   reset: () => void;
 }
 
@@ -41,12 +46,15 @@ export const useLeadFilters = create<FiltersState>((set) => ({
   dateRange: null,
   setFilter: (key, value) => set((state) => ({ ...state, [key]: value })),
   toggleFilter: (key, value) =>
-    set((state) => ({
-      ...state,
-      [key]: state[key as keyof FiltersState].includes(value)
-        ? (state[key as keyof FiltersState] as any[]).filter((v) => v !== value)
-        : [...(state[key as keyof FiltersState] as any[]), value],
-    })),
+    set((state) => {
+      const currentArray = state[key] as string[];
+      return {
+        ...state,
+        [key]: currentArray.includes(value)
+          ? currentArray.filter((v) => v !== value)
+          : [...currentArray, value],
+      };
+    }),
   reset: () =>
     set({
       query: '',
@@ -188,8 +196,20 @@ export default function LeadFilters() {
                 initialFocus
                 mode="range"
                 defaultMonth={dateRange?.start}
-                selected={dateRange}
-                onSelect={(range) => setFilter('dateRange', range)}
+                selected={{
+                  from: dateRange?.start,
+                  to: dateRange?.end
+                }}
+                onSelect={(range) => {
+                  if (range?.from) {
+                    setFilter('dateRange', {
+                      start: range.from,
+                      end: range.to || range.from
+                    });
+                  } else {
+                    setFilter('dateRange', null);
+                  }
+                }}
                 numberOfMonths={2}
               />
             </PopoverContent>
