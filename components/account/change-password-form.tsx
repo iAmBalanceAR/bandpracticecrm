@@ -59,7 +59,7 @@ export default function ChangePasswordForm({ isOpen, onClose }: ChangePasswordFo
   }
 
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="bg-[#111c44] text-white border-0 rounded-md">
         <DialogHeader>
           <DialogTitle className="text-2xl font-bold text-white mt-6 ml-6">Change Password</DialogTitle>

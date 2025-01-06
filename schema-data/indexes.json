@@ -1,0 +1,302 @@
+[
+    {
+      "schema_name": "public",
+      "table_name": "attachments",
+      "index_name": "attachments_lead_id_idx",
+      "index_definition": "CREATE INDEX attachments_lead_id_idx ON public.attachments USING btree (lead_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "attachments",
+      "index_name": "attachments_pkey",
+      "index_definition": "CREATE UNIQUE INDEX attachments_pkey ON public.attachments USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "communications",
+      "index_name": "communications_lead_id_idx",
+      "index_definition": "CREATE INDEX communications_lead_id_idx ON public.communications USING btree (lead_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "communications",
+      "index_name": "communications_pkey",
+      "index_definition": "CREATE UNIQUE INDEX communications_pkey ON public.communications USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "gigs",
+      "index_name": "gigs_gig_date_idx",
+      "index_definition": "CREATE INDEX gigs_gig_date_idx ON public.gigs USING btree (gig_date)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "gigs",
+      "index_name": "gigs_pkey",
+      "index_definition": "CREATE UNIQUE INDEX gigs_pkey ON public.gigs USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "gigs",
+      "index_name": "gigs_user_id_idx",
+      "index_definition": "CREATE INDEX gigs_user_id_idx ON public.gigs USING btree (user_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "lead_notes",
+      "index_name": "lead_notes_created_by_email_idx",
+      "index_definition": "CREATE INDEX lead_notes_created_by_email_idx ON public.lead_notes USING btree (created_by_email)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "lead_notes",
+      "index_name": "lead_notes_lead_id_idx",
+      "index_definition": "CREATE INDEX lead_notes_lead_id_idx ON public.lead_notes USING btree (lead_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "lead_notes",
+      "index_name": "lead_notes_pkey",
+      "index_definition": "CREATE UNIQUE INDEX lead_notes_pkey ON public.lead_notes USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_assigned_to_idx",
+      "index_definition": "CREATE INDEX leads_assigned_to_idx ON public.leads USING btree (assigned_to)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_created_by_email_idx",
+      "index_definition": "CREATE INDEX leads_created_by_email_idx ON public.leads USING btree (created_by_email)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_created_by_idx",
+      "index_definition": "CREATE INDEX leads_created_by_idx ON public.leads USING btree (created_by)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_pkey",
+      "index_definition": "CREATE UNIQUE INDEX leads_pkey ON public.leads USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_status_idx",
+      "index_definition": "CREATE INDEX leads_status_idx ON public.leads USING btree (status)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_tags_idx",
+      "index_definition": "CREATE INDEX leads_tags_idx ON public.leads USING gin (tags)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_title_idx",
+      "index_definition": "CREATE INDEX leads_title_idx ON public.leads USING gin (to_tsvector('english'::regconfig, title))"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_type_idx",
+      "index_definition": "CREATE INDEX leads_type_idx ON public.leads USING btree (type)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_updated_at_idx",
+      "index_definition": "CREATE INDEX leads_updated_at_idx ON public.leads USING btree (updated_at DESC)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "leads",
+      "index_name": "leads_venue_id_idx",
+      "index_definition": "CREATE INDEX leads_venue_id_idx ON public.leads USING btree (venue_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "prices",
+      "index_name": "prices_pkey",
+      "index_definition": "CREATE UNIQUE INDEX prices_pkey ON public.prices USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "products",
+      "index_name": "products_pkey",
+      "index_definition": "CREATE UNIQUE INDEX products_pkey ON public.products USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "profiles",
+      "index_name": "profiles_pkey",
+      "index_definition": "CREATE UNIQUE INDEX profiles_pkey ON public.profiles USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "reminders",
+      "index_name": "reminders_created_by_email_idx",
+      "index_definition": "CREATE INDEX reminders_created_by_email_idx ON public.reminders USING btree (created_by_email)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "reminders",
+      "index_name": "reminders_due_date_idx",
+      "index_definition": "CREATE INDEX reminders_due_date_idx ON public.reminders USING btree (due_date)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "reminders",
+      "index_name": "reminders_lead_id_idx",
+      "index_definition": "CREATE INDEX reminders_lead_id_idx ON public.reminders USING btree (lead_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "reminders",
+      "index_name": "reminders_pkey",
+      "index_definition": "CREATE UNIQUE INDEX reminders_pkey ON public.reminders USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "reminders",
+      "index_name": "reminders_status_idx",
+      "index_definition": "CREATE INDEX reminders_status_idx ON public.reminders USING btree (status)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "saved_venues",
+      "index_name": "saved_venues_pkey",
+      "index_definition": "CREATE UNIQUE INDEX saved_venues_pkey ON public.saved_venues USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "saved_venues",
+      "index_name": "saved_venues_user_idx",
+      "index_definition": "CREATE INDEX saved_venues_user_idx ON public.saved_venues USING btree (user_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "saved_venues",
+      "index_name": "saved_venues_venue_idx",
+      "index_definition": "CREATE INDEX saved_venues_venue_idx ON public.saved_venues USING btree (venue_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "saved_venues",
+      "index_name": "unique_user_venue",
+      "index_definition": "CREATE UNIQUE INDEX unique_user_venue ON public.saved_venues USING btree (user_id, venue_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "stage_plot_items",
+      "index_name": "stage_plot_items_pkey",
+      "index_definition": "CREATE UNIQUE INDEX stage_plot_items_pkey ON public.stage_plot_items USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "stage_plots",
+      "index_name": "stage_plots_pkey",
+      "index_definition": "CREATE UNIQUE INDEX stage_plots_pkey ON public.stage_plots USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "subscriptions",
+      "index_name": "subscriptions_pkey",
+      "index_definition": "CREATE UNIQUE INDEX subscriptions_pkey ON public.subscriptions USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tourconnect",
+      "index_name": "tourconnect_gig_id_idx",
+      "index_definition": "CREATE INDEX tourconnect_gig_id_idx ON public.tourconnect USING btree (gig_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tourconnect",
+      "index_name": "tourconnect_pkey",
+      "index_definition": "CREATE UNIQUE INDEX tourconnect_pkey ON public.tourconnect USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tourconnect",
+      "index_name": "tourconnect_tour_id_gig_id_key",
+      "index_definition": "CREATE UNIQUE INDEX tourconnect_tour_id_gig_id_key ON public.tourconnect USING btree (tour_id, gig_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tourconnect",
+      "index_name": "tourconnect_tour_id_idx",
+      "index_definition": "CREATE INDEX tourconnect_tour_id_idx ON public.tourconnect USING btree (tour_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tourconnect",
+      "index_name": "tourconnect_user_id_idx",
+      "index_definition": "CREATE INDEX tourconnect_user_id_idx ON public.tourconnect USING btree (user_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tours",
+      "index_name": "tours_departure_date_idx",
+      "index_definition": "CREATE INDEX tours_departure_date_idx ON public.tours USING btree (departure_date)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tours",
+      "index_name": "tours_pkey",
+      "index_definition": "CREATE UNIQUE INDEX tours_pkey ON public.tours USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tours",
+      "index_name": "tours_return_date_idx",
+      "index_definition": "CREATE INDEX tours_return_date_idx ON public.tours USING btree (return_date)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "tours",
+      "index_name": "tours_user_id_idx",
+      "index_definition": "CREATE INDEX tours_user_id_idx ON public.tours USING btree (user_id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_city_state_idx",
+      "index_definition": "CREATE INDEX venues_city_state_idx ON public.venues USING btree (city, state)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_location_idx",
+      "index_definition": "CREATE INDEX venues_location_idx ON public.venues USING btree (latitude, longitude)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_pkey",
+      "index_definition": "CREATE UNIQUE INDEX venues_pkey ON public.venues USING btree (id)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_source_idx",
+      "index_definition": "CREATE INDEX venues_source_idx ON public.venues USING btree (source)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_title_idx",
+      "index_definition": "CREATE INDEX venues_title_idx ON public.venues USING btree (title)"
+    },
+    {
+      "schema_name": "public",
+      "table_name": "venues",
+      "index_name": "venues_title_search_idx",
+      "index_definition": "CREATE INDEX venues_title_search_idx ON public.venues USING gin (title gin_trgm_ops)"
+    }
+  ]

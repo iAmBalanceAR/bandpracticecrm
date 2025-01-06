@@ -71,8 +71,14 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
   const { tourStops } = await gigHelpers.getGigsWithCoordinates(tourId)
 
   // Calculate total mileage and get directions if needed
-  let totalMileage = 0
-  let directions = []
+  let totalMileage = 0;
+  let directions: {
+    fromVenue: string;
+    toVenue: string;
+    route: string[];
+    distance: number;
+    estimatedTime: string;
+  }[] = [];
 
   if (options.includeDirections && tourStops.length > 1) {
     for (let i = 0; i < tourStops.length - 1; i++) {

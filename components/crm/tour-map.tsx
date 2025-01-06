@@ -28,6 +28,7 @@ L.Icon.Default.mergeOptions({
 
 interface MapWrapperProps {
   isPdfExport?: boolean;
+  mode?: 'simple' | 'detailed';
 }
 
 function MapWrapper({ isPdfExport = false }: MapWrapperProps) {

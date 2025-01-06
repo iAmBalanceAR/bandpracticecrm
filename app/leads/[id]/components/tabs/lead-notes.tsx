@@ -6,7 +6,6 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
 import { formatDistanceToNow } from 'date-fns';
 import createClient from '@/utils/supabase/client';
 import { toast } from 'sonner';
@@ -17,7 +16,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical, Lock, Unlock } from 'lucide-react';
+import { MoreVertical } from 'lucide-react';
+import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 interface LeadNotesProps {
   lead: Lead & {
@@ -25,9 +25,22 @@ interface LeadNotesProps {
   };
 }
 
+type FeedbackModalState = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'delete';
+  onConfirm?: () => Promise<void>;
+};
+
 export default function LeadNotes({ lead }: LeadNotesProps) {
   const [isLoading, setIsLoading] = useState(false);
-  const [isPrivate, setIsPrivate] = useState(false);
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
   const router = useRouter();
   const supabase = createClient();
 
@@ -37,53 +50,86 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
 
     try {
       const formData = new FormData(e.currentTarget);
+      const { data: { session } } = await supabase.auth.getSession();
+      
+      if (!session) {
+        throw new Error('No session found');
+      }
+
       const { data, error } = await supabase
-        .from('lead_notes')
-        .insert([
-          {
+        .rpc('create_lead_note', {
+          note_data: {
             lead_id: lead.id,
-            content: formData.get('content'),
-            is_private: isPrivate
+            content: formData.get('content')
           }
-        ])
-        .select();
+        });
 
       if (error) throw error;
 
-      toast.success('Note added successfully');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'Note added successfully',
+        type: 'success'
+      });
       router.refresh();
       (e.target as HTMLFormElement).reset();
-      setIsPrivate(false);
     } catch (error) {
       console.error('Error adding note:', error);
-      toast.error('Failed to add note');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to add note',
+        type: 'error'
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
   const handleDelete = async (noteId: string) => {
-    const confirmed = window.confirm('Are you sure you want to delete this note?');
-    if (!confirmed) return;
+    setFeedbackModal({
+      isOpen: true,
+      title: 'Delete Note',
+      message: 'Are you sure you want to delete this note?',
+      type: 'delete',
+      onConfirm: async () => {
+        try {
+          const { data: { session } } = await supabase.auth.getSession();
+          
+          if (!session) {
+            throw new Error('No session found');
+          }
 
-    try {
-      const { error } = await supabase
-        .from('lead_notes')
-        .delete()
-        .eq('id', noteId);
+          const { error } = await supabase
+            .rpc('delete_lead_note', {
+              note_id: noteId
+            });
 
-      if (error) throw error;
+          if (error) throw error;
 
-      toast.success('Note deleted successfully');
-      router.refresh();
-    } catch (error) {
-      console.error('Error deleting note:', error);
-      toast.error('Failed to delete note');
-    }
+          setFeedbackModal({
+            isOpen: true,
+            title: 'Success',
+            message: 'Note deleted successfully',
+            type: 'success'
+          });
+          router.refresh();
+        } catch (error) {
+          console.error('Error deleting note:', error);
+          setFeedbackModal({
+            isOpen: true,
+            title: 'Error',
+            message: 'Failed to delete note',
+            type: 'error'
+          });
+        }
+      }
+    });
   };
 
   return (
-    <>
+    <div className="relative">
       <CardHeader>
         <CardTitle>Notes</CardTitle>
       </CardHeader>
@@ -101,17 +147,7 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
           </div>
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="private"
-                checked={isPrivate}
-                onCheckedChange={setIsPrivate}
-              />
-              <Label htmlFor="private" className="text-sm">
-                Make note private
-              </Label>
-            </div>
-
+            <div></div>
             <Button type="submit" disabled={isLoading}>
               {isLoading ? 'Adding...' : 'Add Note'}
             </Button>
@@ -142,12 +178,6 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
                           addSuffix: true,
                         })}
                       </span>
-                      {note.is_private && (
-                        <div className="flex items-center gap-1 text-yellow-500">
-                          <Lock className="h-3 w-3" />
-                          <span>Private</span>
-                        </div>
-                      )}
                     </div>
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
@@ -155,15 +185,13 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
                           <MoreVertical className="h-4 w-4" />
                         </Button>
                       </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        {note.id && (
-                          <DropdownMenuItem
-                            onClick={() => handleDelete(note.id as string)}
-                            className="text-red-600"
-                          >
-                            Delete Note
-                          </DropdownMenuItem>
-                        )}
+                      <DropdownMenuContent align="end" className="w-[200px] bg-[#111C44]">
+                        <DropdownMenuItem
+                          onClick={() => handleDelete(note.id)}
+                          className="text-red-600 cursor-pointer"
+                        >
+                          Delete Note
+                        </DropdownMenuItem>
                       </DropdownMenuContent>
                     </DropdownMenu>
                   </div>
@@ -173,6 +201,15 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
           )}
         </div>
       </CardContent>
-    </>
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+        onConfirm={feedbackModal.onConfirm}
+      />
+    </div>
   );
 } 

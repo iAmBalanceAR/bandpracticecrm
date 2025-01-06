@@ -1,71 +1,138 @@
 'use client';
 
-import { Lead, Communication, Reminder, LeadNote, Attachment } from '@/app/types/lead';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Lead, LeadCommunication, LeadReminder, LeadNote, Attachment } from '@/app/types/lead';
 import { Card } from '@/components/ui/card';
 import LeadOverview from './tabs/lead-overview';
-import LeadCommunications from '@/app/leads/[id]/components/tabs/lead-communications';
-import LeadReminders from '@/app/leads/[id]/components/tabs/lead-reminders';
-import LeadNotes from '@/app/leads/[id]/components/tabs/lead-notes';
-import LeadAttachments from '@/app/leads/[id]/components/tabs/lead-attachments';
+import LeadCommunications from './tabs/lead-communications';
+import LeadReminders from './tabs/lead-reminders';
+import LeadNotes from './tabs/lead-notes';
+import LeadAttachments from './tabs/lead-attachments';
+import { cn } from '@/lib/utils';
+import { useState } from 'react';
 
 interface LeadTabsProps {
   lead: Lead & {
-    communications: Communication[];
-    reminders: Reminder[];
+    communications: LeadCommunication[];
+    reminders: LeadReminder[];
     lead_notes: LeadNote[];
     attachments: Attachment[];
   };
 }
 
 export default function LeadTabs({ lead }: LeadTabsProps) {
+  const [activeTab, setActiveTab] = useState('overview');
+
+  const tabs = [
+    { id: 'communications', label: 'Communications', count: lead.communications.length },
+    { id: 'reminders', label: 'Reminders', count: lead.reminders.length },
+    { id: 'notes', label: 'Notes', count: lead.lead_notes.length },
+    { id: 'attachments', label: 'Attachments', count: lead.attachments.length },
+  ];
+
   return (
-    <Tabs defaultValue="overview" className="space-y-4">
-      <TabsList>
-        <TabsTrigger value="overview">Overview</TabsTrigger>
-        <TabsTrigger value="communications">
-          Communications ({lead.communications.length})
-        </TabsTrigger>
-        <TabsTrigger value="reminders">
-          Reminders ({lead.reminders.length})
-        </TabsTrigger>
-        <TabsTrigger value="notes">
-          Notes ({lead.lead_notes.length})
-        </TabsTrigger>
-        <TabsTrigger value="attachments">
-          Attachments ({lead.attachments.length})
-        </TabsTrigger>
-      </TabsList>
+    <div className="space-y-6">
+      {/* Description Section */}
+      <section className="bg-[#1B2559] border border-blue-800 rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Description</h2>
+        <p className="text-gray-300">{lead.description || 'No description provided.'}</p>
+      </section>
 
-      <TabsContent value="overview">
-        <Card>
-          <LeadOverview lead={lead} />
-        </Card>
-      </TabsContent>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Details Panel */}
+        <section className="bg-[#1B2559] border border-blue-800 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Details</h2>
+          <div className="space-y-4">
+            <div className="flex justify-between">
+              <span className="text-gray-400">Type</span>
+              <span>{lead.type}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Company</span>
+              <span>{lead.company}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Last Contact</span>
+              <span>{lead.last_contact_date ? new Date(lead.last_contact_date).toLocaleDateString() : 'Not contacted'}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-gray-400">Expected Value</span>
+              <span>{lead.expected_value ? `$${lead.expected_value.toLocaleString()}` : 'Not specified'}</span>
+            </div>
+          </div>
+        </section>
 
-      <TabsContent value="communications">
-        <Card>
-          <LeadCommunications lead={lead} />
-        </Card>
-      </TabsContent>
+        {/* Activity Summary Panel */}
+        <section className="bg-[#1B2559] border border-blue-800 rounded-lg p-6">
+          <h2 className="text-xl font-semibold mb-4">Activity Summary</h2>
+          <div className="grid grid-cols-2 gap-4">
+            {tabs.map(tab => (
+              <div key={tab.id} className="bg-[#111C44] p-4 rounded-lg border-blue-800 border text-center">
+                <div className="text-3xl font-bold mb-2">{tab.count}</div>
+                <div className="text-gray-400">{tab.label}</div>
+              </div>
+            ))}
+          </div>
+        </section>
+      </div>
 
-      <TabsContent value="reminders">
-        <Card>
-          <LeadReminders lead={lead} />
-        </Card>
-      </TabsContent>
+      {/* Navigation Tabs */}
+      <div className="border-b border-gray-700">
+        <nav className="flex justify-center space-x-8">
+          {tabs.map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={cn(
+                "py-4 px-1 text-md font-medium whitespace-nowrap relative transition-all duration-200",
+                "hover:text-lg",
+                activeTab === tab.id
+                  ? "text-white text-lg after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-[2px] after:bg-blue-500 after:transform after:scale-x-100 after:transition-transform after:duration-300"
+                  : "text-gray-400 hover:text-white after:absolute after:bottom-[-2px] after:left-0 after:right-0 after:h-[2px] after:bg-gray-300 after:transform after:scale-x-0 hover:after:scale-x-100 after:transition-transform after:duration-300"
+              )}
+            >
+              <span className="relative z-10 transition-all duration-200">
+                {tab.label} <span className="text-sm ml-1 opacity-75">({tab.count})</span>
+              </span>
+            </button>
+          ))}
+        </nav>
+      </div>
 
-      <TabsContent value="notes">
-        <Card>
-          <LeadNotes lead={lead} />
-        </Card>
-      </TabsContent>
+      {/* Tab Content */}
+      <div className="mt-6">
+        {activeTab === 'communications' && (
+          <Card className="border border-blue-800 bg-[#1B2559]">
+            <LeadCommunications lead={lead} />
+          </Card>
+        )}
+        {activeTab === 'reminders' && (
+          <Card className="border border-blue-800 bg-[#1B2559]">
+            <LeadReminders lead={lead} />
+          </Card>
+        )}
+        {activeTab === 'notes' && (
+          <Card className="border border-blue-800 bg-[#1B2559]">
+            <LeadNotes lead={lead} />
+          </Card>
+        )}
+        {activeTab === 'attachments' && (
+          <Card className="border border-blue-800 bg-[#1B2559]">
+            <LeadAttachments lead={lead} />
+          </Card>
+        )}
+      </div>
 
-      <TabsContent value="attachments">
-        <Card>
-          <LeadAttachments lead={lead} />
-        </Card>
-      </TabsContent>
-    </Tabs>
+      {/* Tags Section */}
+      <section className="bg-[#1B2559] border border-blue-800 rounded-lg p-6">
+        <h2 className="text-xl font-semibold mb-4">Tags</h2>
+        <div className="flex gap-2">
+          {lead.tags?.map((tag, index) => (
+            <span key={index} className="px-3 py-1 bg-[#111C44] rounded-full text-sm">
+              {tag}
+            </span>
+          ))}
+        </div>
+      </section>
+    </div>
   );
 } 

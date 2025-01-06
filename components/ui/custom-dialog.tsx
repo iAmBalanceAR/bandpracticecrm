@@ -14,7 +14,7 @@ interface CustomDialogProps {
 
 export function CustomDialog({ isOpen, onClose, title, children }: CustomDialogProps) {
   return (
-    <Dialog open={isOpen} onClose={onClose}>
+    <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent>
         {children}
       </DialogContent>

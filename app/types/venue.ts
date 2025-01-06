@@ -1,12 +1,16 @@
 export interface Venue {
   id: string;
   title: string;
+  latitude: string | number;
+  longitude: string | number;
   address: string;
   city: string;
   state: string;
   zip: string;
   created_at: string;
   updated_at: string;
+  capacity?: number;
+  verified: boolean;
 }
 
 export interface SavedVenue {

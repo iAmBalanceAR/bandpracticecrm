@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Dialog, DialogContent } from "./dialog"
+import { Dialog, DialogContent, DialogPortal, DialogOverlay } from "./dialog"
 import { Button } from "./button"
 import { Check, AlertTriangle, X } from "lucide-react"
 
@@ -45,53 +45,56 @@ export function FeedbackModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="relative max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
-        <button
-          onClick={onClose}
-          className="absolute right-4 top-4 text-gray-400 hover:text-white"
-        >
-          <X className="h-4 w-4" />
-        </button>
-        <div className="flex flex-col items-center text-center space-y-3">
-          {getIcon()}
-          
-          <h2 className="text-xl font-semibold text-white">
-            {title}
-          </h2>
-          
-          <p className="text-gray-400">
-            {message}
-          </p>
+      <DialogPortal>
+        <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
+        <DialogContent className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
+          <button
+            onClick={onClose}
+            className="absolute right-4 top-4 text-gray-400 hover:text-white"
+          >
+            <X className="h-4 w-4" />
+          </button>
+          <div className="flex flex-col items-center text-center space-y-3">
+            {getIcon()}
+            
+            <h2 className="text-xl font-semibold text-white">
+              {title}
+            </h2>
+            
+            <p className="text-gray-400">
+              {message}
+            </p>
 
-          {type === 'delete' ? (
-            <div className="flex space-x-3">
-              <Button 
-                onClick={onConfirm} 
-                className="bg-red-600 hover:bg-red-700 min-w-[100px] text-white"
-              >
-                Delete
-              </Button>
+            {type === 'delete' ? (
+              <div className="flex space-x-3">
+                <Button 
+                  onClick={onConfirm} 
+                  className="bg-red-600 hover:bg-red-700 min-w-[100px] text-white"
+                >
+                  Delete
+                </Button>
+                <Button 
+                  onClick={onClose} 
+                  className="bg-gray-600 hover:bg-gray-700 min-w-[100px] text-white"
+                >
+                  Cancel
+                </Button>
+              </div>
+            ) : (
               <Button 
                 onClick={onClose} 
-                className="bg-gray-600 hover:bg-gray-700 min-w-[100px] text-white"
+                className={`mt-4 min-w-[100px] text-white ${
+                  type === 'success' 
+                    ? 'bg-green-600 hover:bg-green-700' 
+                    : 'bg-red-600 hover:bg-red-700'
+                }`}
               >
-                Cancel
+                {type === 'success' ? 'Close' : 'Okay'}
               </Button>
-            </div>
-          ) : (
-            <Button 
-              onClick={onClose} 
-              className={`mt-4 min-w-[100px] text-white ${
-                type === 'success' 
-                  ? 'bg-green-600 hover:bg-green-700' 
-                  : 'bg-red-600 hover:bg-red-700'
-              }`}
-            >
-              {type === 'success' ? 'Close' : 'Okay'}
-            </Button>
-          )}
-        </div>
-      </DialogContent>
+            )}
+          </div>
+        </DialogContent>
+      </DialogPortal>
     </Dialog>
   )
 } 

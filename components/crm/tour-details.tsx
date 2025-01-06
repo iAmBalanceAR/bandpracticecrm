@@ -356,7 +356,7 @@ export function TourDetails() {
             )}
           </div>
 
-          <Dialog open={isFormVisible} onChange={(open) => !open && handleCloseForm()}>
+          <Dialog open={isFormVisible} onOpenChange={(open) => !open && handleCloseForm()}>
             <DialogContent className="bg-[#131d43] text-white border-blue-800 p-8 rounded-md">
               <DialogHeader>
                 <DialogTitle className="text-2xl font-semibold text-white">

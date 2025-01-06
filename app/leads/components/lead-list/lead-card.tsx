@@ -30,7 +30,7 @@ const priorityColors = {
 export default function LeadCard({ lead }: LeadCardProps) {
   return (
     <Link href={`/leads/${lead.id}`}>
-      <Card className="hover:bg-muted/50 transition-colors cursor-pointer">
+      <Card className="hover:bg-muted/50 transition-colors cursor-pointer ">
         <CardHeader className="p-4 pb-2">
           <div className="flex items-start justify-between">
             <div>

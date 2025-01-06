@@ -1,9 +1,8 @@
 import { Database } from '@/types/supabase';
 
+export type LeadType = 'venue' | 'artist' | 'promoter' | 'sponsor' | 'other';
 export type LeadStatus = 'new' | 'contacted' | 'in_progress' | 'negotiating' | 'won' | 'lost' | 'archived';
 export type LeadPriority = 'low' | 'medium' | 'high';
-export type LeadType = 'venue' | 'artist' | 'promoter' | 'sponsor' | 'other';
-export type CommunicationType = 'email' | 'call' | 'meeting' | 'note';
 
 export interface Lead {
   id: string;
@@ -11,61 +10,28 @@ export interface Lead {
   type: LeadType;
   status: LeadStatus;
   priority: LeadPriority;
-  assigned_to?: string;
-  company?: string;
+  company: string | null;
+  description: string | null;
+  venue_id: string | null;
   contact_info: {
-    name?: string;
-    email?: string;
-    phone?: string;
-    website?: string;
+    website: any;
+    name: string;
+    email: string;
+    phone: string;
   };
-  venue_id?: string;
-  description?: string;
-  expected_value?: number;
-  last_contact_date: string;
-  next_follow_up?: string;
   tags: string[];
+  next_follow_up: string | null;
+  expected_value: number | null;
+  created_by: string;
+  created_by_email: string;
+  assigned_to: string | null;
   created_at: string;
   updated_at: string;
-  created_by?: string;
-}
-
-export interface Communication {
-  id: string;
-  lead_id: string;
-  type: CommunicationType;
-  content: string;
-  date: string;
-  user_id: string;
-  sentiment?: 'positive' | 'neutral' | 'negative';
-  attachments?: Attachment[];
-}
-
-export interface Attachment {
-  id: string;
-  lead_id: string;
-  communication_id?: string;
-  type: 'document' | 'contract' | 'rider' | 'image' | 'other';
-  file_name: string;
-  file_url: string;
-  file_size: number;
-  file_type: string;
-  uploaded_by: string;
-  uploaded_at: string;
-}
-
-export interface Reminder {
-  id: string;
-  lead_id: string;
-  title: string;
-  description?: string;
-  due_date: string;
-  status: 'pending' | 'completed';
-  priority: LeadPriority;
-  assigned_to: string;
-  created_by: string;
-  created_at: string;
-  completed_at?: string;
+  last_contact_date: string;
+  lead_notes?: LeadNote[];
+  reminders?: LeadReminder[];
+  communications?: LeadCommunication[];
+  attachments?: LeadAttachment[];
 }
 
 export interface LeadNote {
@@ -73,20 +39,69 @@ export interface LeadNote {
   lead_id: string;
   content: string;
   created_by: string;
+  created_by_email: string;
   created_at: string;
-  updated_at: string;
-  is_private: boolean;
+}
+
+export interface LeadReminder {
+  id: string;
+  lead_id: string;
+  title: string;
+  description: string | null;
+  due_date: string;
+  completed: boolean;
+  created_by: string;
+  created_by_email: string;
+  created_at: string;
+}
+
+export interface LeadCommunication {
+  id: string;
+  lead_id: string;
+  type: string;
+  content: string;
+  date: string;
+  sentiment: string | null;
+  user_id: string;
+  created_at: string;
+}
+
+export interface LeadAttachment {
+  id: string;
+  lead_id: string;
+  communication_id: string | null;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_url: string;
+  type: string;
+  uploaded_by: string;
+  uploaded_at: string;
+}
+
+export interface Attachment {
+  id: string;
+  lead_id: string;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  file_url: string;
+  type: 'document' | 'contract' | 'rider' | 'image' | 'other';
+  uploaded_at: string;
+  file_path?: string;
 }
 
 export interface LeadFilters {
-  query?: string;
-  status?: LeadStatus[];
-  priority?: LeadPriority[];
-  type?: LeadType[];
-  assignedTo?: string[];
-  tags?: string[];
-  dateRange?: {
-    start: string;
-    end: string;
-  };
+  query: string;
+  status: string[];
+  priority: LeadPriority[];
+  type: LeadType[];
+  assignedTo: string[];
+  tags: string[];
+  dateRange?: DateRange;
+}
+
+export interface DateRange {
+  from?: Date;
+  to?: Date;
 } 

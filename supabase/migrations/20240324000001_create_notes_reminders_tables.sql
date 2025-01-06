@@ -15,7 +15,6 @@ create table if not exists lead_notes (
   id uuid default gen_random_uuid() primary key,
   lead_id uuid references leads(id) on delete cascade not null,
   content text not null,
-  is_private boolean default false,
   created_by_email text not null,
   created_at timestamp with time zone default now(),
   updated_at timestamp with time zone default now()

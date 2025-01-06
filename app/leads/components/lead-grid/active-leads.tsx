@@ -98,23 +98,33 @@ export default function ActiveLeads() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {leads.map((lead) => (
         <Link key={lead.id} href={`/leads/${lead.id}`}>
-          <Card className="bg-[#192555] border-blue-800 hover:border-blue-600 transition-colors cursor-pointer">
-            <CardContent className="p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-white truncate">
-                  {lead.title}
-                </h3>
-                <Badge 
-                  variant="secondary"
-                  className={
-                    lead.status === 'new' ? 'bg-blue-500' :
-                    lead.status === 'contacted' ? 'bg-yellow-500' :
-                    lead.status === 'in_progress' ? 'bg-purple-500' :
-                    'bg-orange-500'
-                  }
-                >
-                  {lead.status.replace('_', ' ')}
-                </Badge>
+          <Card 
+            className="bg-[#192555] border-blue-800 hover:border-blue-600 transition-colors cursor-pointer "
+          >
+            <CardContent className="p-6 flex flex-col justify-between h-full">
+              <div className="space-y-4">
+                <div className="flex justify-between items-start">
+                  <h3 className="text-lg font-semibold text-white truncate">
+                    {lead.title}
+                  </h3>
+                  <Badge 
+                    variant="secondary"
+                    className={
+                      lead.status === 'new' ? 'bg-blue-500' :
+                      lead.status === 'contacted' ? 'bg-yellow-500' :
+                      lead.status === 'in_progress' ? 'bg-purple-500' :
+                      'bg-orange-500'
+                    }
+                  >
+                    {lead.status.replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div className="text-sm text-muted-foreground truncate">
+                  {lead.company || 'No company'}
+                </div>
+              </div>
+              <div className="text-xs text-muted-foreground">
+                Last Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
               </div>
             </CardContent>
           </Card>

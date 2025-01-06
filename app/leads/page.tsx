@@ -1,9 +1,9 @@
 import { Metadata } from 'next';
-import LeadsDataView from './components/leads-data-view';
+import LeadsDataView from '@/app/leads/components/leads-data-view';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import NewLeadDialog from './components/forms/new-lead-dialog';
+import LeadDialog from './components/forms/lead-dialog';
 import CustomSectionHeader from '@/components/common/CustomSectionHeader';
 
 export const metadata: Metadata = {
@@ -24,13 +24,13 @@ export default function LeadsPage() {
                 </span>
               </div>
             </div>
-            <div className="flex items-center gap-2">
-              <NewLeadDialog>
+            <div className="flex items-center gap-2 mb-4">
+              <LeadDialog>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
-                  <Plus className="mr-2 h-4 w-4" />
+                  <Plus className="mr-0  h-6 w-6" />
                   New Lead
                 </Button>
-              </NewLeadDialog>
+              </LeadDialog>
             </div>
           </CardTitle>
         </CardHeader>

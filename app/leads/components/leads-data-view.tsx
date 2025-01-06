@@ -33,11 +33,16 @@ export default function LeadsDataView() {
   const router = useRouter();
 
   const fetchLeads = async () => {
+    console.log('Starting to fetch leads...');
     setIsLoading(true);
     try {
+      // Log user session
+      const { data: { session } } = await supabase.auth.getSession();
+      console.log('Current user:', session?.user?.email);
+
+      console.log('Executing leads query...');
       const { data, error } = await supabase
-        .from('leads')
-        .select('*')
+        .rpc('get_leads')
         .order('updated_at', { ascending: false });
 
       if (error) {
@@ -45,6 +50,7 @@ export default function LeadsDataView() {
         throw error;
       }
       
+      console.log('Leads data received:', data);
       setLeads((data || []) as Lead[]);
     } catch (error) {
       console.error('Error fetching leads:', error);
@@ -114,7 +120,7 @@ export default function LeadsDataView() {
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {leads.map((lead) => (
         <Link key={lead.id} href={`/leads/${lead.id}`}>
-          <Card className="bg-[#192555] border-blue-800 hover:border-blue-600 transition-colors cursor-pointer">
+          <Card className="bg-[#192555] border-blue-800 hover:border-blue-600 transition-colors cursor-pointer min-h-[150px]">
             <div className="p-4">
               <div className="flex justify-between items-start mb-3">
                 <h3 className="text-lg font-semibold text-white truncate">

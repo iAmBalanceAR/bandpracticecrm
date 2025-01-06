@@ -1,0 +1,1136 @@
+[
+    {
+      "schema_name": "public",
+      "function_name": "array_to_halfvec",
+      "function_type": "Function",
+      "arguments": "numeric[], integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_halfvec",
+      "function_type": "Function",
+      "arguments": "real[], integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_halfvec",
+      "function_type": "Function",
+      "arguments": "integer[], integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_halfvec",
+      "function_type": "Function",
+      "arguments": "double precision[], integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_vector",
+      "function_type": "Function",
+      "arguments": "integer[], integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_vector",
+      "function_type": "Function",
+      "arguments": "numeric[], integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_vector",
+      "function_type": "Function",
+      "arguments": "double precision[], integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "array_to_vector",
+      "function_type": "Function",
+      "arguments": "real[], integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "binary_quantize",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "bit"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "binary_quantize",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "bit"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "connect_gig_to_default_tour",
+      "function_type": "Function",
+      "arguments": "p_gig_id uuid",
+      "return_type": "tourconnect"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "cosine_distance",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "cosine_distance",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "cosine_distance",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "create_lead",
+      "function_type": "Function",
+      "arguments": "lead_data jsonb",
+      "return_type": "leads"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "create_lead_notes",
+      "function_type": "Function",
+      "arguments": "p_lead_id uuid, p_notes json",
+      "return_type": "void"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "create_lead_reminders",
+      "function_type": "Function",
+      "arguments": "p_lead_id uuid, p_reminders json",
+      "return_type": "void"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "create_tour",
+      "function_type": "Function",
+      "arguments": "tour_data jsonb",
+      "return_type": "tours"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "delete_tour",
+      "function_type": "Function",
+      "arguments": "tour_id bigint",
+      "return_type": "void"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "get_default_tour",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "tours"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "get_lead_details",
+      "function_type": "Function",
+      "arguments": "p_lead_id uuid",
+      "return_type": "json"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "get_page_parents",
+      "function_type": "Function",
+      "arguments": "page_id integer",
+      "return_type": "TABLE(id integer, parent_page_id integer, path character varying, meta jsonb)"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "get_user_tours",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "SETOF tours"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gin_extract_query_trgm",
+      "function_type": "Function",
+      "arguments": "text, internal, smallint, internal, internal, internal, internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gin_extract_value_trgm",
+      "function_type": "Function",
+      "arguments": "text, internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gin_trgm_consistent",
+      "function_type": "Function",
+      "arguments": "internal, smallint, text, integer, internal, internal, internal, internal",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gin_trgm_triconsistent",
+      "function_type": "Function",
+      "arguments": "internal, smallint, text, integer, internal, internal, internal",
+      "return_type": "\"char\""
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_compress",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_consistent",
+      "function_type": "Function",
+      "arguments": "internal, text, smallint, oid, internal",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_decompress",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_distance",
+      "function_type": "Function",
+      "arguments": "internal, text, smallint, oid, internal",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_in",
+      "function_type": "Function",
+      "arguments": "cstring",
+      "return_type": "gtrgm"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_options",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "void"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_out",
+      "function_type": "Function",
+      "arguments": "gtrgm",
+      "return_type": "cstring"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_penalty",
+      "function_type": "Function",
+      "arguments": "internal, internal, internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_picksplit",
+      "function_type": "Function",
+      "arguments": "internal, internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_same",
+      "function_type": "Function",
+      "arguments": "gtrgm, gtrgm, internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "gtrgm_union",
+      "function_type": "Function",
+      "arguments": "internal, internal",
+      "return_type": "gtrgm"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec",
+      "function_type": "Function",
+      "arguments": "halfvec, integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_accum",
+      "function_type": "Function",
+      "arguments": "double precision[], halfvec",
+      "return_type": "double precision[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_add",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_avg",
+      "function_type": "Function",
+      "arguments": "double precision[]",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_cmp",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_combine",
+      "function_type": "Function",
+      "arguments": "double precision[], double precision[]",
+      "return_type": "double precision[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_concat",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_eq",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_ge",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_gt",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_in",
+      "function_type": "Function",
+      "arguments": "cstring, oid, integer",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_l2_squared_distance",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_le",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_lt",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_mul",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_ne",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_negative_inner_product",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_out",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "cstring"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_recv",
+      "function_type": "Function",
+      "arguments": "internal, oid, integer",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_send",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "bytea"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_spherical_distance",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_sub",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_to_float4",
+      "function_type": "Function",
+      "arguments": "halfvec, integer, boolean",
+      "return_type": "real[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_to_sparsevec",
+      "function_type": "Function",
+      "arguments": "halfvec, integer, boolean",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_to_vector",
+      "function_type": "Function",
+      "arguments": "halfvec, integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "halfvec_typmod_in",
+      "function_type": "Function",
+      "arguments": "cstring[]",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "hamming_distance",
+      "function_type": "Function",
+      "arguments": "bit, bit",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "handle_new_tour",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "handle_new_user",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "handle_updated_at",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "hnsw_bit_support",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "hnsw_halfvec_support",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "hnsw_sparsevec_support",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "hnswhandler",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "index_am_handler"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "inner_product",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "inner_product",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "inner_product",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "ivfflat_bit_support",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "ivfflat_halfvec_support",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "internal"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "ivfflathandler",
+      "function_type": "Function",
+      "arguments": "internal",
+      "return_type": "index_am_handler"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "jaccard_distance",
+      "function_type": "Function",
+      "arguments": "bit, bit",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l1_distance",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l1_distance",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l1_distance",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_distance",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_distance",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_distance",
+      "function_type": "Function",
+      "arguments": "halfvec, halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_norm",
+      "function_type": "Function",
+      "arguments": "sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_norm",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_normalize",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_normalize",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "l2_normalize",
+      "function_type": "Function",
+      "arguments": "sparsevec",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "match_page_sections",
+      "function_type": "Function",
+      "arguments": "embedding vector, match_threshold double precision, match_count integer, min_content_length integer",
+      "return_type": "TABLE(id integer, page_id integer, slug character varying, heading character varying, content text, similarity double precision)"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "search_leads",
+      "function_type": "Function",
+      "arguments": "p_query text DEFAULT NULL::text, p_status text[] DEFAULT NULL::text[], p_priority text[] DEFAULT NULL::text[], p_type text[] DEFAULT NULL::text[], p_assigned_to uuid[] DEFAULT NULL::uuid[], p_tags text[] DEFAULT NULL::text[], p_date_start timestamp without time zone DEFAULT NULL::timestamp without time zone, p_date_end timestamp without time zone DEFAULT NULL::timestamp without time zone",
+      "return_type": "SETOF leads"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "set_default_tour",
+      "function_type": "Function",
+      "arguments": "p_tour_id integer",
+      "return_type": "void"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "set_limit",
+      "function_type": "Function",
+      "arguments": "real",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "show_limit",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "show_trgm",
+      "function_type": "Function",
+      "arguments": "text",
+      "return_type": "text[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "similarity",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "similarity_dist",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "similarity_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec",
+      "function_type": "Function",
+      "arguments": "sparsevec, integer, boolean",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_cmp",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_eq",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_ge",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_gt",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_in",
+      "function_type": "Function",
+      "arguments": "cstring, oid, integer",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_l2_squared_distance",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_le",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_lt",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_ne",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_negative_inner_product",
+      "function_type": "Function",
+      "arguments": "sparsevec, sparsevec",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_out",
+      "function_type": "Function",
+      "arguments": "sparsevec",
+      "return_type": "cstring"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_recv",
+      "function_type": "Function",
+      "arguments": "internal, oid, integer",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_send",
+      "function_type": "Function",
+      "arguments": "sparsevec",
+      "return_type": "bytea"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_to_halfvec",
+      "function_type": "Function",
+      "arguments": "sparsevec, integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_to_vector",
+      "function_type": "Function",
+      "arguments": "sparsevec, integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "sparsevec_typmod_in",
+      "function_type": "Function",
+      "arguments": "cstring[]",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "strict_word_similarity",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "strict_word_similarity_commutator_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "strict_word_similarity_dist_commutator_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "strict_word_similarity_dist_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "strict_word_similarity_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "subvector",
+      "function_type": "Function",
+      "arguments": "halfvec, integer, integer",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "subvector",
+      "function_type": "Function",
+      "arguments": "vector, integer, integer",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "update_last_updated_column",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "update_saved_venues_last_updated",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "update_tour",
+      "function_type": "Function",
+      "arguments": "tour_id bigint, tour_data jsonb",
+      "return_type": "tours"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "update_tours_last_updated",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "update_updated_at_column",
+      "function_type": "Function",
+      "arguments": "",
+      "return_type": "trigger"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector",
+      "function_type": "Function",
+      "arguments": "vector, integer, boolean",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_accum",
+      "function_type": "Function",
+      "arguments": "double precision[], vector",
+      "return_type": "double precision[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_add",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_avg",
+      "function_type": "Function",
+      "arguments": "double precision[]",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_cmp",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_combine",
+      "function_type": "Function",
+      "arguments": "double precision[], double precision[]",
+      "return_type": "double precision[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_concat",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_dims",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_dims",
+      "function_type": "Function",
+      "arguments": "halfvec",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_eq",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_ge",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_gt",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_in",
+      "function_type": "Function",
+      "arguments": "cstring, oid, integer",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_l2_squared_distance",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_le",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_lt",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_mul",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_ne",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_negative_inner_product",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_norm",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_out",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "cstring"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_recv",
+      "function_type": "Function",
+      "arguments": "internal, oid, integer",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_send",
+      "function_type": "Function",
+      "arguments": "vector",
+      "return_type": "bytea"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_spherical_distance",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "double precision"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_sub",
+      "function_type": "Function",
+      "arguments": "vector, vector",
+      "return_type": "vector"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_to_float4",
+      "function_type": "Function",
+      "arguments": "vector, integer, boolean",
+      "return_type": "real[]"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_to_halfvec",
+      "function_type": "Function",
+      "arguments": "vector, integer, boolean",
+      "return_type": "halfvec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_to_sparsevec",
+      "function_type": "Function",
+      "arguments": "vector, integer, boolean",
+      "return_type": "sparsevec"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "vector_typmod_in",
+      "function_type": "Function",
+      "arguments": "cstring[]",
+      "return_type": "integer"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "word_similarity",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "word_similarity_commutator_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "boolean"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "word_similarity_dist_commutator_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "word_similarity_dist_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "real"
+    },
+    {
+      "schema_name": "public",
+      "function_name": "word_similarity_op",
+      "function_type": "Function",
+      "arguments": "text, text",
+      "return_type": "boolean"
+    }
+  ]

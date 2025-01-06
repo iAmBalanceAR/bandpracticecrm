@@ -1,0 +1,602 @@
+[
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "attachments",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "communications",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "service_role",
+      "table_schema": "public",
+      "table_name": "gigs",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "anon",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "DELETE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "TRUNCATE"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "REFERENCES"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "INSERT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "SELECT"
+    },
+    {
+      "grantee": "authenticated",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "UPDATE"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "TRIGGER"
+    },
+    {
+      "grantee": "postgres",
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "privilege_type": "REFERENCES"
+    }
+  ]

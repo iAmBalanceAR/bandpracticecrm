@@ -3,12 +3,12 @@
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import NewLeadDialog from './components/forms/new-lead-dialog';
 import CustomSectionHeader from '@/components/common/CustomSectionHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import LeadFilters from './components/lead-list/lead-filters';
 import LeadList from './components/lead-list/lead-list';
 import ActiveLeads from './components/lead-grid/active-leads';
+import LeadDialog from './components/forms/lead-dialog';
 
 export default function LeadsLayout() {
   return (
@@ -24,12 +24,12 @@ export default function LeadsLayout() {
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <NewLeadDialog>
+              <LeadDialog>
                 <Button className="bg-blue-600 hover:bg-blue-700 text-white">
                   <Plus className="mr-2 h-4 w-4" />
                   New Lead
                 </Button>
-              </NewLeadDialog>
+              </LeadDialog>
             </div>
           </CardTitle>
         </CardHeader>

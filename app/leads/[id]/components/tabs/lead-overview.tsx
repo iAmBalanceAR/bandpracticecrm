@@ -16,7 +16,7 @@ interface LeadOverviewProps {
 
 export default function LeadOverview({ lead }: LeadOverviewProps) {
   return (
-    <CardContent className="space-y-6">
+    <CardContent className="space-y-6  p-4">
       <div>
         <h3 className="text-lg font-semibold mb-2">Description</h3>
         <p className="text-muted-foreground">
@@ -79,8 +79,8 @@ export default function LeadOverview({ lead }: LeadOverviewProps) {
       <div>
         <h3 className="text-lg font-semibold mb-2">Activity Summary</h3>
         <dl className="grid grid-cols-4 gap-4">
-          <div className="text-center p-4 bg-muted rounded-lg">
-            <dt className="text-sm font-medium text-muted-foreground">Communications</dt>
+          <div className="text-center p-4 bg-muted rounded-lg ">
+            <dt className="text-sm font-medium text-muted-foreground ">Communications</dt>
             <dd className="mt-1 text-2xl font-semibold">{lead.communications.length}</dd>
           </div>
           <div className="text-center p-4 bg-muted rounded-lg">

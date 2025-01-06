@@ -5,6 +5,9 @@ import LeadHeader from '@/app/leads/[id]/components/lead-header';
 import LeadTabs from '@/app/leads/[id]/components/lead-tabs';
 import CustomSectionHeader from '@/components/common/CustomSectionHeader';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import Link from 'next/link';
+import { ArrowLeft, Mail, Phone } from 'lucide-react';
 
 export const metadata: Metadata = {
   title: 'Lead Details',
@@ -20,34 +23,8 @@ interface LeadPageProps {
 export default async function LeadPage({ params }: LeadPageProps) {
   const supabase = createClient();
 
-  console.log('Fetching lead with ID:', params.id);
-
   const { data: lead, error } = await supabase
-    .from('leads')
-    .select(`
-      *,
-      lead_notes (
-        id,
-        content,
-        is_private,
-        created_by_email,
-        created_at,
-        updated_at
-      ),
-      reminders (
-        id,
-        title,
-        description,
-        due_date,
-        status,
-        priority,
-        created_by_email,
-        created_at,
-        completed_at
-      )
-    `)
-    .eq('id', params.id)
-    .single();
+    .rpc('get_lead_with_details', { p_lead_id: params.id });
 
   if (error) {
     console.error('Error fetching lead:', error);
@@ -59,34 +36,46 @@ export default async function LeadPage({ params }: LeadPageProps) {
     notFound();
   }
 
-  // Add empty arrays for missing properties
-  const enrichedLead = {
-    ...lead,
-    communications: [],
-    attachments: [],
-    lead_notes: lead.lead_notes || [],
-    reminders: lead.reminders || []
-  };
-
-  console.log('Lead found:', enrichedLead);
-
   return (
-    <CustomSectionHeader title={enrichedLead.title} underlineColor="#008ffb">
-      <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
-        <CardHeader className="pb-0 mb-0">
-          <CardTitle className="flex justify-between items-center text-3xl font-bold">
-            <div className="">
-              <div className="flex flex-auto tracking-tight text-3xl">
-                <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                  Lead Details
-                </span>
-              </div>
+    <CustomSectionHeader title="Lead Management" underlineColor="#008ffb">
+      <Card className="bg-[#111C44] min-h-[500px] border-blue-800 p-0 m-0">
+        <CardContent className="p-6">
+          <Link 
+            href="/leads" 
+            className="inline-flex items-center text-md text-slate-300 hover:text-white mb-4"
+          >
+            <ArrowLeft className="h-4 w-4 mr-1" />
+            Back to Leads
+          </Link>
+
+          <div className="bg-[#1B2559] border border-blue-800 rounded-lg p-6 mb-6">
+            <h1 className="text-3xl font-bold text-white text-shadow-sm font-mono text-shadow-x-2 text-shadow-y-2 text-shadow-black mb-4">
+              {lead.title}
+            </h1>
+            <div className="flex items-center gap-6 text-md text-gray-400">
+              {lead.contact_info.email && (
+                <div className="flex items-center gap-2">
+                  <Mail className="h-4 w-4" />
+                  <a href={`mailto:${lead.contact_info.email}`} className="hover:text-white">
+                    {lead.contact_info.email}
+                  </a>
+                </div>
+              )}
+              {lead.contact_info.phone && (
+                <div className="flex items-center gap-2">
+                  <Phone className="h-4 w-4" />
+                  <a href={`tel:${lead.contact_info.phone}`} className="hover:text-white">
+                    {lead.contact_info.phone}
+                  </a>
+                </div>
+              )}
             </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <LeadHeader lead={enrichedLead} />
-          <LeadTabs lead={enrichedLead} />
+          </div>
+
+          <LeadHeader lead={lead} />
+          <div className="mt-8">
+            <LeadTabs lead={lead} />
+          </div>
         </CardContent>
       </Card>
     </CustomSectionHeader>

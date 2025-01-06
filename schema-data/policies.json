@@ -1,0 +1,296 @@
+[
+    {
+      "schemaname": "public",
+      "tablename": "communications",
+      "policyname": "Users can insert communications for their leads",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "communications",
+      "policyname": "Users can view communications for their leads",
+      "cmd": "SELECT",
+      "policy_definition": "(EXISTS ( SELECT 1\n   FROM leads\n  WHERE ((leads.id = communications.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid()) OR (EXISTS ( SELECT 1\n           FROM auth.users\n          WHERE ((users.id = auth.uid()) AND ((users.raw_user_meta_data ->> 'role'::text) = 'admin'::text))))))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "gigs",
+      "policyname": "Users can delete their own gigs",
+      "cmd": "DELETE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "gigs",
+      "policyname": "Users can insert their own gigs",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "gigs",
+      "policyname": "Users can update their own gigs",
+      "cmd": "UPDATE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "gigs",
+      "policyname": "Users can view their own gigs",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "lead_notes",
+      "policyname": "Users can delete their own lead notes",
+      "cmd": "DELETE",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "lead_notes",
+      "policyname": "Users can insert their own lead notes",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "lead_notes",
+      "policyname": "Users can update their own lead notes",
+      "cmd": "UPDATE",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "lead_notes",
+      "policyname": "Users can view their own lead notes",
+      "cmd": "SELECT",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "leads",
+      "policyname": "Users can insert leads",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "leads",
+      "policyname": "Users can update leads they own or are assigned to",
+      "cmd": "UPDATE",
+      "policy_definition": "((auth.uid() = created_by) OR (auth.uid() = assigned_to) OR (EXISTS ( SELECT 1\n   FROM auth.users\n  WHERE ((users.id = auth.uid()) AND ((users.raw_user_meta_data ->> 'role'::text) = 'admin'::text)))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "leads",
+      "policyname": "Users can view leads they created or are assigned to",
+      "cmd": "SELECT",
+      "policy_definition": "((auth.uid() = created_by) OR (auth.uid() = assigned_to) OR (EXISTS ( SELECT 1\n   FROM auth.users\n  WHERE ((users.id = auth.uid()) AND ((users.raw_user_meta_data ->> 'role'::text) = 'admin'::text)))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "prices",
+      "policyname": "Prices are viewable by everyone.",
+      "cmd": "SELECT",
+      "policy_definition": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "products",
+      "policyname": "Products are viewable by everyone.",
+      "cmd": "SELECT",
+      "policy_definition": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "Public profiles are viewable by everyone.",
+      "cmd": "SELECT",
+      "policy_definition": "true"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "Users can insert their own profile.",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "profiles",
+      "policyname": "Users can update own profile.",
+      "cmd": "UPDATE",
+      "policy_definition": "(auth.uid() = id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "reminders",
+      "policyname": "Users can delete their own reminders",
+      "cmd": "DELETE",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "reminders",
+      "policyname": "Users can insert their own reminders",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "reminders",
+      "policyname": "Users can update their own reminders",
+      "cmd": "UPDATE",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "reminders",
+      "policyname": "Users can view their own reminders",
+      "cmd": "SELECT",
+      "policy_definition": "((auth.jwt() ->> 'email'::text) = created_by_email)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "saved_venues",
+      "policyname": "Users can delete their own saved venues",
+      "cmd": "DELETE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "saved_venues",
+      "policyname": "Users can save venues",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "saved_venues",
+      "policyname": "Users can view their own saved venues",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plot_items",
+      "policyname": "Users can delete items from their stage plots",
+      "cmd": "DELETE",
+      "policy_definition": "(EXISTS ( SELECT 1\n   FROM stage_plots\n  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plot_items",
+      "policyname": "Users can insert items to their stage plots",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plot_items",
+      "policyname": "Users can update items on their stage plots",
+      "cmd": "UPDATE",
+      "policy_definition": "(EXISTS ( SELECT 1\n   FROM stage_plots\n  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plot_items",
+      "policyname": "Users can view items of their stage plots",
+      "cmd": "SELECT",
+      "policy_definition": "(EXISTS ( SELECT 1\n   FROM stage_plots\n  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plots",
+      "policyname": "Users can delete their own stage plots",
+      "cmd": "DELETE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plots",
+      "policyname": "Users can insert their own stage plots",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plots",
+      "policyname": "Users can update their own stage plots",
+      "cmd": "UPDATE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "stage_plots",
+      "policyname": "Users can view their own stage plots",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "subscriptions",
+      "policyname": "Users can view own subscriptions.",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tourconnect",
+      "policyname": "Users can delete their own tour connections",
+      "cmd": "DELETE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tourconnect",
+      "policyname": "Users can insert their own tour connections",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tourconnect",
+      "policyname": "Users can update their own tour connections",
+      "cmd": "UPDATE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tourconnect",
+      "policyname": "Users can view their own tour connections",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tours",
+      "policyname": "Users can delete their own tours",
+      "cmd": "DELETE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tours",
+      "policyname": "Users can insert their own tours",
+      "cmd": "INSERT",
+      "policy_definition": null
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tours",
+      "policyname": "Users can update their own tours",
+      "cmd": "UPDATE",
+      "policy_definition": "(auth.uid() = user_id)"
+    },
+    {
+      "schemaname": "public",
+      "tablename": "tours",
+      "policyname": "Users can view their own tours",
+      "cmd": "SELECT",
+      "policy_definition": "(auth.uid() = user_id)"
+    }
+  ]

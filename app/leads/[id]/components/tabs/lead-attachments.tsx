@@ -40,7 +40,7 @@ function formatBytes(bytes: number, decimals = 2) {
 
 interface LeadAttachmentsProps {
   lead: Lead & {
-    attachments: Partial<Attachment>[];
+    attachments: Attachment[];
   };
 }
 
@@ -59,49 +59,63 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
   const router = useRouter();
   const supabase = createClient();
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+    await handleSubmit(formData, file);
+  };
+
+  const handleSubmit = async (formData: FormData, file: File) => {
     setIsUploading(true);
 
     try {
-      const formData = new FormData(e.currentTarget);
-      const file = formData.get('file') as File;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('No session found');
+      }
+
       const fileName = file.name;
       const fileType = file.type;
-      const filePath = `leads/${lead.id}/${fileName}`;
+      const filePath = `${session.user.id}/leads/${lead.id}/${fileName}`;
 
       // Upload file to storage
-      const { error: uploadError } = await supabase.storage
+      const { error: uploadError, data: uploadData } = await supabase.storage
         .from('attachments')
         .upload(filePath, file);
 
       if (uploadError) throw uploadError;
 
-      // Create attachment record
-      const { data, error: dbError } = await supabase
+      // Get the public URL
+      const { data: { publicUrl } } = supabase.storage
         .from('attachments')
-        .insert([
-          {
+        .getPublicUrl(filePath);
+
+      // Create attachment record using RPC
+      const { data, error: dbError } = await supabase
+        .rpc('create_attachment', {
+          attachment_data: {
             lead_id: lead.id,
             file_name: fileName,
             file_type: fileType,
-            file_path: filePath,
-            date: new Date().toISOString()
+            file_size: file.size,
+            type: uploadType,
+            file_url: publicUrl
           }
-        ])
-        .select(`
-          id,
-          file_name,
-          file_type,
-          file_path,
-          date
-        `);
+        });
 
       if (dbError) throw dbError;
 
       toast.success('Attachment added successfully');
       router.refresh();
-      (e.target as HTMLFormElement).reset();
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     } catch (error) {
       console.error('Error adding attachment:', error);
       toast.error('Failed to add attachment');
@@ -115,19 +129,24 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
     if (!confirmed) return;
 
     try {
-      // Delete from storage
-      const filePath = new URL(attachment.file_url).pathname.split('/').pop();
-      if (filePath) {
-        await supabase.storage
-          .from('attachments')
-          .remove([`leads/${lead.id}/${filePath}`]);
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
+      if (!session) {
+        throw new Error('No session found');
       }
 
-      // Delete from database
-      const { error } = await supabase
+      const filePath = `${session.user.id}/leads/${lead.id}/${attachment.file_name}`;
+      await supabase.storage
         .from('attachments')
-        .delete()
-        .eq('id', attachment.id);
+        .remove([filePath]);
+
+      // Delete from database using RPC
+      const { error } = await supabase
+        .rpc('delete_attachment', {
+          p_attachment_id: attachment.id
+        });
 
       if (error) throw error;
 
@@ -156,12 +175,12 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                 <SelectTrigger className="w-[180px]">
                   <SelectValue placeholder="Select type" />
                 </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="document">Document</SelectItem>
-                  <SelectItem value="contract">Contract</SelectItem>
-                  <SelectItem value="rider">Rider</SelectItem>
-                  <SelectItem value="image">Image</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                <SelectContent className="bg-[#1B2559] text-white">
+                  <SelectItem value="document" className="cursor-pointer">Document</SelectItem>
+                  <SelectItem value="contract" className="cursor-pointer">Contract</SelectItem>
+                  <SelectItem value="rider" className="cursor-pointer">Rider</SelectItem>
+                  <SelectItem value="image" className="cursor-pointer">Image</SelectItem>
+                  <SelectItem value="other" className="cursor-pointer">Other</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -170,7 +189,7 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                 ref={fileInputRef}
                 type="file"
                 className="hidden"
-                onChange={handleSubmit}
+                onChange={handleFileSelect}
                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
               />
               <Button
@@ -229,7 +248,10 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete(attachment)}
+                        onClick={() => handleDelete({
+                          ...attachment,
+                          type: attachment.type as "image" | "document" | "contract" | "rider" | "other"
+                        })}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

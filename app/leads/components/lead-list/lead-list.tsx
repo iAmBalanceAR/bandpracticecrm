@@ -59,8 +59,8 @@ export default function LeadList() {
       }
       if (filters.dateRange) {
         query = query
-          .gte('created_at', filters.dateRange.start)
-          .lte('created_at', filters.dateRange.end);
+          .gte('created_at', filters.dateRange.from)
+          .lte('created_at', filters.dateRange.to);
       }
 
       console.log('fetchLeads: Executing query');

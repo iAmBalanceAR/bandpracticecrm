@@ -61,15 +61,20 @@ typography: {
 ### Layout Components
 
 #### PageContainer
+
 The main layout wrapper for all pages:
+
 ```typescript
+
 <div className="min-h-screen bg-dark-background text-dark-text p-4 md:p-6 lg:p-8">
   {children}
 </div>
 ```
 
 #### Card
+
 Reusable card component with consistent styling:
+
 ```typescript
 interface CardProps {
   children: React.ReactNode;
@@ -102,7 +107,9 @@ const Card: React.FC<CardProps> = ({
 ```
 
 ### Spacing System
+
 Consistent spacing using Tailwind's scale:
+
 - Extra small: `space-2` (0.5rem, 8px)
 - Small: `space-4` (1rem, 16px)
 - Medium: `space-6` (1.5rem, 24px)
@@ -110,6 +117,7 @@ Consistent spacing using Tailwind's scale:
 - Extra large: `space-12` (3rem, 48px)
 
 ### Responsive Breakpoints
+
 ```typescript
 screens: {
   'sm': '640px',
@@ -123,7 +131,9 @@ screens: {
 ### Common Components
 
 #### Button
+
 Standard button component with variants:
+
 ```typescript
 interface ButtonProps {
   variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
@@ -147,7 +157,9 @@ const buttonSizes = {
 ```
 
 #### Input
+
 Standardized form input component:
+
 ```typescript
 interface InputProps {
   error?: string;
@@ -164,7 +176,9 @@ const inputStyles = {
 ```
 
 ### Grid System
+
 Flexible grid system using Tailwind's grid classes:
+
 ```typescript
 // Basic grid
 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -181,7 +195,9 @@ Flexible grid system using Tailwind's grid classes:
 ```
 
 ### Animation Classes
+
 Common animation utilities:
+
 ```typescript
 animations: {
   fadeIn: 'animate-fadeIn',
@@ -223,6 +239,7 @@ The application uses a consistent system of dialog boxes for user feedback and c
 The `FeedbackModal` component is used for displaying success messages, errors, and confirmation dialogs. It supports three types of modals:
 
 1. **Success Modal**
+
 ```typescript
 setFeedbackModal({
   isOpen: true,
@@ -232,7 +249,8 @@ setFeedbackModal({
 });
 ```
 
-2. **Error Modal**
+. **Error Modal**
+
 ```typescript
 setFeedbackModal({
   isOpen: true,
@@ -242,7 +260,8 @@ setFeedbackModal({
 });
 ```
 
-3. **Delete Confirmation Modal**
+. **Delete Confirmation Modal**
+
 ```typescript
 showDeleteConfirmation(itemId, {
   title: 'Delete Item',
@@ -252,8 +271,6 @@ showDeleteConfirmation(itemId, {
   }
 });
 ```
-
-### Best Practices
 
 1. **Success Messages**
    - Use for confirming successful operations
@@ -311,6 +328,7 @@ const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();
 ### Styling Guidelines
 
 The modals follow the application's dark theme with consistent styling:
+
 - Background: `bg-[#111C44]`
 - Text: White for high contrast
 - Success actions: Green accents
@@ -320,10 +338,11 @@ The modals follow the application's dark theme with consistent styling:
 ### Accessibility
 
 The modals are built with accessibility in mind:
+
 - Keyboard navigation support
 - ARIA labels for screen readers
 - Focus management
 - Escape key closes modals
 - Click outside modal area to close
 
-Remember to always provide clear feedback to users through these modals and maintain consistency in their usage throughout the application. 
+Remember to always provide clear feedback to users through these modals and maintain consistency in their usage throughout the application.

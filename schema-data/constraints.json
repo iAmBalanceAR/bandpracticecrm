@@ -1,0 +1,402 @@
+[
+    {
+      "table_schema": "public",
+      "table_name": "attachments",
+      "constraint_name": "attachments_communication_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "communication_id",
+      "references": "communications.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "attachments",
+      "constraint_name": "attachments_lead_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "lead_id",
+      "references": "leads.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "attachments",
+      "constraint_name": "attachments_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "attachments",
+      "constraint_name": "attachments_uploaded_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "uploaded_by",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "communications",
+      "constraint_name": "communications_lead_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "lead_id",
+      "references": "leads.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "communications",
+      "constraint_name": "communications_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "communications",
+      "constraint_name": "communications_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "gigs",
+      "constraint_name": "gigs_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "gigs",
+      "constraint_name": "gigs_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "constraint_name": "lead_notes_created_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "created_by",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "constraint_name": "lead_notes_lead_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "lead_id",
+      "references": "leads.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "lead_notes",
+      "constraint_name": "lead_notes_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "leads",
+      "constraint_name": "leads_assigned_to_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "assigned_to",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "leads",
+      "constraint_name": "leads_created_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "created_by",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "leads",
+      "constraint_name": "leads_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "leads",
+      "constraint_name": "leads_venue_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "venue_id",
+      "references": "venues.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "prices",
+      "constraint_name": "prices_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "prices",
+      "constraint_name": "prices_product_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "product_id",
+      "references": "products.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "products",
+      "constraint_name": "products_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "constraint_name": "profiles_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "profiles",
+      "constraint_name": "profiles_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "reminders",
+      "constraint_name": "reminders_assigned_to_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "assigned_to",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "reminders",
+      "constraint_name": "reminders_created_by_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "created_by",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "reminders",
+      "constraint_name": "reminders_lead_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "lead_id",
+      "references": "leads.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "reminders",
+      "constraint_name": "reminders_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "saved_venues_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "saved_venues_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "saved_venues_venue_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "venue_id",
+      "references": "venues.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "unique_user_venue",
+      "constraint_type": "UNIQUE",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "unique_user_venue",
+      "constraint_type": "UNIQUE",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "unique_user_venue",
+      "constraint_type": "UNIQUE",
+      "column_name": "venue_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "saved_venues",
+      "constraint_name": "unique_user_venue",
+      "constraint_type": "UNIQUE",
+      "column_name": "venue_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "stage_plot_items",
+      "constraint_name": "stage_plot_items_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "stage_plot_items",
+      "constraint_name": "stage_plot_items_stage_plot_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "stage_plot_id",
+      "references": "stage_plots.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "stage_plots",
+      "constraint_name": "stage_plots_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "stage_plots",
+      "constraint_name": "stage_plots_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "subscriptions",
+      "constraint_name": "subscriptions_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "subscriptions",
+      "constraint_name": "subscriptions_price_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "price_id",
+      "references": "prices.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "subscriptions",
+      "constraint_name": "subscriptions_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_gig_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "gig_id",
+      "references": "gigs.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_tour_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "tour_id",
+      "references": "tours.id"
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_tour_id_gig_id_key",
+      "constraint_type": "UNIQUE",
+      "column_name": "gig_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_tour_id_gig_id_key",
+      "constraint_type": "UNIQUE",
+      "column_name": "tour_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_tour_id_gig_id_key",
+      "constraint_type": "UNIQUE",
+      "column_name": "tour_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_tour_id_gig_id_key",
+      "constraint_type": "UNIQUE",
+      "column_name": "gig_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tourconnect",
+      "constraint_name": "tourconnect_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tours",
+      "constraint_name": "tours_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "tours",
+      "constraint_name": "tours_user_id_fkey",
+      "constraint_type": "FOREIGN KEY",
+      "column_name": "user_id",
+      "references": null
+    },
+    {
+      "table_schema": "public",
+      "table_name": "venues",
+      "constraint_name": "venues_pkey",
+      "constraint_type": "PRIMARY KEY",
+      "column_name": "id",
+      "references": null
+    }
+  ]
