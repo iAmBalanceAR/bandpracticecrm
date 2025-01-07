@@ -30,6 +30,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
     title: string
     message: string
     type: 'success' | 'error' | 'warning' | 'delete'
+    onConfirm?: () => void
   }>({
     isOpen: false,
     title: '',
@@ -38,6 +39,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
   })
   const [selectedEquipment, setSelectedEquipment] = useState<string>('')
   const [isExporting, setIsExporting] = useState(false)
+  const [saveType, setSaveType] = useState<'continue' | 'exit' | null>(null)
 
   const equipmentByCategory = getEquipmentByCategory()
 
@@ -105,6 +107,35 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
     ))
   }
 
+  const handleLabelChange = (id: string, label: string) => {
+    setItems(items.map(item =>
+      item.id === id
+        ? { ...item, customLabel: label }
+        : item
+    ))
+  }
+
+  const handleShowLabelChange = (id: string, showLabel: boolean) => {
+    setItems(items.map(item =>
+      item.id === id
+        ? { ...item, showLabel }
+        : item
+    ))
+  }
+
+  const handleDeleteItem = (id: string) => {
+    setFeedbackModal({
+      isOpen: true,
+      title: 'Delete Item',
+      message: 'Are you sure you want to remove this item from the stage plot?',
+      type: 'delete',
+      onConfirm: () => {
+        setItems(items.filter(item => item.id !== id))
+        setSelectedItem(null)
+      }
+    })
+  }
+
   const handleTechRequirementsChange = (id: string, requirements: Record<string, string[]>) => {
     setItems(items.map(item =>
       item.id === id
@@ -113,7 +144,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
     ))
   }
 
-  const handleSave = async () => {
+  const handleSave = async (shouldExit: boolean = true) => {
     if (!plotName) {
       setFeedbackModal({
         isOpen: true,
@@ -134,6 +165,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
       return
     }
 
+    setSaveType(shouldExit ? 'exit' : 'continue')
     setIsSaving(true)
 
     try {
@@ -181,7 +213,9 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         type: 'success'
       })
 
-      onSaved?.()
+      if (shouldExit) {
+        onSaved?.()
+      }
     } catch (error) {
       console.error('Error saving stage plot:', error)
       setFeedbackModal({
@@ -192,6 +226,21 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
       })
     } finally {
       setIsSaving(false)
+      setSaveType(null)
+    }
+  }
+
+  const handleCancel = () => {
+    if (items.length > 0) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Warning',
+        message: 'You have unsaved changes. Are you sure you want to cancel?',
+        type: 'warning',
+        onConfirm: () => onSaved?.()
+      })
+    } else {
+      onSaved?.()
     }
   }
 
@@ -245,6 +294,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
 
   return (
     <div className="space-y-4">
+      
       <div className="flex items-end gap-4">
         <div className="flex-1">
           <Label htmlFor="plot-name">Plot Name</Label>
@@ -258,17 +308,19 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         <div className="flex-1">
           <Label>Add Equipment</Label>
           <div className="flex gap-2">
-            <Select value={selectedEquipment} onValueChange={setSelectedEquipment}>
+            <Select value={selectedEquipment} onValueChange={setSelectedEquipment} >
               <SelectTrigger>
                 <SelectValue placeholder="Select equipment..." />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-[#111C44] text-white ">
                 {Object.entries(equipmentByCategory).map(([category, items]) => (
                   <SelectGroup key={category}>
-                    <SelectLabel>{CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}</SelectLabel>
+                    <SelectLabel className="font-mono font-normal text-lg text-[#ff9920] px-0 pb-0 pl-1.5 border-b border-[#ff9920]/50 m-0">
+                      {CATEGORY_LABELS[category as keyof typeof CATEGORY_LABELS]}
+                    </SelectLabel>
                     {items.map((item) => (
-                      <SelectItem key={item.id} value={item.id}>
-                        {item.label}
+                      <SelectItem key={item.id} value={item.id} className="cursor-pointer  focus:bg-[#030817] p-2 focus:font-semibold">
+                       {item.label}
                       </SelectItem>
                     ))}
                   </SelectGroup>
@@ -278,6 +330,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
             <Button 
               onClick={handleAddItem}
               disabled={!selectedEquipment}
+              className="bg-blue-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
             >
               Add
             </Button>
@@ -285,8 +338,8 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         </div>
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
-        <div className="col-span-2">
+      <div className="space-y-4">
+        <div className="w-full">
           <StageGrid
             items={items}
             selectedItem={selectedItem}
@@ -294,23 +347,16 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
             onPositionChange={handlePositionChange}
             onSizeChange={handleSizeChange}
             onRotationChange={handleRotationChange}
+            onDeleteItem={handleDeleteItem}
+            onLabelChange={handleLabelChange}
           />
         </div>
-        <div>
-          <TechnicalRequirements
-            items={items}
-            selectedItem={selectedItem}
-            onRequirementsChange={handleTechRequirementsChange}
-          />
-        </div>
-      </div>
-
-      <div className="flex justify-end gap-2">
+        <div className="flex justify-end gap-2">
         <Button
           variant="outline"
           onClick={handleExport}
           disabled={isExporting || items.length === 0}
-          className="gap-2"
+          className="gap-2 bg-blue-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
         >
           {isExporting ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -319,15 +365,37 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
           )}
           Export PDF
         </Button>
+        {plotId && (
+          <Button
+            onClick={() => handleSave(false)}
+            disabled={isSaving}
+            className="gap-2 bg-green-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
+          >
+            {isSaving && saveType === 'continue' && <Loader2 className="h-4 w-4 animate-spin" />}
+            Save and Continue
+          </Button>
+        )}
         <Button
-          onClick={handleSave}
-          disabled={isSaving || items.length === 0}
-          className="gap-2"
+          onClick={() => handleSave(true)}
+          disabled={isSaving}
+          className="gap-2 bg-green-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
         >
-          {isSaving && <Loader2 className="h-4 w-4 animate-spin" />}
-          Save Plot
+          {isSaving && saveType === 'exit' && <Loader2 className="h-4 w-4 animate-spin" />}
+          {plotId ? 'Save and Exit' : 'Save Plot'}
         </Button>
       </div>
+        <div className="w-full">
+          <TechnicalRequirements
+            items={items}
+            selectedItem={selectedItem}
+            onRequirementsChange={handleTechRequirementsChange}
+            onLabelChange={handleLabelChange}
+            onShowLabelChange={handleShowLabelChange}
+          />
+        </div>
+      </div>
+
+      
 
       <FeedbackModal
         isOpen={feedbackModal.isOpen}
@@ -335,6 +403,7 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         title={feedbackModal.title}
         message={feedbackModal.message}
         type={feedbackModal.type}
+        onConfirm={feedbackModal.onConfirm}
       />
     </div>
   )

@@ -20,6 +20,8 @@ export interface StagePlotItem {
   technical_requirements: {
     [key: string]: string[]
   }
+  customLabel?: string
+  showLabel?: boolean
   created_at: string
 }
 

@@ -17,6 +17,7 @@ export default function DraggableItem({
   const [isResizing, setIsResizing] = useState(false)
   const [dragStart, setDragStart] = useState<Position | null>(null)
   const [initialPosition, setInitialPosition] = useState<Position>(position)
+  const [initialSize, setInitialSize] = useState<Size>(size)
 
   useEffect(() => {
     if (!isDragging && !isResizing) return
@@ -36,20 +37,25 @@ export default function DraggableItem({
         
         onPositionChange(id, { x: newX, y: newY })
       } else if (isResizing) {
-        const dx = ((e.clientX - dragStart.x) / parentRect.width) * 100
-        const dy = ((e.clientY - dragStart.y) / parentRect.height) * 100
+        const dx = ((e.clientX - dragStart.x) / parentRect.width) * 50
+        const dy = ((e.clientY - dragStart.y) / parentRect.height) * 50
         
-        const newWidth = Math.max(10, Math.min(100 - position.x, size.width + dx))
-        const newHeight = Math.max(10, Math.min(100 - position.y, size.height + dy))
+        const newWidth = Math.max(5, Math.min(100 - position.x, initialSize.width + dx))
+        const newHeight = Math.max(5, Math.min(100 - position.y, initialSize.height + dy))
         
         onSizeChange(id, { width: newWidth, height: newHeight })
       }
     }
 
-    const handleMouseUp = () => {
-      setIsDragging(false)
-      setIsResizing(false)
-      setDragStart(null)
+    const handleMouseUp = (e: MouseEvent) => {
+      if (isDragging || isResizing) {
+        setIsDragging(false)
+        setIsResizing(false)
+        setDragStart(null)
+        
+        document.removeEventListener('mousemove', handleMouseMove)
+        document.removeEventListener('mouseup', handleMouseUp)
+      }
     }
 
     document.addEventListener('mousemove', handleMouseMove)
@@ -59,7 +65,7 @@ export default function DraggableItem({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [id, isDragging, isResizing, dragStart, initialPosition, position, size, onPositionChange, onSizeChange])
+  }, [id, isDragging, isResizing, dragStart, initialPosition, initialSize, position, size, onPositionChange, onSizeChange])
 
   const handleMouseDown = (e: React.MouseEvent, type: 'drag' | 'resize') => {
     e.stopPropagation()
@@ -68,6 +74,7 @@ export default function DraggableItem({
       setInitialPosition(position)
     } else {
       setIsResizing(true)
+      setInitialSize(size)
     }
     setDragStart({ x: e.clientX, y: e.clientY })
   }
@@ -82,7 +89,8 @@ export default function DraggableItem({
         width: `${size.width}%`,
         height: `${size.height}%`,
         transform: `rotate(${rotation}deg)`,
-        cursor: isDragging ? 'grabbing' : 'grab'
+        cursor: isDragging ? 'grabbing' : 'grab',
+        userSelect: 'none'
       }}
       onMouseDown={(e) => handleMouseDown(e, 'drag')}
     >

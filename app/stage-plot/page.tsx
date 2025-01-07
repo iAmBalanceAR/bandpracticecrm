@@ -4,13 +4,13 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableHeader, TableBody, TableCell, TableHead, TableRow } from "@/components/ui/table"
 import CustomSectionHeader from "@/components/common/CustomSectionHeader"
-import { Plus, FileDown, Edit, Trash, Loader2 } from "lucide-react"
+import { Plus, FileDown, Edit, Trash, Loader2, ArrowLeft, X } from "lucide-react"
 import { FeedbackModal } from "@/components/ui/feedback-modal"
 import StagePlotEditor from './components/stage-plot-editor'
 import { listStagePlots, deleteStagePlot, getStagePlot } from './utils/db'
 import { generateStagePlotPDF } from './utils/export'
 import type { StagePlot, StagePlotItem } from './types'
-
+import Link from 'next/link'
 interface StagePlotWithItems extends StagePlot {
   items: StagePlotItem[]
 }
@@ -93,33 +93,50 @@ export default function StagePlotPage() {
     <CustomSectionHeader title="Stage Plot Generator" underlineColor="#0f1729">
       <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
         <CardHeader className="pb-4 mb-2">
-          <CardTitle className="flex justify-between items-center text-3xl font-bold">
-            <div className="flex flex-auto tracking-tight text-3xl">
-              <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+          <CardTitle className="flex justify-end ittems-center text-3xl font-bold">
+             {/* <div className="flex flex-auto tracking-tight text-3xl">
+             <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
                 Stage Plot Generator
               </span>
-            </div>
+            </div> */}
+            
             {!isCreating && !selectedPlot && (
-              <Button onClick={() => setIsCreating(true)} className="gap-2 bg-blue-600 hover:bg-blue-700">
+              <>
+              <div className="flex flex-auto tracking-tight text-3xl mt-2">
+                  <span className=" gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+                  Saved  Stage Plots
+                  </span> 
+              </div>
+              <div className="f tracking-tight float-right text-3xl"><Button onClick={() => setIsCreating(true)} className="gap-2 bg-blue-600 hover:bg-blue-700">
                 <Plus size={20} />
                 Create New Plot
               </Button>
+              </div>
+              </>
             )}
           </CardTitle>
         </CardHeader>
-        <CardContent className="pt-2">
+        <CardContent className="pt-0">
           {isCreating ? (
             <div className="space-y-4">
-              <div className="flex justify-end mb-4">
+              <div className="mb-4">
                 <Button 
-                  variant="outline" 
-                  onClick={() => setIsCreating(false)}
-                  className="bg-gray-600 hover:bg-gray-700 text-white border-none"
+                  onClick={() => {
+                    setFeedbackModal({
+                      isOpen: true,
+                      title: 'Warning',
+                      message: 'You have unsaved changes. Are you sure you want to cancel?',
+                      type: 'warning',
+                      onConfirm: () => setIsCreating(false)
+                    })
+                  }}
+                  className="border-black border-2 bg-red-600 hover:bg-red-700 text-white"
                 >
-                  Back to List
+                  <X className="h-6 w-6 mr-1" />
+                  Cancel
                 </Button>
-              </div>
-              <StagePlotEditor 
+              </div>      
+               <StagePlotEditor 
                 onSaved={() => {
                   setIsCreating(false)
                   loadPlots()
@@ -128,13 +145,22 @@ export default function StagePlotPage() {
             </div>
           ) : selectedPlot ? (
             <div className="space-y-4">
-              <div className="flex justify-end mb-4">
+              <div className="mb-4">
                 <Button 
                   variant="outline" 
-                  onClick={() => setSelectedPlot(null)}
-                  className="bg-gray-600 hover:bg-gray-700 text-white border-none"
+                  onClick={() => {
+                    setFeedbackModal({
+                      isOpen: true,
+                      title: 'Warning',
+                      message: 'You have unsaved changes. Are you sure you want to cancel?',
+                      type: 'warning',
+                      onConfirm: () => setSelectedPlot(null)
+                    })
+                  }}
+                  className="border-black border-2 bg-red-600 hover:bg-red-700 text-white"
                 >
-                  Back to List
+                  <X className="h-6 w-6 mr-1" />
+                  Cancel
                 </Button>
               </div>
               <StagePlotEditor 
@@ -166,30 +192,32 @@ export default function StagePlotPage() {
                   </Button>
                 </div>
               ) : (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Name</TableHead>
-                      <TableHead>Created</TableHead>
-                      <TableHead>Band Members</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
+                <>
+                <div className="border-gray-500 border-2  rounded-lg">
+                <Table className="">
+                  <TableHeader className="" >
+                    <TableRow className=" text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1  ">
+                    <TableHead className=" text-gray-100 bg-[#1F2937] pt-4  pb-4 ">Plot Title</TableHead>
+                      <TableHead className=" text-gray-100 bg-[#1F2937] pt-4  pb-4 ">Created On</TableHead>
+                      <TableHead className="text-gray-100 bg-[#1F2937] pt-4  pb-4  ">Items Plotted</TableHead>
+                      <TableHead className="text-gray-100 bg-[#1F2937] pt-4  pb-4  pr-9 text-right ">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {plots.map((plot) => (
-                      <TableRow key={plot.id}>
-                        <TableCell className="font-medium">{plot.name}</TableCell>
-                        <TableCell>{new Date(plot.created_at).toLocaleDateString()}</TableCell>
-                        <TableCell>{plot.items.length} members</TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
+                      <TableRow key={plot.id} className="bg-[#111827] border-gray-500 border-b  text-base">
+                        <TableCell className="font-medium text-gray-400">{plot.name}</TableCell>
+                        <TableCell className="text-gray-400">{new Date(plot.created_at).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-gray-400">{plot.items.length} Items</TableCell>
+                        <TableCell className="text-right text-gray-400 ">
+                          <div className="flex justify-end gap-2 ">
                             <Button
                               size="icon"
                               variant="ghost"
                               onClick={() => setSelectedPlot(plot.id)}
                               title="Edit"
                             >
-                              <Edit size={18} />
+                              <Edit size={18} className="text-lime-400" />
                             </Button>
                             <Button
                               size="icon"
@@ -197,7 +225,7 @@ export default function StagePlotPage() {
                               onClick={() => handleDelete(plot.id)}
                               title="Delete"
                             >
-                              <Trash size={18} />
+                              <Trash size={18} className="text-red-400" />
                             </Button>
                           </div>
                         </TableCell>
@@ -205,6 +233,8 @@ export default function StagePlotPage() {
                     ))}
                   </TableBody>
                 </Table>
+                </div>
+                </>
               )}
             </div>
           )}
@@ -217,6 +247,7 @@ export default function StagePlotPage() {
         title={feedbackModal.title}
         message={feedbackModal.message}
         type={feedbackModal.type}
+        onConfirm={feedbackModal.onConfirm}
       />
     </CustomSectionHeader>
   )

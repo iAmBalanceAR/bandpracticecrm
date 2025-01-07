@@ -15,6 +15,8 @@ export type EquipmentType = {
   defaultWidth: number;
   defaultHeight: number;
   defaultTechnicalRequirements?: string[];
+  showLabel?: boolean;
+  customLabel?: string;
 };
 
 export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
@@ -22,7 +24,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'electric_guitar',
     category: 'guitars',
     label: 'Electric Guitar',
-    svgFile: '/images/stageicons/eguitar.svg',
+    svgFile: '/images/stageicons/guitar4-red.svg',
     defaultWidth: 15,
     defaultHeight: 15,
     defaultTechnicalRequirements: ['DI Box', 'XLR Cable', '1/4" Cable']
@@ -31,7 +33,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'acoustic_guitar',
     category: 'guitars',
     label: 'Acoustic Guitar',
-    svgFile: '/images/stageicons/classicalguitar.svg',
+    svgFile: '/images/stageicons/guitar1-orange.svg',
     defaultWidth: 15,
     defaultHeight: 15,
     defaultTechnicalRequirements: ['DI Box', 'XLR Cable', '1/4" Cable']
@@ -40,7 +42,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'electric_bass',
     category: 'bass',
     label: 'Electric Bass',
-    svgFile: '/images/stageicons/bass.svg',
+    svgFile: '/images/stageicons/bass6-red.svg',
     defaultWidth: 15,
     defaultHeight: 15,
     defaultTechnicalRequirements: ['DI Box', 'XLR Cable', '1/4" Cable']
@@ -49,7 +51,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'upright_bass',
     category: 'bass',
     label: 'Upright Bass',
-    svgFile: '/images/stageicons/contrabass.svg',
+    svgFile: '/images/stageicons/doublebass2.svg',
     defaultWidth: 20,
     defaultHeight: 20,
     defaultTechnicalRequirements: ['DI Box', 'XLR Cable']
@@ -58,7 +60,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'drum_kit',
     category: 'drums',
     label: 'Drum Kit',
-    svgFile: '/images/stageicons/drumkitb.svg',
+    svgFile: '/images/stageicons/drumset2.svg',
     defaultWidth: 30,
     defaultHeight: 30,
     defaultTechnicalRequirements: ['Kick Mic', 'Snare Mic', 'Tom Mics', 'Overhead Mics']
@@ -67,7 +69,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'congas',
     category: 'drums',
     label: 'Congas',
-    svgFile: '/images/stageicons/congas.svg',
+    svgFile: '/images/stageicons/congas-yellow.svg',
     defaultWidth: 15,
     defaultHeight: 15,
     defaultTechnicalRequirements: ['Microphone']
@@ -76,7 +78,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'keyboard',
     category: 'keys',
     label: 'Keyboard',
-    svgFile: '/images/stageicons/keyboarda.svg',
+    svgFile: '/images/stageicons/keyboard2-red.svg',
     defaultWidth: 25,
     defaultHeight: 15,
     defaultTechnicalRequirements: ['DI Box', 'Power Supply']
@@ -85,7 +87,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'piano',
     category: 'keys',
     label: 'Piano',
-    svgFile: '/images/stageicons/pianoa.svg',
+    svgFile: '/images/stageicons/piano2.svg',
     defaultWidth: 35,
     defaultHeight: 25,
     defaultTechnicalRequirements: ['Piano Mics']
@@ -94,7 +96,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'microphone',
     category: 'vocals',
     label: 'Microphone',
-    svgFile: '/images/stageicons/microphone2.svg',
+    svgFile: '/images/stageicons/microphone2-blue.svg',
     defaultWidth: 10,
     defaultHeight: 10,
     defaultTechnicalRequirements: ['XLR Cable']
@@ -121,7 +123,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'bass_amp',
     category: 'equipment',
     label: 'Bass Amp',
-    svgFile: '/images/stageicons/basscombo.svg',
+    svgFile: '/images/stageicons/bassamp.svg',
     defaultWidth: 20,
     defaultHeight: 20,
     defaultTechnicalRequirements: ['Power Supply', 'DI Box']
@@ -130,10 +132,11 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     id: 'di_box',
     category: 'equipment',
     label: 'DI Box',
-    svgFile: '/images/stageicons/dibox.svg',
+    svgFile: '/images/stageicons/dibox-blue.svg',
     defaultWidth: 10,
     defaultHeight: 10,
-    defaultTechnicalRequirements: ['XLR Cable']
+    defaultTechnicalRequirements: ['XLR Cable'],
+    showLabel: false
   },
   monitor_left: {
     id: 'monitor_left',
@@ -141,7 +144,8 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     label: 'Monitor Wedge (Left)',
     svgFile: '/images/stageicons/monitor2.svg',
     defaultWidth: 15,
-    defaultHeight: 10
+    defaultHeight: 10,
+    showLabel: false
   },
   monitor_right: {
     id: 'monitor_right',
@@ -149,6 +153,7 @@ export const EQUIPMENT_MAP: Record<string, EquipmentType> = {
     label: 'Monitor Wedge (Right)',
     svgFile: '/images/stageicons/monitor.svg',
     defaultWidth: 15,
-    defaultHeight: 10
+    defaultHeight: 10,
+    showLabel: false
   }
 }; 

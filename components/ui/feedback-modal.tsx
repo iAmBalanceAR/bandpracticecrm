@@ -43,6 +43,13 @@ export function FeedbackModal({
     }
   }
 
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm()
+      onClose()
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogPortal>
@@ -65,13 +72,13 @@ export function FeedbackModal({
               {message}
             </p>
 
-            {type === 'delete' ? (
+            {(type === 'delete' || type === 'warning') && onConfirm ? (
               <div className="flex space-x-3">
                 <Button 
-                  onClick={onConfirm} 
-                  className="bg-red-600 hover:bg-red-700 min-w-[100px] text-white"
+                  onClick={handleConfirm}
+                  className={`${type === 'delete' ? 'bg-red-600 hover:bg-red-700' : 'bg-blue-600 hover:bg-blue-700'} min-w-[100px] text-white`}
                 >
-                  Delete
+                  {type === 'delete' ? 'Delete' : 'Continue'}
                 </Button>
                 <Button 
                   onClick={onClose} 
