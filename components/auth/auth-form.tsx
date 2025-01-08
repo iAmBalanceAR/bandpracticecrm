@@ -1,15 +1,13 @@
 'use client'
 
 import React from 'react'
-import { useState } from 'react'
+import { useState, } from 'react'
 import createClient from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
-import { Card, CardContent } from '@/components/ui/card'
+import { Form } from '@/components/ui/form'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { Separator } from '@/components/ui/separator'
-import { Github } from 'lucide-react'
-import { useMobile } from '@/components/providers/mobile-provider'
 import { useRouter } from 'next/navigation'
 
 export function AuthForm() {
@@ -20,7 +18,7 @@ export function AuthForm() {
   const [message, setMessage] = useState<string | null>(null)
   const supabase = createClient()
   const router = useRouter()
-  const { isMobile, isTouchDevice } = useMobile()
+
 
   const handleOAuthSignIn = async (provider: 'google' | 'github' | 'facebook') => {
     try {
@@ -66,88 +64,74 @@ export function AuthForm() {
   }
 
   return (
-    <div className="flex min-h-full flex-1 flex-col justify-centersm:px-6 lg:px-8">
+    <div className="flex min-h-full flex-1 flex-col justify-center align-middle sm:px-6 lg:px-8 mt-0">
 
 
-      <div className=" sm:mx-auto sm:w-full sm:max-w-[480px]">
-        <div className="bg-white px-6 py-12 shadow sm:rounded-lg sm:px-12">
+      <div className=" mt-8 sm:mx-auto sm:w-full sm:max-w-[480px]">
+        <div className="bg-[#1B2559] px-0 py-0 pb-12 mb-4 shadow sm:rounded-lg sm:px-12 border-blue-600 border">'   
+        <h1 className="text-[#43A7C5]  text-center font-semibold font-mono text-3xl mb-8">
+          Sign In To Your Account
+        </h1>
           <form className="space-y-6" onSubmit={handleSignIn}>
             {error && (
               <Alert variant="destructive" className="bg-red-900 border-red-600">
                 <AlertDescription>{error}</AlertDescription>
               </Alert>
-            )}
-            
-            <div>
-              <label htmlFor="email" className="block text-sm font-medium leading-6 text-gray-900">
+            )}         
+            <div className="mb-4">
+              <Label htmlFor="email" className="text-shadow-lg text-shadow-gray-200 block text-lg font-mono font-semibold leading-6 text-gray-200 pb-1">
                 Email address
-              </label>
+              </Label>
               <div className="mt-2">
-                <input
+                <Input
                   id="email"
+                  placeholder='Enter your email address'
                   name="email"
                   type="email"
                   autoComplete="email"
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="bg-[#111c44]  w-full rounded-md p-1.5 text-white focus:border-white border-gray-400 border placeholder:text-gray-600  sm:text-sm sm:leading-6 pt-1"
                 />
               </div>
             </div>
 
-            <div>
-              <label htmlFor="password" className="block text-sm font-medium leading-6 text-gray-900">
+            <div className="mb-4">
+              <Label htmlFor="password" className="block text-lg font-mono font-semibold leading-6 text-gray-200 p-1.5 rounded-md">
                 Password
-              </label>
-              <div className="mt-2">
-                <input
+              </Label>
+              <div className=" mb-8 mt-2">
+                <Input
                   id="password"
                   name="password"
                   type="password"
+                  placeholder='Enter your password'
                   autoComplete="current-password"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
+                  className="bg-[#111c44] border focus:border-white border-gray-400 text-white placeholder:text-gray-600 pt-1"
                 />
               </div>
             </div>
 
-            <div>
-              <button
+            <div className="pt-2">
+              <Button
                 type="submit"
                 disabled={loading}
-                className="flex w-full justify-center rounded-md bg-indigo-600 px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                className="bg-green-700 font-semibold leading-6 text-white shadow-sm hover:bg-green-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2  outline-green-600 focus-visible:outline-black w-full"
               >
                 {loading ? 'Loading...' : 'Sign in'}
-              </button>
+              </Button>
             </div>
+
           </form>
 
-          {/* <div className="mt-6">
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-200" />
-              </div>
-              <div className="relative flex justify-center text-sm font-medium leading-6">
-                <span className="bg-white px-6 text-gray-900">Or continue with</span>
-              </div>
-            </div>
+          </div>
 
-            <div className="mt-6">
-              <button
-                onClick={() => handleOAuthSignIn('github')}
-                disabled={loading}
-                className="flex w-full items-center justify-center gap-3 rounded-md bg-[#24292F] px-3 py-1.5 text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#24292F]"
-              >
-                <Github className="h-5 w-5" />
-                <span className="text-sm font-semibold leading-6">GitHub</span>
-              </button>
-            </div>
-          </div> */}
-        </div>
-      </div>
+      </div>       
+
     </div>
   )
 } 

@@ -17,7 +17,12 @@ export default function Template({
   if (pathname === '/splash') {
     return <>{children}</>
   }
-
+  if (pathname === '/auth/signin') {
+    return <>{children}</>
+  }
+  if (pathname === '/auth/signup') {
+    return <>{children}</>
+  }
   return (
     <AuthProvider>
       <TourProvider>
