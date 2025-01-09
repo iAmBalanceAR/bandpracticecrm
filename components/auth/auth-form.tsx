@@ -47,11 +47,13 @@ export function AuthForm() {
           message: error.message,
           type: 'error'
         })
+        setLoading(false)
         return
       }
 
       if (data?.session) {
         router.push('/account')
+        return
       }
     } catch (error: any) {
       setFeedbackModal({
@@ -60,7 +62,6 @@ export function AuthForm() {
         message: error.message || 'An unexpected error occurred',
         type: 'error'
       })
-    } finally {
       setLoading(false)
     }
   }
