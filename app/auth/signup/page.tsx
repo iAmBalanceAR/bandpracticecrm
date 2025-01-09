@@ -15,11 +15,11 @@ export default function SignUp() {
                 height={160}
                 className="mx-auto"
            />
-          <div className="justify-center items-center">
+         <div className="justify-center items-center">
             <SignUpForm />
-            <p className="mt-2 text-sm text-muted-foreground text-white mx-auto text-center">
-              Already have an account?{' '}
-              <Link href="/auth/signin" className="font-medium text-base hover:text-blue-500/90 text-blue-400 hover:underline">
+             <p className="mt-2 text-sm text-muted-foreground text-white mx-auto text-center">
+                Already have an account?{' '}
+                 <Link href="/auth/signin" className="font-medium text-base hover:text-blue-500/90 text-blue-400 hover:underline">
                 Sign in here
               </Link>
             </p>
