@@ -122,6 +122,9 @@ importers:
       '@types/html2canvas':
         specifier: ^1.0.0
         version: 1.0.0
+      '@types/react-google-recaptcha':
+        specifier: ^2.1.9
+        version: 2.1.9
       class-variance-authority:
         specifier: ^0.7.1
         version: 0.7.1
@@ -188,6 +191,9 @@ importers:
       react-error-boundary:
         specifier: ^4.1.2
         version: 4.1.2(react@18.2.0)
+      react-google-recaptcha:
+        specifier: ^3.1.0
+        version: 3.1.0(react@18.2.0)
       react-hook-form:
         specifier: ^7.54.1
         version: 7.54.1(react@18.2.0)
@@ -1677,6 +1683,9 @@ packages:
   '@types/react-dom@18.2.7':
     resolution: {integrity: sha512-GRaAEriuT4zp9N4p1i8BDBYmEyfo+xQ3yHjJU4eiK5NDa1RmUZG+unZABUTK4/Ox/M+GaHwb6Ow8rUITrtjszA==, tarball: https://registry.npmjs.org/@types/react-dom/-/react-dom-18.2.7.tgz}
 
+  '@types/react-google-recaptcha@2.1.9':
+    resolution: {integrity: sha512-nT31LrBDuoSZJN4QuwtQSF3O89FVHC4jLhM+NtKEmVF5R1e8OY0Jo4//x2Yapn2aNHguwgX5doAq8Zo+Ehd0ug==, tarball: https://registry.npmjs.org/@types/react-google-recaptcha/-/react-google-recaptcha-2.1.9.tgz}
+
   '@types/react-transition-group@4.4.12':
     resolution: {integrity: sha512-8TV6R3h2j7a91c+1DXdJi3Syo69zzIZbz7Lg5tORM5LEJG7X/E6a1V3drRyBRZq7/utz7A+c4OgYLiLcYGHG6w==, tarball: https://registry.npmjs.org/@types/react-transition-group/-/react-transition-group-4.4.12.tgz}
     peerDependencies:
@@ -2436,6 +2445,11 @@ packages:
   ramda@0.29.1:
     resolution: {integrity: sha512-OfxIeWzd4xdUNxlWhgFazxsA/nl3mS4/jGZI5n00uWOoSSFRhC1b6gl6xvmzUamgmqELraWp0J/qqVlXYPDPyA==, tarball: https://registry.npmjs.org/ramda/-/ramda-0.29.1.tgz}
 
+  react-async-script@1.2.0:
+    resolution: {integrity: sha512-bCpkbm9JiAuMGhkqoAiC0lLkb40DJ0HOEJIku+9JDjxX3Rcs+ztEOG13wbrOskt3n2DTrjshhaQ/iay+SnGg5Q==, tarball: https://registry.npmjs.org/react-async-script/-/react-async-script-1.2.0.tgz}
+    peerDependencies:
+      react: '>=16.4.1'
+
   react-day-picker@8.10.1:
     resolution: {integrity: sha512-TMx7fNbhLk15eqcMt+7Z7S2KF7mfTId/XJDjKE8f+IUcFn0l08/kI4FiYTL/0yuOLmEcbR4Fwe3GJf/NiiMnPA==, tarball: https://registry.npmjs.org/react-day-picker/-/react-day-picker-8.10.1.tgz}
     peerDependencies:
@@ -2475,6 +2489,11 @@ packages:
     resolution: {integrity: sha512-GQDxZ5Jd+Aq/qUxbCm1UtzmL/s++V7zKgE8yMktJiCQXCCFZnMZh9ng+6/Ne6PjNSXH0L9CjeOEREfRnq6Duag==, tarball: https://registry.npmjs.org/react-error-boundary/-/react-error-boundary-4.1.2.tgz}
     peerDependencies:
       react: '>=16.13.1'
+
+  react-google-recaptcha@3.1.0:
+    resolution: {integrity: sha512-cYW2/DWas8nEKZGD7SCu9BSuVz8iOcOLHChHyi7upUuVhkpkhYG/6N3KDiTQ3XAiZ2UAZkfvYKMfAHOzBOcGEg==, tarball: https://registry.npmjs.org/react-google-recaptcha/-/react-google-recaptcha-3.1.0.tgz}
+    peerDependencies:
+      react: '>=16.4.1'
 
   react-hook-form@7.54.1:
     resolution: {integrity: sha512-PUNzFwQeQ5oHiiTUO7GO/EJXGEtuun2Y1A59rLnZBBj+vNEOWt/3ERTiG1/zt7dVeJEM+4vDX/7XQ/qanuvPMg==, tarball: https://registry.npmjs.org/react-hook-form/-/react-hook-form-7.54.1.tgz}
@@ -4222,6 +4241,10 @@ snapshots:
     dependencies:
       '@types/react': 18.2.18
 
+  '@types/react-google-recaptcha@2.1.9':
+    dependencies:
+      '@types/react': 18.2.18
+
   '@types/react-transition-group@4.4.12(@types/react@18.2.18)':
     dependencies:
       '@types/react': 18.2.18
@@ -4956,6 +4979,12 @@ snapshots:
 
   ramda@0.29.1: {}
 
+  react-async-script@1.2.0(react@18.2.0):
+    dependencies:
+      hoist-non-react-statics: 3.3.2
+      prop-types: 15.8.1
+      react: 18.2.0
+
   react-day-picker@8.10.1(date-fns@4.1.0)(react@18.2.0):
     dependencies:
       date-fns: 4.1.0
@@ -5002,6 +5031,12 @@ snapshots:
     dependencies:
       '@babel/runtime': 7.26.0
       react: 18.2.0
+
+  react-google-recaptcha@3.1.0(react@18.2.0):
+    dependencies:
+      prop-types: 15.8.1
+      react: 18.2.0
+      react-async-script: 1.2.0(react@18.2.0)
 
   react-hook-form@7.54.1(react@18.2.0):
     dependencies:

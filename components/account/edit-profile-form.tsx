@@ -68,10 +68,12 @@ export default function EditProfileForm({ user, isOpen, onClose }: EditProfileFo
       if (profileError) throw profileError
 
       setSuccess(true)
+      onClose()
+      
+      // Add a small delay before reloading to show the success message
       setTimeout(() => {
-        router.refresh()
-        onClose()
-      }, 1000)
+        window.location.reload()
+      }, 500)
     } catch (error: any) {
       setError(error.message)
     } finally {

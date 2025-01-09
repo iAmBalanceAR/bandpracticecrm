@@ -58,14 +58,14 @@ const GigDetailsModal = ({ gig, isOpen, onClose }: { gig: Gig | null, isOpen: bo
   
   return (
     <PortalContent>
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-[9998]" />
-      <div className="relative z-[9999]">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[49] " />
+      <div className=" fixed inset-0 flex items-center justify-center z-[50]">
         <CustomDialog isOpen={isOpen} onClose={onClose} title={gig.title}>
           <div className="space-y-4 p-4 bg-[#0f1729] text-white border border-[#008ffb] rounded-lg">
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex  justify-between items-start mb-6">
               <h2 className="text-2xl font-mono">
                 <span className="text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                  {gig.title}
+                  {gig.title}  
                 </span>
               </h2>
               <Button 
@@ -126,21 +126,21 @@ const GigDetailsModal = ({ gig, isOpen, onClose }: { gig: Gig | null, isOpen: bo
                   <Clock className="w-4 h-4 text-[#008ffb]" />
                   <h3 className="font-semibold text-[#008ffb]">Load In</h3>
                 </div>
-                <p className="text-white">{format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}</p>
+                <p className="text-white ml-6">{format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Mic2 className="w-4 h-4 text-[#008ffb]" />
                   <h3 className="font-semibold text-[#008ffb]">Sound Check</h3>
                 </div>
-                <p className="text-white">{format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}</p>
+                <p className="text-white pl-7">{format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}</p>
               </div>
               <div>
                 <div className="flex items-center gap-2 mb-2">
                   <Music className="w-4 h-4 text-[#008ffb]" />
                   <h3 className="font-semibold text-[#008ffb]">Set Time</h3>
                 </div>
-                <p className="text-white">{format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}</p>
+                <p className="text-white pl-6">{format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}</p>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -227,7 +227,7 @@ const PortalContent = ({ children }: { children: React.ReactNode }) => {
   if (!mounted) return null
 
   return createPortal(
-    <div className="relative z-[9999]">
+    <div className="relative">
       {children}
     </div>,
     document.body

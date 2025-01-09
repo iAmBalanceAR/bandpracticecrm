@@ -15,18 +15,6 @@ export function Dashboard() {
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const [contactsLeads, setContactsLeads] = React.useState([
-    { id: 1, name: "John Doe", email: "johndoe@example.com", type: "Contact", status: "Active", priority: "High" },
-    { id: 2, name: "Jane Smith", email: "janesmith@example.com", type: "Lead", status: "New", priority: "Normal" },
-    { id: 3, name: "Mike Johnson", email: "mikejohnson@example.com", type: "Contact", status: "Active", priority: "Low" },
-    { id: 4, name: "Sarah Brown", email: "sarahbrown@example.com", type: "Lead", status: "New", priority: "High" },
-    { id: 5, name: "Chris Lee", email: "chrislee@example.com", type: "Contact", status: "Active", priority: "Normal" },
-  ])
-
-  const dismissContact = (id: number) => {
-    setContactsLeads(contactsLeads.filter((contact: { id: number }) => contact.id !== id))
-  }
-
   const analyticsData = [
     { month: "Jan", expenses: 2500, miles: 1200, days: 15, pay: 5000 },
     { month: "Feb", expenses: 2200, miles: 1500, days: 18, pay: 5500 },
@@ -61,33 +49,6 @@ export function Dashboard() {
     return { total, average }
   }
 
-  const notes = [
-    {
-      id: 1,
-      title: "Project Management Discussion",
-      date: "2023-06-15",
-      type: "Meeting",
-      author: "Selvia Davis",
-      authorInitials: "SD",
-    },
-    {
-      id: 2,
-      title: "New Project Invitation: Nexttask",
-      date: "2023-06-14",
-      type: "Invitation",
-      author: "Bryan",
-      authorInitials: "BR", 
-    },
-    {
-      id: 3,
-      title: "Project Management Updates",
-      date: "2023-06-13",
-      type: "Update",
-      author: "John",
-      authorInitials: "JO",
-    },
-  ]
-   
   return (
     <>
       <div className="relative float-left max-w-[1200px] mx-auto">
@@ -114,7 +75,7 @@ export function Dashboard() {
 
             <div className="mt-6 grid gap-6 md:grid-cols-2">
               <SavedVenuesCard />
-              <ContactsLeadsCard contacts={contactsLeads} onDismiss={dismissContact} />
+              <ContactsLeadsCard />
             </div>
             <div className="max-w-full mx-auto mt-6">
               <AnalyticsCard

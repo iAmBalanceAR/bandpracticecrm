@@ -15,6 +15,7 @@ export default function AccountPage() {
   const [isEditProfileOpen, setIsEditProfileOpen] = useState(false)
   const [isChangePasswordOpen, setIsChangePasswordOpen] = useState(false)
   const [user, setUser] = useState<any>(null)
+  const [subscriptionStatus, setSubscriptionStatus] = useState<string>('')
   const supabase = createClient()
   const router = useRouter()
 
@@ -22,6 +23,19 @@ export default function AccountPage() {
     const getUser = async () => {
       const { data: { user } } = await supabase.auth.getUser()
       setUser(user)
+
+      if (user) {
+        // Fetch subscription status
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('subscription_status')
+          .eq('id', user.id)
+          .single()
+        
+        if (profile) {
+          setSubscriptionStatus(profile.subscription_status || 'No active subscription')
+        }
+      }
     }
     getUser()
   }, [])
@@ -44,17 +58,20 @@ export default function AccountPage() {
         <Card className="border-0">
           <div className="border-0">
             <div className="flex items-center justify-between mb-8 border-0">
-              <div className="flex items-center space-x-4">
+              <div className="flex items-top space-x-4">
                 <ProfileAvatar 
                   avatarUrl={user?.user_metadata?.avatar_url}
                   alt={user?.user_metadata?.full_name || 'User'}
-                  className="h-16 w-16"
+                  className="h-32 w-32"
                   iconClassName="h-8 w-8"
                 />
                 <div>
                   <h2 className="text-2xl font-bold text-white">{user?.user_metadata?.full_name || user?.email}</h2>
                   <p className="text-gray-400">{user?.email}</p>
+                  <p className="text-sm text-[#43A7C5] mt-1">
+                  {subscriptionStatus || 'No active subscription'} </p>
                 </div>
+                
               </div>
               <Button onClick={handleSignOut} variant="destructive" className="bg-red-900 hover:bg-red-800">
                 Sign Out

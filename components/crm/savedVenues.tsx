@@ -95,13 +95,13 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
   return (
     <>
       <CustomCard 
-        title="Saved Venues"
+        title="Latest Saved Venues"
         cardColor="[#008ffb]"
-        addclassName=""
+        addclassName="h-[350x] bg-[#020817]"
       >
-        <div className="rounded-md overflow-hidden">
-          <Table className="w-full">
-            <TableHeader className=" text-black border-0">
+        <div className="bg-[#020817] h-[calc(370px-3.5rem)] overflow-y-auto">
+          <Table className="w-full ">
+            <TableHeader className="text-black border-0 bg-white sticky top-0 z-10">
               <TableRow>
                 <TableHead className="bg-white p-[7px] pl-4 text-left text-xs font-medium">Venue</TableHead>
                 <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">City</TableHead>

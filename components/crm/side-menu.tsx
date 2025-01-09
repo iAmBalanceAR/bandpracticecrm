@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop } from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -15,7 +15,6 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/lib/providers/theme-provider'
-
 interface SideMenuProps {
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
@@ -213,10 +212,16 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
                 {sidebarOpen && <span>Notes &amp; Reminders</span>}
               </Button>
             </Link> */}
-            <Link href="/file-uploads" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/file-uploads' ? 'bg-[#1B2559]' : ''}`}>
+            {/* <Link href="/file-uploads" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/file-uploads' ? 'bg-[#1B2559]' : ''}`}>
               <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} ${pathname === '/file-uploads' ? 'text-white' : 'text-gray-400 hover:text-white'} text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
                 <Upload className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#ff9920]`} />
                 {sidebarOpen && <span>File Manager</span>}
+              </Button>
+            </Link> */}
+              <Link href="/stage-plot" className={`block hover:bg-[#1B2559] hover:text-white rounded-md ${pathname === '/stage-plot' ? 'bg-[#1B2559]' : ''}`}>
+            <Button variant="ghost" className={`w-full justify-${sidebarOpen ? 'start' : 'center'} ${pathname === '/stage-plot' ? 'text-white' : 'text-gray-400 hover:text-white'} text-lg ${!sidebarOpen ? 'p-0' : 'px-2'}`}>
+                <Guitar className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-[#ff9920]`} />
+                {sidebarOpen && <span>Stage Plot Generator</span>}
               </Button>
             </Link>
           </nav>
