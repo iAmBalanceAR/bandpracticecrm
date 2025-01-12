@@ -3,9 +3,9 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Only redirect to splash in production
-  const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
-  if (isProduction && request.nextUrl.pathname === '/') {
+  // Check if we're in production by looking at the hostname
+  const isLocalhost = request.headers.get('host')?.includes('localhost') || request.headers.get('host')?.includes('127.0.0.1')
+  if (!isLocalhost && request.nextUrl.pathname === '/') {
     return NextResponse.redirect(new URL('/splash', request.url))
   }
 
