@@ -57,21 +57,24 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
 
     if (containerRef.current && !mapRef.current) {
       mapRef.current = L.map(containerRef.current, {
-        // Add smooth zoom animation by default
-        zoomAnimation: true,
-        fadeAnimation: true,
-        markerZoomAnimation: true
-      }).setView([39.8283, -98.5795], isPdfExport ? 5 : 4, {
-        animate: true,
-        duration: 1
+        zoomAnimation: !isPdfExport, // Disable animations for PDF
+        fadeAnimation: !isPdfExport,
+        markerZoomAnimation: !isPdfExport,
+        dragging: !isPdfExport, // Disable dragging for PDF
+        zoomControl: !isPdfExport, // Hide zoom controls for PDF
+        scrollWheelZoom: !isPdfExport // Disable scroll zoom for PDF
+      }).setView([39.8283, -98.5795], isPdfExport ? 4 : 4, {
+        animate: !isPdfExport
       })
       
-      // Use a more detailed tile layer
-      L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
+      // Use a more detailed tile layer with higher contrast for PDF
+      L.tileLayer(isPdfExport 
+        ? 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png'  // Light theme for PDF
+        : 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
         subdomains: 'abcd',
         minZoom: 0,
-        maxZoom: 20
+        maxZoom: isPdfExport ? 10 : 20
       }).addTo(mapRef.current)
 
       setMap(mapRef.current)
@@ -82,10 +85,9 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
         mapRef.current.remove()
         mapRef.current = null
       }
-      // Remove custom styles
       styleElement.remove()
     }
-  }, [currentTour?.id])
+  }, [currentTour?.id, isPdfExport])
 
   // Update markers and route when tour stops change
   useEffect(() => {
@@ -119,14 +121,14 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
         fetchSequentialRoute(tourStops).then(routeCoords => {
           const routeLine = L.polyline(routeCoords, {
             color: '#008ffb',
-            weight: 5,
-            opacity: 0.9
+            weight: isPdfExport ? 3 : 5,
+            opacity: isPdfExport ? 1 : 0.9
           }).addTo(map)
 
           // Calculate the bounds with margin
           const bounds = routeLine.getBounds()
-          const latMargin = (bounds.getNorth() - bounds.getSouth()) * 0.15
-          const lngMargin = (bounds.getEast() - bounds.getWest()) * 0.15
+          const latMargin = (bounds.getNorth() - bounds.getSouth()) * (isPdfExport ? 0.1 : 0.15)
+          const lngMargin = (bounds.getEast() - bounds.getWest()) * (isPdfExport ? 0.1 : 0.15)
           
           const expandedBounds = L.latLngBounds(
             [bounds.getSouth() - latMargin, bounds.getWest() - lngMargin],
@@ -134,65 +136,39 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
           )
           
           map.fitBounds(expandedBounds, { 
-            padding: [5, 5],
-            maxZoom: 12,
-            animate: true,
-            duration: 2.5, // Slower animation (2.5 seconds)
-            easeLinearity: 0.2  // More gradual easing
+            padding: isPdfExport ? [2, 2] : [5, 5],
+            maxZoom: isPdfExport ? 8 : 12,
+            animate: !isPdfExport,
+            duration: isPdfExport ? 0 : 2.5
           })
-
-          // Add distance markers at midpoint
-          const midpoint = routeCoords[Math.floor(routeCoords.length / 2)]
-          if (midpoint) {
-            // Calculate total distance from the route data
-            let totalDistance = 0
-            for (let i = 0; i < tourStops.length - 1; i++) {
-              const start = tourStops[i]
-              const end = tourStops[i + 1]
-              const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=false`
-              fetch(url)
-                .then(response => response.json())
-                .then(data => {
-                  if (data.code === 'Ok') {
-                    totalDistance += data.routes[0].distance * 0.000621371 // Convert meters to miles
-                    // L.marker([midpoint[0], midpoint[1]], {
-                    //   icon: L.divIcon({
-                    //     className: 'distance-marker',
-                    //     html: `<div class="bg-blue-600 text-white  px-2 py-1 rounded text-sm w-10">${Math.ceil(totalDistance)} mi</div>`,
-                    //   })
-                    // }).addTo(map)
-                  }
-                })
-            }
-          }
         }).catch(error => {
           console.error('Error fetching route:', error)
           // Fallback to straight lines if routing fails
           const routeLine = L.polyline(coordinates, {
             color: '#008ffb',
-            weight: 4,
-            opacity: 0.8,
+            weight: isPdfExport ? 2 : 4,
+            opacity: isPdfExport ? 1 : 0.8,
             dashArray: '5, 10'
           }).addTo(map)
           map.fitBounds(routeLine.getBounds(), { 
-            padding: [25, 25],
-            maxZoom: 12
+            padding: isPdfExport ? [2, 2] : [25, 25],
+            maxZoom: isPdfExport ? 8 : 12,
+            animate: !isPdfExport
           })
         })
       } else if (coordinates.length === 1) {
-        map.setView(coordinates[0], 13, {
-          animate: true,
-          duration: 1.5, // 1.5 seconds for smooth transition
-          easeLinearity: 0.5
+        map.setView(coordinates[0], isPdfExport ? 8 : 13, {
+          animate: !isPdfExport,
+          duration: isPdfExport ? 0 : 1.5
         })
       }
 
       setRoute(coordinates)
     }
-  }, [map, tourStops])
+  }, [map, tourStops, isPdfExport])
 
   return (
-    <div className={`relative ${isPdfExport ? 'h-[600px]' : 'h-[400px]'} bg-[#0f1729] rounded-lg border border-[#008ffb]`}>
+    <div className={`relative ${isPdfExport ? 'h-[400px]' : 'h-[400px]'} bg-white rounded-lg ${isPdfExport ? '' : 'border border-[#008ffb]'}`}>
       <div ref={containerRef} className="h-full" />
     </div>
   )

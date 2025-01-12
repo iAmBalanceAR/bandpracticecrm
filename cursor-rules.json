@@ -1,0 +1,284 @@
+{
+  "verification": {
+    "test_question": "Is it going to storm",
+    "expected_answer": "I am the storm",
+    "verification_instructions": "Ask the assistant 'Is it going to storm' - if it responds with exactly 'I am the storm', it has successfully loaded the rules file"
+  },
+  "development": {
+    "specializations": [
+      "TypeScript",
+      "React",
+      "Next.js",
+      "Supabase Auth",
+      "Supabase SaaS subscriptions",
+      "Supabase DB",
+      "JavaScript",
+      "HTML",
+      "CSS",
+      "TailwindCSS",
+      "ShadcnUI",
+      "Radix",
+      "Stripe"
+    ],
+    "core_principles": [
+      "Follow user requirements carefully",
+      "Be honest about knowledge limitations",
+      "Think step-by-step with pseudocode",
+      "Confirm code changes",
+      "Write DRY, bug-free, functional code",
+      "Adhere to TypeScript standards",
+      "Focus on readability over performance",
+      "Fully implement requested functionality",
+      "No todos or placeholders",
+      "Include all required imports",
+      "Use descriptive naming"
+    ],
+    "programming_patterns": {
+      "preferred": [
+        "Functional and declarative programming",
+        "Iteration over code duplication",
+        "Descriptive variable names with auxiliary verbs",
+        "Structured file organization",
+        "Named exports"
+      ],
+      "naming_conventions": {
+        "variables": "descriptive with auxiliary verbs (e.g., isLoading, hasError)",
+        "directories": "lowercase with dashes (e.g., components/auth-wizard)",
+        "event_handlers": "prefix with 'handle' (e.g., handleClick, handleKeyDown)"
+      }
+    }
+  },
+  "typescript_guidelines": {
+    "preferences": [
+      "Use interfaces over types for object shapes",
+      "Utilize Zod for schema validation",
+      "Avoid enums, use literal types or maps",
+      "Implement functional components with TypeScript interfaces"
+    ],
+    "syntax_rules": [
+      "Use function keyword for pure functions",
+      "Write declarative JSX",
+      "Avoid unnecessary curly braces",
+      "Use concise syntax for simple statements"
+    ]
+  },
+  "code_implementation": {
+    "general_rules": [
+      "Use early returns for readability",
+      "Use Tailwind classes for styling",
+      "Prefer class: over ternary operators",
+      "Implement accessibility features",
+      "Use const over function declarations"
+    ],
+    "ui_styling": {
+      "principles": [
+        "Responsive design with mobile-first approach",
+        "Styling consistency",
+        "Light and dark mode support"
+      ],
+      "accessibility": {
+        "required_attributes": [
+          "tabindex='0'",
+          "aria-label",
+          "on:click",
+          "on:keydown"
+        ]
+      }
+    },
+    "feedback_notifications": {
+      "component": "/components/ui/feedback-modal.tsx",
+      "usage_rules": [
+        "All error messages must use FeedbackModal",
+        "All success notifications must use FeedbackModal",
+        "All update/status messages must use FeedbackModal",
+        "All destructive action confirmations must use FeedbackModal"
+      ],
+      "implementation": {
+        "modal_types": {
+          "success": {
+            "usage": "Confirm successful operations",
+            "requirements": [
+              "Clear, concise messages",
+              "Specify what was accomplished",
+              "Auto-close after short delay (optional)"
+            ],
+            "code_example": {
+              "state_setup": "const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({ isOpen: false, title: '', message: '', type: 'success' });",
+              "usage": "setFeedbackModal({ isOpen: true, title: 'Success', message: 'Operation completed successfully', type: 'success' });"
+            }
+          },
+          "error": {
+            "usage": "Display error messages and failures",
+            "requirements": [
+              "Clear error description",
+              "Possible resolution steps if applicable",
+              "User-friendly message with technical details in console"
+            ],
+            "code_example": {
+              "state_setup": "const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({ isOpen: false, title: '', message: '', type: 'error' });",
+              "usage": "setFeedbackModal({ isOpen: true, title: 'Error', message: 'An error occurred while processing your request', type: 'error' });"
+            }
+          },
+          "delete": {
+            "usage": "Confirm destructive actions",
+            "requirements": [
+              "Clear warning about the action",
+              "Specify what will be deleted",
+              "Require explicit confirmation",
+              "Mention if action is irreversible"
+            ],
+            "code_example": {
+              "state_setup": "const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();",
+              "usage": "showDeleteConfirmation(itemId, { title: 'Delete Item', message: 'Are you sure you want to delete this item?', onConfirm: async () => { /* Handle deletion logic here */ } });"
+            }
+          }
+        },
+        "component_integration": {
+          "state_interface": "interface FeedbackModalState { isOpen: boolean; title: string; message: string; type: 'success' | 'error'; }",
+          "state_initialization": "const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({ isOpen: false, title: '', message: '', type: 'success' });",
+          "component_usage": "const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();",
+          "render_example": "// Render the modals\n<FeedbackModal isOpen={feedbackModal.isOpen} onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))} title={feedbackModal.title} message={feedbackModal.message} type={feedbackModal.type} />"
+        },
+        "styling": {
+          "theme": {
+            "background": "bg-[#111C44]",
+            "text": "text-white",
+            "success_accent": "text-green-500",
+            "error_accent": "text-red-500"
+          },
+          "accessibility": [
+            "Keyboard navigation support",
+            "ARIA labels for screen readers",
+            "Focus management",
+            "Escape key closes modals",
+            "Click outside modal area to close"
+          ]
+        }
+      }
+    }
+  },
+  "project_structure": {
+    "directories": {
+      "app": "Main application code",
+      "components": "Shared components",
+      "ui": "UI components",
+      "api": "API routes",
+      ".notes": {
+        "description": "Project specific reference and reports directory",
+        "required_files": {
+          "project-overview.md": {
+            "purpose": "Maintain current project status and development history",
+            "update_frequency": "Every 15 minutes when changes occur",
+            "content_requirements": [
+              "Current development status",
+              "Recent changes and updates",
+              "Outstanding issues",
+              "Development decisions and rationale",
+              "Project milestones and progress"
+            ],
+            "maintenance_rules": [
+              "Create file at project initialization",
+              "Update automatically every 15 minutes if changes detected",
+              "Track all significant code changes",
+              "Document development decisions",
+              "Maintain version history"
+            ]
+          }
+        }
+      }
+    },
+    "configuration": {
+      "environment": [
+        ".env",
+        ".env.local"
+      ],
+      "next_config": "environment-specific configurations",
+      "package_manager": "PNPM"
+    }
+  },
+  "backend_integration": {
+    "supabase": {
+      "services": [
+        "Authentication",
+        "Database interactions",
+        "Subscription model"
+      ],
+      "requirements": [
+        "Follow security guidelines",
+        "Implement performance best practices",
+        "Use Zod schemas for data validation"
+      ],
+      "database_schema_rules": {
+        "prohibited_actions": [
+          "Do not read migration files for schema information",
+          "Do not attempt to infer schema from application code"
+        ],
+        "schema_retrieval_process": {
+          "method": "Request SQL queries from user",
+          "workflow": [
+            "Compose appropriate SQL query for needed information",
+            "Present SQL query to user for execution",
+            "Wait for user to run query and provide results",
+            "Use provided results for schema understanding"
+          ],
+          "information_types": [
+            "Table structures",
+            "Database functions",
+            "Rules and policies",
+            "Triggers",
+            "State management",
+            "Indexes",
+            "Foreign key relationships",
+            "Views and materialized views",
+            "Custom types and enums"
+          ],
+          "example_queries": {
+            "table_structure": "SELECT * FROM information_schema.columns WHERE table_schema = 'public';",
+            "functions": "SELECT * FROM information_schema.routines WHERE routine_schema = 'public';",
+            "policies": "SELECT * FROM pg_policies WHERE schemaname = 'public';",
+            "triggers": "SELECT * FROM information_schema.triggers WHERE trigger_schema = 'public';"
+          }
+        }
+      }
+    },
+    "stripe": {
+      "features": [
+        "Payment processing",
+        "Subscription management",
+        "Customer Portal integration"
+      ],
+      "implementation": [
+        "Webhook handlers for events",
+        "Proper error handling",
+        "Security measures",
+        "Subscription status syncing"
+      ]
+    }
+  },
+  "quality_assurance": {
+    "testing": [
+      "Write unit tests",
+      "Write integration tests",
+      "Ensure code coverage",
+      "Meet quality metrics"
+    ],
+    "error_handling": [
+      "Handle errors at function start",
+      "Use early returns for errors",
+      "Implement guard clauses",
+      "Proper error logging",
+      "User-friendly error messages"
+    ]
+  },
+  "documentation": {
+    "official_resources": {
+      "Next.js": "https://nextjs.org/docs/app",
+      "Node.js": "https://nodejs.org/en/docs",
+      "React": "https://react.dev/reference/react",
+      "TypeScript": "https://www.typescriptlang.org/docs/",
+      "TailwindCSS": "https://tailwindcss.com/docs",
+      "ShadcnUI": "https://ui.shadcn.com/docs",
+      "Supabase": "https://supabase.com/docs"
+    }
+  }
+} 

@@ -286,72 +286,74 @@ export function TourDetails() {
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <Table className="w-full border-l border-r border-b border-[#4A5568] text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                  <TableHeader>
-                    <TableRow className="bg-black hover:bg-[#1E293B] text-white text-shadow-lg -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                      <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Title</TableHead>
-                      <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Start Date</TableHead>
-                      <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">End Date</TableHead>
-                      <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Description</TableHead>
-                      <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Default</TableHead>
-                      <TableHead className="text-white border-t border-b border-[#4A5568] text-center">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {tours.map((tour) => (
-                      <TableRow key={tour.id} className="hover:bg-black border-b border-[#4A5568]">
-                        <TableCell className="font-medium text-gray-200 py-2">
-                          <div className="flex items-center">
-                            <span>{tour.title}</span>
-                          </div>
-                        </TableCell>
-                        <TableCell className="text-gray-200 py-2 text-center">
-                          {tour.start_date ? format(new Date(tour.start_date.split('T')[0]), 'PPP') : 'Not set'}
-                        </TableCell>
-                        <TableCell className="text-gray-200 py-2 text-center">
-                          {tour.end_date ? format(new Date(tour.end_date.split('T')[0]), 'PPP') : 'Not set'}
-                        </TableCell>
-                        <TableCell className="text-gray-200 py-2">
-                          {tour.description || '-'}
-                        </TableCell>
-                        <TableCell className="text-gray-200 py-2 text-center">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            onClick={() => handleSetDefault(tour.id)}
-                            className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
-                          >
-                            {tour.is_default ? (
-                              <Star className="h-5 w-5 fill-current" />
-                            ) : (
-                              <StarOff className="h-5 w-5" />
-                            )}
-                          </Button>
-                        </TableCell>
-                        <TableCell className="py-2">
-                          <div className="flex space-x-2 justify-center">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(tour)}
-                              className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                            >
-                              <Edit2 className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleSetDefault(tour.id)}
-                              className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                            >
-                              Set Default
-                            </Button>
-                          </div>
-                        </TableCell>
+                <div className="border-gray-500 border-2 rounded-lg">
+                  <Table className="w-full">
+                    <TableHeader>
+                      <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Start Date</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">End Date</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Description</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Default</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 pr-9 text-right">Actions</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
+                    </TableHeader>
+                    <TableBody>
+                      {tours.map((tour) => (
+                        <TableRow key={tour.id} className="bg-[#111827] border-gray-500 border-b text-base">
+                          <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                            <div className="flex items-center">
+                              <span>{tour.title}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4">
+                            {tour.start_date ? format(new Date(tour.start_date.split('T')[0]), 'PPP') : 'Not set'}
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4">
+                            {tour.end_date ? format(new Date(tour.end_date.split('T')[0]), 'PPP') : 'Not set'}
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4">
+                            {tour.description || '-'}
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleSetDefault(tour.id)}
+                              className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
+                            >
+                              {tour.is_default ? (
+                                <Star className="h-5 w-5 fill-current" />
+                              ) : (
+                                <StarOff className="h-5 w-5" />
+                              )}
+                            </Button>
+                          </TableCell>
+                          <TableCell className="pt-4 pb-4">
+                            <div className="flex space-x-2 justify-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(tour)}
+                                className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                              >
+                                <Edit2 className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleSetDefault(tour.id)}
+                                className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                              >
+                                Set Default
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
               </div>
             )}
           </div>

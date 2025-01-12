@@ -6,7 +6,7 @@ import GigCalendarCard from "@/components/crm/gig-calendar-card"
 import SavedVenuesCard from "@/components/crm/savedVenues"
 import ContactsLeadsCard from "@/components/crm/contacts-leads-card"
 import AnalyticsCard from "@/components/crm/analytics-card"
-import NotesCard from "@/components/crm/notes-card"
+import StagePlotCard from "@/components/crm/stage-plot-card"
 import { CustomDialog } from "@/components/ui/custom-dialog"
 import { useTour } from "@/components/providers/tour-provider" 
 
@@ -15,43 +15,9 @@ export function Dashboard() {
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const analyticsData = [
-    { month: "Jan", expenses: 2500, miles: 1200, days: 15, pay: 5000 },
-    { month: "Feb", expenses: 2200, miles: 1500, days: 18, pay: 5500 },
-    { month: "Mar", expenses: 2800, miles: 1800, days: 22, pay: 6200 },
-    { month: "Apr", expenses: 3000, miles: 2000, days: 20, pay: 6800 },
-    { month: "May", expenses: 2700, miles: 1700, days: 17, pay: 6000 },
-    { month: "Jun", expenses: 3200, miles: 2200, days: 25, pay: 7500 },
-  ]
-
-  const chartConfig = {
-    expenses: {
-      label: "Expenses",
-      color: "hsl(var(--chart-1))",
-    },
-    miles: {
-      label: "Miles Driven",
-      color: "hsl(var(--chart-2))",
-    },
-    days: {
-      label: "Days on Road",
-      color: "hsl(var(--chart-3))",
-    },
-    pay: {
-      label: "Gig Pay",
-      color: "hsl(var(--chart-4))",
-    },
-  }
-
-  const getTotalAndAverage = (key: string) => {
-    const total = analyticsData.reduce((sum, item) => sum + Number(item[key as keyof typeof analyticsData[0]]), 0)
-    const average = total / analyticsData.length
-    return { total, average }
-  }
-
   return (
     <>
-      <div className="relative float-left max-w-[1200px] mx-auto">
+      <div className="w-full">
         {/* Start Common Header Component  */} 
         <header className="flex items-center justify-between ml-8 pr-0 h-16">
           <h1 className="text-4xl text-white">
@@ -78,14 +44,10 @@ export function Dashboard() {
               <ContactsLeadsCard />
             </div>
             <div className="max-w-full mx-auto mt-6">
-              <AnalyticsCard
-                analyticsData={analyticsData}
-                chartConfig={chartConfig}
-                getTotalAndAverage={getTotalAndAverage}
-              />
+              <StagePlotCard />
             </div>
-            <div className="max-w-[1200px] mx-auto mt-6">
-              <NotesCard />
+            <div className="max-w-full mx-auto mt-6">
+              <AnalyticsCard  />
             </div>
           </div>
         </main>

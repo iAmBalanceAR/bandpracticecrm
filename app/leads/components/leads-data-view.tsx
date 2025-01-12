@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 
 const statusColors = {
   new: 'bg-blue-500',
@@ -26,6 +27,32 @@ const priorityColors = {
   high: 'bg-red-500'
 } as const;
 
+interface LeadPayload {
+  id: string;
+  title: string;
+  type: string;
+  status: string;
+  priority: string;
+  company?: string;
+  description?: string;
+  venue_id?: string;
+  contact_info: Record<string, any>;
+  tags?: string[];
+  next_follow_up?: string;
+  expected_value?: number;
+  last_contact_date?: string;
+  created_by: string;
+  created_by_email: string;
+  assigned_to?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+type RealtimeLeadPayload = RealtimePostgresChangesPayload<{
+  new: LeadPayload | null;
+  old: LeadPayload | null;
+}>;
+
 export default function LeadsDataView() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -33,14 +60,8 @@ export default function LeadsDataView() {
   const router = useRouter();
 
   const fetchLeads = async () => {
-    console.log('Starting to fetch leads...');
     setIsLoading(true);
     try {
-      // Log user session
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current user:', session?.user?.email);
-
-      console.log('Executing leads query...');
       const { data, error } = await supabase
         .rpc('get_leads')
         .order('updated_at', { ascending: false });
@@ -50,7 +71,6 @@ export default function LeadsDataView() {
         throw error;
       }
       
-      console.log('Leads data received:', data);
       setLeads((data || []) as Lead[]);
     } catch (error) {
       console.error('Error fetching leads:', error);
@@ -72,21 +92,40 @@ export default function LeadsDataView() {
         { 
           event: '*', 
           schema: 'public', 
-          table: 'leads' 
+          table: 'leads',
         }, 
-        (payload: any) => {
+        async (payload: RealtimeLeadPayload) => {
+          const leadId = ((payload.new as LeadPayload) || (payload.old as LeadPayload))?.id;
+          if (!leadId) return;
+
+          const { data, error } = await supabase
+            .rpc('get_leads')
+            .eq('id', leadId)
+            .single();
+
+          if (error) {
+            console.error('Error fetching updated lead:', error);
+            return;
+          }
+
+          const updatedLead = data as Lead;
+          
           if (payload.eventType === 'INSERT') {
-            setLeads(prev => [payload.new as Lead, ...prev]);
-          } else if (payload.eventType === 'DELETE') {
-            setLeads(prev => prev.filter(lead => lead.id !== payload.old.id));
+            setLeads(prev => [updatedLead, ...prev]);
+          } else if (payload.eventType === 'DELETE' && ((payload as RealtimeLeadPayload).old as LeadPayload)?.id) {
+            setLeads(prev => prev.filter(lead => lead.id !== ((payload as RealtimeLeadPayload).old as LeadPayload).id));
           } else if (payload.eventType === 'UPDATE') {
             setLeads(prev => prev.map(lead => 
-              lead.id === payload.new.id ? (payload.new as Lead) : lead
+              lead.id === updatedLead.id ? updatedLead : lead
             ));
           }
         }
       )
-      .subscribe();
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to leads changes:', status);
+        }
+      });
 
     return () => {
       supabase.removeChannel(channel);

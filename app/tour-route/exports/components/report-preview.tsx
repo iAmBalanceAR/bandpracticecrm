@@ -20,7 +20,12 @@ export function ReportPreview({ data }: ReportPreviewProps) {
       {/* Tour Information */}
       <Card className="p-6 bg-[#1B2559] border-none shadow-lg">
         <div className="flex items-center justify-between mb-6">
-          <h3 className="text-2xl font-bold text-white">{data.tourInfo.title}</h3>
+          <div>
+            <h3 className="text-2xl font-bold text-white">{data.tourInfo.title}</h3>
+            {data.tourInfo.description && (
+              <p className="text-gray-400 mt-2 whitespace-pre-wrap">{data.tourInfo.description}</p>
+            )}
+          </div>
           <div className="text-right">
             <p className="text-gray-400 text-sm">Total Distance</p>
             <p className="text-xl font-bold text-white">{Math.ceil(data.tourInfo.totalMileage)} miles</p>
@@ -53,10 +58,18 @@ export function ReportPreview({ data }: ReportPreviewProps) {
             <img src={data.mapImageUrl} alt="Tour Route Map" className="w-full" />
           </div>
         </Card>
-      ) : (
-        <div id="tour-route-map" className="w-full h-[600px] rounded-lg overflow-hidden shadow-lg">
-          <TourMap isPdfExport={true} />
-        </div>
+      ) : currentTour?.id && (
+        <Card className="p-6 bg-[#1B2559] border-none shadow-lg">
+          <h3 className="text-xl font-semibold mb-4 text-white flex items-center">
+            <Navigation className="w-5 h-5 mr-2" />
+            Tour Route Map
+          </h3>
+          <div className="rounded-lg overflow-hidden">
+            <div id="tour-route-map" className="w-full h-[400px]">
+              <TourMap isPdfExport={true} />
+            </div>
+          </div>
+        </Card>
       )}
 
       {/* Gigs */}

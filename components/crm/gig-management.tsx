@@ -180,6 +180,8 @@ interface Gig {
 
 interface GigWithTour extends Omit<Gig, 'tours'> {
   tourInfo?: TourInfo | null;
+  city?: string;
+  state?: string;
 }
 
 export default function GigManagement() {
@@ -624,40 +626,40 @@ export default function GigManagement() {
             </div>
           ) : (
             <div className="overflow-x-auto clear-both">
-              <Table className="w-full border-l border-r border-b border-[#4A5568] text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black pt-0 mt-0">
+              <div className="border-gray-500 border-2 rounded-lg">
+                <Table className="w-full">
                 <TableHeader>
-                  <TableRow className="bg-black hover:bg-[#1E293B] text-white text-shadow-lg -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Gig Title
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Venue
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Date
-                    </TableHead>
-                    <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">
-                      Tour
-                    </TableHead>
-                    <TableHead className="text-white border-t border-b border-[#4A5568] text-center">
-                      Actions
-                    </TableHead>
+                  <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Gig Title</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Venue</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Date</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Tour</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 pr-9 text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {gigs.map((gig) => (
-                    <TableRow key={gig.id} className="hover:bg-black border-b border-[#4A5568]">
-                      <TableCell className="font-medium text-gray-200 py-2">
+                    <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
+                      <TableCell className="font-medium text-gray-400 pt-4 pb-4">
                         <div className="flex items-center">
                           <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
                           <span>{gig.title}</span>
                         </div>
                       </TableCell>
-                      <TableCell className="text-gray-200 py-2">{gig.venue}</TableCell>
-                      <TableCell className="text-gray-200 py-2 text-center">
+                      <TableCell className="text-gray-400 pt-4 pb-4">
+                        <div className="flex flex-col">
+                          <span>{gig.venue}</span>
+                          {(gig.venue_city || gig.venue_state) && (
+                            <span className="text-xs text-gray-500">
+                              {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
+                            </span>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-400 pt-4 pb-4">
                         {formatDateSafely(gig.gig_date)}
                       </TableCell>
-                      <TableCell className="text-gray-200 py-2 text-center">
+                      <TableCell className="text-gray-400 pt-4 pb-4">
                         {gig.tourInfo ? (
                           <div className="flex items-center justify-center space-x-1">
                             <span>{gig.tourInfo.title}</span>
@@ -669,7 +671,7 @@ export default function GigManagement() {
                           <span className="text-gray-400">No tour</span>
                         )}
                       </TableCell>
-                      <TableCell className="py-2">
+                      <TableCell className="pt-4 pb-4">
                         <div className="flex space-x-2 justify-center">
                           <Button 
                             variant="ghost" 
@@ -697,6 +699,7 @@ export default function GigManagement() {
                   ))}
                 </TableBody>
               </Table>
+              </div>
             </div>
           )}
 

@@ -7,8 +7,8 @@ interface TourInfo {
   id: string
   title: string
   description: string | null
-  start_date: string
-  end_date: string
+  departure_date: string | null
+  return_date: string | null
   is_default: boolean
   user_id: string
   created_at: string

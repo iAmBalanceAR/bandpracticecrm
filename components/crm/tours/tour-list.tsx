@@ -312,89 +312,89 @@ export default function TourList() {
         </Button>
     </div>
       <div className="overflow-x-auto clear-both">
-        <Table className="w-full border-l border-r border-b border-[#4A5568] text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-          <TableHeader>
-            <TableRow className="bg-black hover:bg-[#1E293B] text-white text-shadow-lg -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-              <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Title</TableHead>
-              <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Status</TableHead>
-              <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Departure</TableHead>
-              <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Return</TableHead>
-              <TableHead className="cursor-pointer text-white border-t border-b border-[#4A5568] text-center">Created</TableHead>
-              <TableHead className="text-white border-t border-b border-[#4A5568] text-center">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tours.length === 0 ? (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8">
-                  <p className="text-gray-400 mb-4">No tours found</p>
-                  <Button
-                    onClick={handleAddNew}
-                    variant="outline"
-                    className="bg-[#1B2559] hover:bg-[#2a3c7d] border-none"
-                  >
-                    Create your first tour
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ) : (
-              tours.map((tour) => (
-                <TableRow key={tour.id} className="hover:bg-black border-b border-[#4A5568]">
-                  <TableCell className="font-medium text-gray-200 py-2">
-                    <Link 
-                      href={`/tours/${tour.id}`}
-                      className="hover:text-blue-400 transition-colors"
-                    >
-                      {tour.title}
-                    </Link>
-                  </TableCell>
-                  <TableCell className="text-gray-200 py-2 text-center">
-                    <span className={getStatusColor(tour.status)}>
-                      {tour.status}
-                    </span>
-                  </TableCell>
-                  <TableCell className="text-gray-200 py-2 text-center">
-                    {formatDate(tour.departure_date)}
-                  </TableCell>
-                  <TableCell className="text-gray-200 py-2 text-center">
-                    {formatDate(tour.return_date)}
-                  </TableCell>
-                  <TableCell className="text-gray-200 py-2 text-center">
-                    {formatDate(tour.created_at)}
-                  </TableCell>
-                  <TableCell className="py-2">
-                    <div className="flex space-x-2 justify-center">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleEdit(tour)}
-                        className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleDeleteTour(tour.id)}
-                        className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={() => handleSetDefault(tour.id)}
-                        className={`hover:bg-[#2D3748] hover:text-yellow-400 hover:shadow-yellow-400 hover:shadow-sm hover:font-semibold ${tour.is_default ? 'text-yellow-400' : 'text-white'}`}
-                      >
-                        <Star className={`w-4 h-4 ${tour.is_default ? 'fill-yellow-400' : ''}`} />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        {loading ? (
+          <div className="flex justify-center items-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
+          </div>
+        ) : tours.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-gray-400 mb-4">No tours found</p>
+            <Button 
+              onClick={handleAddNew}
+              className="bg-[#008ffb] hover:bg-[#0070cc]"
+            >
+              Create your first tour
+            </Button>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <div className="border-gray-500 border-2 rounded-lg">
+              <Table className="w-full">
+                <TableHeader>
+                  <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Start Date</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">End Date</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Status</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Default</TableHead>
+                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 pr-9 text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {tours.map((tour) => (
+                    <TableRow key={tour.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
+                      <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                        <div className="flex items-center">
+                          <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                          <span>{tour.title}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-gray-400 pt-4 pb-4">
+                        {formatDate(tour.departure_date)}
+                      </TableCell>
+                      <TableCell className="text-gray-400 pt-4 pb-4">
+                        {formatDate(tour.return_date)}
+                      </TableCell>
+                      <TableCell className={`${getStatusColor(tour.status)} pt-4 pb-4`}>
+                        {tour.status}
+                      </TableCell>
+                      <TableCell className="text-gray-400 pt-4 pb-4 text-center">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleSetDefault(tour.id)}
+                          className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
+                        >
+                          <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
+                        </Button>
+                      </TableCell>
+                      <TableCell className="pt-4 pb-4">
+                        <div className="flex space-x-2 justify-center">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleEdit(tour)}
+                            className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleDeleteTour(tour.id)}
+                            className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          </div>
+        )}
       </div>
 
       {isFormVisible && (

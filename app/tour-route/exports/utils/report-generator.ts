@@ -2,6 +2,7 @@ import { gigHelpers } from '@/utils/db/gigs'
 import createClient from '@/utils/supabase/client'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
+import { format } from 'date-fns'
 
 interface ReportOptions {
   includeMap: boolean;
@@ -80,7 +81,7 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
     estimatedTime: string;
   }[] = [];
 
-  if (options.includeDirections && tourStops.length > 1) {
+  if (tourStops.length > 1) {
     for (let i = 0; i < tourStops.length - 1; i++) {
       const start = tourStops[i]
       const end = tourStops[i + 1]
@@ -114,7 +115,7 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
             fromVenue: start.name,
             toVenue: end.name,
             route: directions_steps,
-            distance: legDistance, // Use the already rounded leg distance
+            distance: legDistance,
             estimatedTime: formatDuration(route.duration)
           })
         }
@@ -125,27 +126,34 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
   }
 
   // Transform gigs data
-  const formattedGigs = gigs.map((gig, index) => ({
-    venue: gig.venue,
-    date: gig.gig_date,
-    address: `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`,
-    loadIn: gig.load_in_time,
-    setTime: gig.set_time,
-    contactInfo: options.includeContactInfo ? {
-      name: gig.contact_name,
-      email: gig.contact_email,
-      phone: gig.contact_phone
-    } : undefined,
-    distanceFromPrevious: index > 0 ? directions[index - 1]?.distance : undefined
-  }))
+  const formattedGigs = gigs.map((gig, index) => {
+    // Find the corresponding direction for this gig (if it exists)
+    const previousLegDistance = index > 0 && directions.length >= index 
+      ? directions[index - 1].distance 
+      : undefined;
+
+    return {
+      venue: gig.venue,
+      date: gig.gig_date,
+      address: `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`,
+      loadIn: gig.load_in_time,
+      setTime: gig.set_time,
+      contactInfo: options.includeContactInfo ? {
+        name: gig.contact_name,
+        email: gig.contact_email,
+        phone: gig.contact_phone
+      } : undefined,
+      distanceFromPrevious: previousLegDistance
+    };
+  });
 
   // Calculate financials if needed
   let financials
   if (options.includeFinancials) {
     const totalDeposits = gigs.reduce((sum, gig) => sum + (gig.deposit_amount || 0), 0)
     const totalPayments = gigs.reduce((sum, gig) => sum + gig.contract_total, 0)
-    // Estimated expenses could be calculated based on mileage and other factors
-    const estimatedExpenses = totalMileage * 0.65 // Example: $0.65 per mile
+    // Calculate estimated expenses based on total mileage
+    const estimatedExpenses = totalMileage * 0.65 // $0.65 per mile
 
     financials = {
       totalDeposits,
@@ -157,11 +165,15 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
   return {
     tourInfo: {
       title: tour.title,
-      startDate: tour.start_date,
-      endDate: tour.end_date,
+      startDate: formatDate(tour.departure_date),
+      endDate: formatDate(tour.return_date),
+      description: tour.description,
       totalMileage
     },
-    gigs: formattedGigs,
+    gigs: formattedGigs.map(gig => ({
+      ...gig,
+      date: formatDate(gig.date)
+    })),
     directions: options.includeDirections ? directions : undefined,
     mapImageUrl: options.includeMap ? await captureMap() : undefined,
     financials: options.includeFinancials ? financials : undefined
@@ -175,10 +187,45 @@ function formatDuration(seconds: number): string {
 }
 
 async function captureMap(): Promise<string> {
-  // This function will need to be implemented to capture the map as an image
-  // It might involve using html2canvas on a map element
-  // For now, return a placeholder
-  return ''
+  const mapElement = document.getElementById('tour-route-map');
+  if (!mapElement) return '';
+
+  // A4 dimensions in mm
+  const A4_WIDTH_MM = 210;
+  const A4_HEIGHT_MM = 297;
+  const MARGIN_MM = 20;
+  
+  // Calculate available width in mm for the map (accounting for margins)
+  const availableWidthMM = A4_WIDTH_MM - (MARGIN_MM * 2);
+  
+  // Convert mm to pixels (assuming 96 DPI - standard screen resolution)
+  // 1 inch = 25.4 mm, 1 inch = 96 pixels
+  const pixelsPerMM = 96 / 25.4;
+  const mapWidthPx = Math.floor(availableWidthMM * pixelsPerMM);
+  const mapHeightPx = Math.floor((availableWidthMM * 0.6) * pixelsPerMM); // 0.6 aspect ratio for map
+
+  // Set map container dimensions
+  mapElement.style.width = `${mapWidthPx}px`;
+  mapElement.style.height = `${mapHeightPx}px`;
+
+  // Wait for map tiles to load and render
+  await new Promise(resolve => setTimeout(resolve, 2000));
+
+  try {
+    const canvas = await html2canvas(mapElement, {
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      scale: 2, // Increase quality
+      logging: false,
+      width: mapWidthPx,
+      height: mapHeightPx
+    });
+    return canvas.toDataURL('image/png');
+  } catch (error) {
+    console.error('Error capturing map:', error);
+    return '';
+  }
 }
 
 export async function generatePDF(reportData: ReportData) {
@@ -194,181 +241,327 @@ export async function generatePDF(reportData: ReportData) {
   const pageWidth = (pdf.internal as any).pageSize.width;
   const contentWidth = pageWidth - (margin * 2);
 
-  // Helper function for text wrapping
+  // Add custom fonts and icons
+  pdf.addFont('fonts/lucide-icons.ttf', 'LucideIcons', 'normal');
+
+  // Helper functions
   const splitText = (text: string, fontSize: number): string[] => {
     pdf.setFontSize(fontSize);
     return pdf.splitTextToSize(text, contentWidth);
   };
 
-  // Safe text rendering helper
   const renderText = (
     text: any,
     x: number,
     y: number,
-    options?: { align?: 'left' | 'center' | 'right' }
+    options?: { 
+      align?: 'left' | 'center' | 'right', 
+      fontSize?: number, 
+      isBold?: boolean,
+      textColor?: string 
+    }
   ) => {
     const safeText = String(text || '');
+    if (options?.fontSize) pdf.setFontSize(options.fontSize);
+    if (options?.isBold) {
+      pdf.setFont('helvetica', 'bold');
+    } else {
+      pdf.setFont('helvetica', 'normal');
+    }
+    if (options?.textColor) {
+      const color = options.textColor.match(/^#([A-Fa-f0-9]{6})$/);
+      if (color) {
+        const r = parseInt(color[1].substring(0, 2), 16) / 255;
+        const g = parseInt(color[1].substring(2, 4), 16) / 255;
+        const b = parseInt(color[1].substring(4, 6), 16) / 255;
+        pdf.setTextColor(r, g, b);
+      }
+    } else {
+      pdf.setTextColor(0, 0, 0);
+    }
     (pdf as any).text(safeText, x, y, options);
   };
 
-  // Add title
-  pdf.setFontSize(24);
-  pdf.setTextColor(0, 0, 0);
-  renderText(reportData.tourInfo.title, pageWidth / 2, y, { align: 'center' });
-  y += 15;
+  const drawLine = (startX: number, startY: number, endX: number, endY: number, color: string = '#E5E7EB') => {
+    const rgb = color.match(/^#([A-Fa-f0-9]{6})$/);
+    if (rgb) {
+      const r = parseInt(rgb[1].substring(0, 2), 16) / 255;
+      const g = parseInt(rgb[1].substring(2, 4), 16) / 255;
+      const b = parseInt(rgb[1].substring(4, 6), 16) / 255;
+      pdf.setDrawColor(r, g, b);
+    }
+    pdf.setLineWidth(0.2);
+    pdf.line(startX, startY, endX, endY);
+  };
 
-  // Add tour information
-  pdf.setFontSize(12);
-  renderText(`Start Date: ${reportData.tourInfo.startDate || ''}`, margin, y);
-  renderText(`End Date: ${reportData.tourInfo.endDate || ''}`, pageWidth - margin, y, { align: 'right' });
-  y += 10;
-  renderText(`Total Mileage: ${Math.ceil(reportData.tourInfo.totalMileage)} miles`, margin, y);
-  y += 15;
+  const addNewPage = () => {
+    pdf.addPage();
+    y = 20;
+  };
 
-  // Add map if included (now at the top, right after basic info)
-  if (reportData.mapImageUrl && reportData.mapImageUrl.length > 0) {
+  const needsNewPage = (requiredSpace: number) => {
+    const pageHeight = (pdf.internal as any).pageSize.height;
+    return (y + requiredSpace) > (pageHeight - margin);
+  };
+
+  // Title Section
+  renderText(reportData.tourInfo.title, pageWidth / 2, y + 5, { 
+    align: 'center', 
+    fontSize: 24, 
+    isBold: true
+  });
+
+  y += 20;
+
+  // Tour Info Grid
+  const infoWidth = contentWidth / 2;
+  renderText(`Start: ${reportData.tourInfo.startDate}`, margin, y, { 
+    fontSize: 12,
+    textColor: '#6B7280'
+  });
+  renderText(`End: ${reportData.tourInfo.endDate}`, margin + infoWidth, y, { 
+    fontSize: 12,
+    textColor: '#6B7280'
+  });
+  y += 8;
+  renderText(`Total Distance: ${Math.ceil(reportData.tourInfo.totalMileage)} miles`, margin, y, { 
+    fontSize: 12,
+    textColor: '#6B7280'
+  });
+  y += 20;
+
+  // Map Section (if included)
+  if (reportData.mapImageUrl) {
+    renderText('Tour Route Map', margin, y, { 
+      fontSize: 16, 
+      isBold: true
+    });
+    y += 15;
+
     try {
-      const img = new Image();
-      img.src = reportData.mapImageUrl;
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
-      });
-
-      // Calculate dimensions to maintain aspect ratio while fitting the page width
-      const imgAspectRatio = img.height / img.width;
-      const imgWidth = contentWidth;
-      // Limit the height to a reasonable size on the page
-      const maxHeight = 100; // millimeters
-      const calculatedHeight = imgWidth * imgAspectRatio;
-      const imgHeight = Math.min(calculatedHeight, maxHeight);
-
-      // Add some padding before the map
-      y += 5;
-      
-      // Add map title
-      pdf.setFontSize(16);
-      renderText('Tour Route Map', margin, y);
-      y += 10;
-
-      // Add the map with compression
-      pdf.addImage(
-        reportData.mapImageUrl,
-        'PNG',
-        margin,
-        y,
-        imgWidth,
-        imgHeight,
-        undefined,
-        'FAST'
-      );
-      
-      y += imgHeight + 15; // Add some padding after the map
+      const img = reportData.mapImageUrl;
+      if (img) {
+        // Calculate dimensions to maintain aspect ratio
+        const mapWidth = contentWidth;
+        const mapHeight = mapWidth * 0.6; // 0.6 aspect ratio for map
+        pdf.addImage(img, 'PNG', margin, y, mapWidth, mapHeight);
+        y += mapHeight + 20;
+      }
     } catch (error) {
       console.error('Error adding map to PDF:', error);
     }
   }
 
-  // Add gig list
-  pdf.setFontSize(16);
-  renderText('Tour Schedule', margin, y);
-  y += 10;
-
-  // Gigs
-  pdf.setFontSize(10);
-  for (const gig of reportData.gigs) {
-    if (y > (pdf.internal as any).pageSize.height - 30) {
-      pdf.addPage();
-      y = 20;
-    }
-
-    pdf.setFont('helvetica', 'bold');
-    renderText(gig.venue, margin, y);
-    pdf.setFont('helvetica', 'normal');
-    y += 5;
-    renderText(`Date: ${gig.date}`, margin + 5, y);
-    y += 5;
-    renderText(`Load In: ${gig.loadIn} | Set Time: ${gig.setTime}`, margin + 5, y);
-    y += 5;
-    const addressLines = splitText(`Address: ${gig.address}`, 10);
-    addressLines.forEach((line: string) => {
-      renderText(line, margin + 5, y);
-      y += 5;
+  // Financial Summary Section
+  if (reportData.financials) {
+    renderText('Financial Summary', margin + 5, y + 5, { 
+      fontSize: 16, 
+      isBold: true
     });
-    if (gig.distanceFromPrevious) {
-      renderText(`Distance from previous: ${Math.ceil(gig.distanceFromPrevious)} miles`, margin + 5, y);
-      y += 5;
-    }
-    y += 5;
-  }
+    y += 20;
 
-  // Add directions if included
-  if (reportData.directions && reportData.directions.length > 0) {
-    pdf.addPage();
-    const startY = 20;
-    y = startY;
-    pdf.setFontSize(16);
-    renderText('Driving Directions', margin, y);
+    const formatCurrency = (amount: number) => `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    
+    // Draw table header
+    pdf.setFillColor(247, 248, 250); // Light gray background
+    pdf.rect(margin, y, contentWidth, 10, 'F');
+    
+    renderText('Item', margin + 5, y + 6, { 
+      fontSize: 10,
+      isBold: true
+    });
+    renderText('Amount', pageWidth - margin - 5, y + 6, { 
+      fontSize: 10,
+      isBold: true,
+      align: 'right'
+    });
     y += 10;
 
-    pdf.setFontSize(10);
+    // Draw table rows
+    const items = [
+      { label: 'Total Contract Value', value: reportData.financials.totalPayments },
+      { label: 'Total Deposits', value: reportData.financials.totalDeposits },
+      { label: 'Remaining Balance', value: reportData.financials.totalPayments - reportData.financials.totalDeposits },
+      { label: 'Estimated Expenses', value: reportData.financials.estimatedExpenses },
+    ];
+
+    items.forEach((item, index) => {
+      if (index % 2 === 0) {
+        pdf.setFillColor(252, 252, 253); // Extremely light gray for zebra striping
+        pdf.rect(margin, y, contentWidth, 10, 'F');
+      }
+      
+      renderText(item.label, margin + 5, y + 6, { 
+        fontSize: 10,
+        textColor: '#6B7280'
+      });
+      renderText(formatCurrency(item.value), pageWidth - margin - 5, y + 6, { 
+        fontSize: 10,
+        align: 'right'
+      });
+      y += 10;
+    });
+
+    // Draw total line
+    drawLine(margin, y, margin + contentWidth, y);
+    y += 5;
+    renderText('Estimated Net', margin + 5, y + 6, { 
+      fontSize: 12,
+      isBold: true
+    });
+    renderText(
+      formatCurrency(reportData.financials.totalPayments - reportData.financials.estimatedExpenses),
+      pageWidth - margin - 5, 
+      y + 6, 
+      { 
+        fontSize: 12,
+        isBold: true,
+        align: 'right'
+      }
+    );
+
+    y += 20;
+  }
+
+  // Tour Schedule Section - Start on new page
+  addNewPage();
+  renderText('Tour Schedule', margin, y, { 
+    fontSize: 16, 
+    isBold: true
+  });
+  y += 15;
+
+  for (const gig of reportData.gigs) {
+    if (needsNewPage(60)) addNewPage();
+
+    // Header with date and venue
+    renderText(gig.venue, margin + 5, y + 5, { 
+      fontSize: 14, 
+      isBold: true
+    });
+    renderText(gig.date, pageWidth - margin - 5, y + 5, { 
+      fontSize: 12,
+      align: 'right',
+      textColor: '#6B7280'
+    });
+
+    // Distance info
+    if (gig.distanceFromPrevious) {
+      renderText(`${Math.ceil(gig.distanceFromPrevious)} miles from previous venue`, pageWidth - margin - 5, y + 12, { 
+        fontSize: 10,
+        align: 'right',
+        textColor: '#3B82F6'
+      });
+    }
+
+    y += 15; // Reduced from 20
+
+    // Two-column layout for details
+    const colWidth = contentWidth / 2;
+    
+    // Left column
+    renderText(`Load In: ${gig.loadIn}`, margin + 5, y, { 
+      fontSize: 12,
+      textColor: '#6B7280'
+    });
+    y += 6; // Reduced from 8
+    renderText(`Set Time: ${gig.setTime}`, margin + 5, y, { 
+      fontSize: 12,
+      textColor: '#6B7280'
+    });
+    y += 6; // Reduced from 8
+    const addressLines = splitText(gig.address, 10);
+    addressLines.forEach((line, index) => {
+      renderText(line, margin + 5, y + (index * 4), { // Reduced from 5 
+        fontSize: 10,
+        textColor: '#6B7280'
+      });
+    });
+
+    // Right column - Contact Info
+    if (gig.contactInfo) {
+      const rightCol = margin + colWidth;
+      let contactY = y - 12; // Adjusted from -16
+      
+      const contactName = gig.contactInfo.name || 'N/A';
+      const contactPhone = gig.contactInfo.phone || 'N/A';
+      const contactEmail = gig.contactInfo.email || 'N/A';
+
+      renderText(contactName, rightCol, contactY, { 
+        fontSize: 12,
+        textColor: '#6B7280'
+      });
+      contactY += 6; // Reduced from 8
+      renderText(contactPhone, rightCol, contactY, { 
+        fontSize: 12,
+        textColor: '#6B7280'
+      });
+      contactY += 6; // Reduced from 8
+      renderText(contactEmail, rightCol, contactY, { 
+        fontSize: 12,
+        textColor: '#6B7280'
+      });
+    }
+
+    // Add a subtle divider with less padding
+    y += 25; // Reduced from 35
+    drawLine(margin, y, margin + contentWidth, y);
+    y += 15; // Reduced from 40
+  }
+
+  // Driving Directions Section
+  if (reportData.directions && reportData.directions.length > 0) {
+    addNewPage();
+    renderText('Driving Directions', margin, y, { 
+      fontSize: 16, 
+      isBold: true
+    });
+    y += 15;
+
     for (const leg of reportData.directions) {
-      if (y > (pdf.internal as any).pageSize.height - 30) {
-        pdf.addPage();
-        y = startY;
+      if (needsNewPage(60)) addNewPage();
+
+      renderText(`${leg.fromVenue || 'Unknown Location'} → ${leg.toVenue || 'Unknown Location'}`, margin + 5, y + 5, { 
+        fontSize: 14,
+        isBold: true
+      });
+      y += 15;
+
+      renderText(`${leg.distance} miles - ${leg.estimatedTime}`, margin + 5, y, { 
+        fontSize: 12,
+        textColor: '#3B82F6'
+      });
+      y += 10;
+
+      for (const step of leg.route) {
+        if (needsNewPage(8)) addNewPage();
+        const lines = splitText(`• ${step}`, 10);
+        lines.forEach(line => {
+          renderText(line, margin + 5, y, { 
+            fontSize: 10,
+            textColor: '#6B7280'
+          });
+          y += 6;
+        });
       }
 
-      pdf.setFont('helvetica', 'bold');
-      const fromVenue = leg.fromVenue || '';
-      const toVenue = leg.toVenue || '';
-      renderText(`${fromVenue} → ${toVenue}`, margin, y);
-      pdf.setFont('helvetica', 'normal');
-      y += 5;
-      renderText(`Distance: ${Math.ceil(leg.distance)} miles | Est. Time: ${leg.estimatedTime}`, margin + 5, y);
-      y += 5;
-
-      leg.route.forEach((step: string, index: number) => {
-        if (y > (pdf.internal as any).pageSize.height - 30) {
-          pdf.addPage();
-          y = startY;
-        }
-        const stepLines = splitText(`${index + 1}. ${step}`, 10);
-        stepLines.forEach((line: string) => {
-          renderText(line, margin + 5, y);
-          y += 5;
-        });
-      });
-      y += 5;
+      // Add a subtle divider
+      drawLine(margin, y + 15, margin + contentWidth, y + 15);
+      y += 20;
     }
-  }
-
-  // Add financials if included
-  if (reportData.financials) {
-    const startY = y;
-    if (startY > (pdf.internal as any).pageSize.height - 60) {
-      pdf.addPage();
-      y = 20;
-    } else {
-      y += 10;
-    }
-
-    pdf.setFontSize(16);
-    renderText('Financial Summary', margin, y);
-    y += 10;
-
-    pdf.setFontSize(10);
-    const { totalDeposits = 0, totalPayments = 0, estimatedExpenses = 0 } = reportData.financials;
-    renderText(`Total Deposits: $${totalDeposits.toFixed(2)}`, margin + 5, y);
-    y += 5;
-    renderText(`Total Payments: $${totalPayments.toFixed(2)}`, margin + 5, y);
-    y += 5;
-    renderText(`Estimated Expenses: $${estimatedExpenses.toFixed(2)}`, margin + 5, y);
-    y += 5;
-    const netIncome = totalPayments - estimatedExpenses;
-    renderText(`Net Income: $${netIncome.toFixed(2)}`, margin + 5, y);
   }
 
   // Save the PDF
-  const fileName = reportData.tourInfo.title.replace(/\s+/g, '_');
-  pdf.save(`${fileName}_Tour_Report.pdf`);
+  pdf.save(`${reportData.tourInfo.title.replace(/[^a-z0-9]/gi, '_').toLowerCase()}_tour_report.pdf`);
+}
+
+function formatDate(dateString: string | null) {
+  if (!dateString) return 'Not set';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return format(date, 'MMM d, yyyy');
+  } catch (error) {
+    return 'Invalid date';
+  }
 } 

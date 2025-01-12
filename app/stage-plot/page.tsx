@@ -205,7 +205,7 @@ export default function StagePlotPage() {
                   </TableHeader>
                   <TableBody>
                     {plots.map((plot) => (
-                      <TableRow key={plot.id} className="bg-[#111827] border-gray-500 border-b  text-base">
+                      <TableRow key={plot.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
                         <TableCell className="font-medium text-gray-400">{plot.name}</TableCell>
                         <TableCell className="text-gray-400">{new Date(plot.created_at).toLocaleDateString()}</TableCell>
                         <TableCell className="text-gray-400">{plot.items.length} Items</TableCell>

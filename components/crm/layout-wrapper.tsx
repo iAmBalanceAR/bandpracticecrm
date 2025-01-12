@@ -33,8 +33,8 @@ export default function LayoutWrapper({
           <div className="w-72 bg-[#1B2559] animate-pulse" />
         )}
         <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
-          <div className="max-w-[1200px] mx-auto px-4 relative flex flex-col ">
-            <div className="flex-1 pt-0 ">
+          <div className="max-w-[1200px] w-full mx-auto px-4 relative flex flex-col">
+            <div className="flex-1 pt-0">
               {children}
             </div>
             <div className="w-full">
@@ -52,8 +52,8 @@ export default function LayoutWrapper({
         <SideMenu sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       )}     
       <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
-        <div className="max-w-[1200px] mx-auto relative flex flex-col">
-          <div className="pt-4">
+        <div className="max-w-[1200px] w-full mx-auto px-4 relative flex flex-col">
+          <div className="flex-1 pt-4">
             {children}
           </div>
           <div className="w-full">

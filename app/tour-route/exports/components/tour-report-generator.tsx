@@ -7,10 +7,14 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { ReportPreview } from '@/app/tour-route/exports/components/report-preview'
 import { useTour } from '@/components/providers/tour-provider'
-import { Loader2 } from 'lucide-react'
+import { Loader2, Sparkles } from 'lucide-react'
 import { generateTourReport, generatePDF } from '@/app/tour-route/exports/utils/report-generator'
 import html2canvas from 'html2canvas'
 import { FeedbackModal } from "@/components/ui/feedback-modal"
+import { createRoot } from 'react-dom/client'
+import PDFLoadingOverlay from './pdf-loading-overlay'
+import ReportLoadingOverlay from './report-loading-overlay'
+import { format } from 'date-fns'
 
 interface ReportOptions {
   includeMap: boolean;
@@ -18,7 +22,16 @@ interface ReportOptions {
   includeFinancials: boolean;
   includeContactInfo: boolean;
 }
-
+const formatDate = (dateString: string | null) => {
+  if (!dateString) return 'Not set';
+  try {
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) return 'Invalid date';
+    return format(date, 'MMM d, yyyy');
+  } catch (error) {
+    return 'Invalid date';
+  }
+};
 export function TourReportGenerator() {
   const { currentTour, isLoading } = useTour()
   const [isGenerating, setIsGenerating] = useState(false)
@@ -34,55 +47,88 @@ export function TourReportGenerator() {
     type: 'success'
   })
   const [options, setOptions] = useState<ReportOptions>({
-    includeMap: true,
-    includeDirections: true,
-    includeFinancials: false,
+    includeMap: false,
+    includeDirections: false,
+    includeFinancials: true,
     includeContactInfo: true,
   })
   const [previewData, setPreviewData] = useState<any>(null)
 
   const handleGenerateReport = async () => {
-    setIsGenerating(true)
-    try {
-      if (!currentTour?.id) {
-        throw new Error('No tour selected')
-      }
-      const data = await generateTourReport(currentTour.id, options)
-      setPreviewData(data)
-    } catch (error) {
-      console.error('Error generating report:', error)
-    } finally {
-      setIsGenerating(false)
-    }
+    if (!currentTour?.id) return
+
+    // Create loading overlay container
+    const loadingContainer = document.createElement('div')
+    document.body.appendChild(loadingContainer)
+    const loadingRoot = createRoot(loadingContainer)
+
+    // Render loading overlay and start report generation
+    loadingRoot.render(
+      <ReportLoadingOverlay 
+        onComplete={async () => {
+          try {
+            const data = await generateTourReport(currentTour.id, options)
+            setPreviewData(data)
+          } catch (error) {
+            console.error('Error generating report:', error)
+            setFeedbackModal({
+              isOpen: true,
+              title: 'Error',
+              message: 'Failed to generate report preview. Please try again.',
+              type: 'error'
+            })
+          } finally {
+            loadingRoot.unmount()
+            document.body.removeChild(loadingContainer)
+          }
+        }} 
+      />
+    )
   }
 
   const handleDownloadPDF = async () => {
     if (!previewData) return
-    try {
-      // Capture the map if it's included in options
-      if (options.includeMap) {
-        const mapElement = document.getElementById('tour-route-map')
-        if (mapElement) {
-          const canvas = await html2canvas(mapElement)
-          previewData.mapImageUrl = canvas.toDataURL('image/png')
-        }
-      }
-      await generatePDF(previewData)
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Success',
-        message: 'Tour report has been generated and downloaded successfully!',
-        type: 'success'
-      })
-    } catch (error) {
-      console.error('Error generating PDF:', error)
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Error',
-        message: 'Failed to generate PDF. Please try again.',
-        type: 'error'
-      })
-    }
+
+    // Create loading overlay container
+    const loadingContainer = document.createElement('div')
+    document.body.appendChild(loadingContainer)
+    const loadingRoot = createRoot(loadingContainer)
+
+    // Render loading overlay and start PDF generation
+    loadingRoot.render(
+      <PDFLoadingOverlay 
+        onComplete={async () => {
+          try {
+            // Capture the map if it's included in options
+            if (options.includeMap) {
+              const mapElement = document.getElementById('tour-route-map')
+              if (mapElement) {
+                const canvas = await html2canvas(mapElement)
+                previewData.mapImageUrl = canvas.toDataURL('image/png')
+              }
+            }
+            await generatePDF(previewData)
+            setFeedbackModal({
+              isOpen: true,
+              title: 'Success',
+              message: 'Tour report has been generated and downloaded successfully!',
+              type: 'success'
+            })
+          } catch (error) {
+            console.error('Error generating PDF:', error)
+            setFeedbackModal({
+              isOpen: true,
+              title: 'Error',
+              message: 'Failed to generate PDF. Please try again.',
+              type: 'error'
+            })
+          } finally {
+            loadingRoot.unmount()
+            document.body.removeChild(loadingContainer)
+          }
+        }} 
+      />
+    )
   }
 
   if (isLoading) {
@@ -109,26 +155,6 @@ export function TourReportGenerator() {
           <div className="space-y-4">
             <div className="flex items-center space-x-2">
               <Checkbox
-                id="includeMap"
-                checked={options.includeMap}
-                onChange={(e) => 
-                  setOptions(prev => ({ ...prev, includeMap: e.target.checked }))
-                }
-              />
-              <Label htmlFor="includeMap">Include Tour Route Map</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="includeDirections"
-                checked={options.includeDirections}
-                onChange={(e) => 
-                  setOptions(prev => ({ ...prev, includeDirections: e.target.checked }))
-                }
-              />
-              <Label htmlFor="includeDirections">Include Driving Directions</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <Checkbox
                 id="includeFinancials"
                 checked={options.includeFinancials}
                 onChange={(e) => 
@@ -146,6 +172,27 @@ export function TourReportGenerator() {
                 }
               />
               <Label htmlFor="includeContactInfo">Include Venue Contact Information</Label>
+            </div>
+            <div className="flex flex-col gap-2">
+              <label className="flex items-center gap-2">
+                <Checkbox 
+                  checked={options.includeMap}
+                  onChange={(e) => 
+                    setOptions(prev => ({ ...prev, includeMap: e.target.checked }))
+                  }
+                />
+                <span className="flex items-center gap-1">Include Map Overview <span className="text-sm text-red-400 inline-flex items-center gap-1">(beta <Sparkles className="h-3 w-3" />)</span></span>
+              </label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="includeDirections"
+                checked={options.includeDirections}
+                onChange={(e) => 
+                  setOptions(prev => ({ ...prev, includeDirections: e.target.checked }))
+                }
+              />
+              <Label htmlFor="includeDirections">Include Driving Directions</Label>
             </div>
           </div>
           <div className="mt-6 space-y-4">
@@ -178,9 +225,14 @@ export function TourReportGenerator() {
           <h3 className="text-xl font-semibold mb-4 text-white">Tour Information</h3>
           <div className="space-y-2 text-gray-300">
             <p><span className="font-semibold">Tour Name:</span> {currentTour.title}</p>
-            <p><span className="font-semibold">Start Date:</span> {currentTour.start_date}</p>
-            <p><span className="font-semibold">End Date:</span> {currentTour.end_date}</p>
-            {/* Add more tour details as needed */}
+            <p><span className="font-semibold">Start Date:</span> {formatDate(currentTour.departure_date)}</p>
+            <p><span className="font-semibold">End Date:</span> {formatDate(currentTour.return_date)}</p>
+            {currentTour.description && (
+              <div className="mt-4">
+                <p className="font-semibold mb-1">Notes:</p>  
+                <p className="text-sm whitespace-pre-wrap">{currentTour.description}</p>
+              </div>
+            )}
           </div>
         </Card>
       </div>
