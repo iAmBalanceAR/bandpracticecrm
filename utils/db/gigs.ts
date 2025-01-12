@@ -76,7 +76,7 @@ export const gigHelpers = {
       }
     }
 
-    // Get all gigs with their tour connections
+    // Get all gigs with their tour connections, ensuring user_id matches in both tables
     const { data, error } = await supabase
       .from('gigs')
       .select(`
@@ -90,6 +90,7 @@ export const gigHelpers = {
         )
       `)
       .eq('user_id', user.id)
+      .eq('tourconnect.user_id', user.id)
       .eq('tourconnect.tour_id', tourId)
       .order('gig_date', { ascending: true })
 
@@ -161,12 +162,13 @@ export const gigHelpers = {
       .single()
 
     if (defaultTour) {
-      // Connect the gig to the default tour
+      // Connect the gig to the default tour with user_id
       const { error: connectError } = await supabase
         .from('tourconnect')
         .insert([{
           gig_id: newGig.id,
-          tour_id: defaultTour.id
+          tour_id: defaultTour.id,
+          user_id: user.id
         }])
 
       if (connectError) {
@@ -269,7 +271,7 @@ export const gigHelpers = {
       }
     }
 
-    // Get all gigs with their tour connections
+    // Get all gigs with their tour connections, ensuring user_id matches in both tables
     const { data: gigs, error } = await supabase
       .from('gigs')
       .select(`
@@ -283,6 +285,7 @@ export const gigHelpers = {
         )
       `)
       .eq('user_id', user.id)
+      .eq('tourconnect.user_id', user.id)
       .eq('tourconnect.tour_id', tourId)
       .order('gig_date', { ascending: true })
 

@@ -1,1507 +1,1577 @@
 [
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "communication_id",
-      "data_type": "uuid",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "file_name",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "file_size",
-      "data_type": "integer",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "file_type",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "file_url",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "lead_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "type",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "uploaded_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "attachments",
-      "column_name": "uploaded_by",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "content",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "date",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "lead_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "sentiment",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "type",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "communications",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "contact_email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "contact_name",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "contact_phone",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "contract_total",
-      "data_type": "numeric",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "crew_hands_in",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "crew_hands_out",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "deposit_amount",
-      "data_type": "numeric",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "deposit_paid",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "gig_date",
-      "data_type": "date",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "gig_details",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "gig_status",
-      "data_type": "USER-DEFINED",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "hotel_included",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "load_in_time",
-      "data_type": "time without time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "meal_included",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "open_balance",
-      "data_type": "numeric",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "set_length",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "set_time",
-      "data_type": "time without time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "sound_check_time",
-      "data_type": "time without time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "title",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "venue",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "venue_address",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "venue_city",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "venue_state",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "gigs",
-      "column_name": "venue_zip",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "content",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "created_by",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "created_by_email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "lead_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "lead_notes",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "assigned_to",
-      "data_type": "uuid",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "company",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "contact_info",
-      "data_type": "jsonb",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "created_by",
-      "data_type": "uuid",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "created_by_email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "expected_value",
-      "data_type": "numeric",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "last_contact_date",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "next_follow_up",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "priority",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "status",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "tags",
-      "data_type": "ARRAY",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "title",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "type",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "leads",
-      "column_name": "venue_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "active",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "created",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "currency",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "interval",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "interval_count",
-      "data_type": "integer",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "metadata",
-      "data_type": "jsonb",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "product_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "trial_period_days",
-      "data_type": "integer",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "type",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "unit_amount",
-      "data_type": "bigint",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "prices",
-      "column_name": "updated",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "active",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "created",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "image",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "metadata",
-      "data_type": "jsonb",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "name",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "products",
-      "column_name": "updated",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "avatar_url",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "full_name",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "stripe_customer_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "subscription_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "subscription_price_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "subscription_status",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "profiles",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "assigned_to",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "completed_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "created_by",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "created_by_email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "due_date",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "lead_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "priority",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "status",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "reminders",
-      "column_name": "title",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "saved_venues",
-      "column_name": "created_date",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "saved_venues",
-      "column_name": "id",
-      "data_type": "bigint",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "saved_venues",
-      "column_name": "last_updated",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "saved_venues",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "saved_venues",
-      "column_name": "venue_id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "equipment_id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "height",
-      "data_type": "double precision",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "position_x",
-      "data_type": "double precision",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "position_y",
-      "data_type": "double precision",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "rotation",
-      "data_type": "double precision",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "stage_plot_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "technical_requirements",
-      "data_type": "jsonb",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plot_items",
-      "column_name": "width",
-      "data_type": "double precision",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "name",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "stage_depth",
-      "data_type": "integer",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "stage_width",
-      "data_type": "integer",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "stage_plots",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "cancel_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "cancel_at_period_end",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "canceled_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "created",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "current_period_end",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "current_period_start",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "ended_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "metadata",
-      "data_type": "jsonb",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "price_id",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "quantity",
-      "data_type": "integer",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "status",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "trial_end",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "trial_start",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "subscriptions",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tourconnect",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tourconnect",
-      "column_name": "gig_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tourconnect",
-      "column_name": "id",
-      "data_type": "bigint",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tourconnect",
-      "column_name": "tour_id",
-      "data_type": "bigint",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tourconnect",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "created_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "departure_date",
-      "data_type": "date",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "id",
-      "data_type": "bigint",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "is_default",
-      "data_type": "boolean",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "last_updated",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "return_date",
-      "data_type": "date",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "session_id",
-      "data_type": "uuid",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "status",
-      "data_type": "USER-DEFINED",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "thumbnail",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "title",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "tours",
-      "column_name": "user_id",
-      "data_type": "uuid",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "address",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "address2",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "agelimit",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "allowsunderagewithguardian",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "bookingemail",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "bookinginfo",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "bookingname",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "bookingphone",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "capacity",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "city",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "country",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "createdat",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "daysopen",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "description",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "email",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "eventful",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "facebook",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "featured",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "genres",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "hoursofoperation",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "id",
-      "data_type": "text",
-      "is_nullable": "NO"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "images",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "instagram",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "isprivateclub",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "lastscraped",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "latitude",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "longitude",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "notes",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "permanentlyclosed",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "phone",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "rating",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "reviewcount",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "source",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "sourceid",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "sourceurl",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "state",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "status",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "title",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "twitter",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "updated_at",
-      "data_type": "timestamp with time zone",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "venuetype",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "verified",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "votecount",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "website",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "yelp",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "youtube",
-      "data_type": "text",
-      "is_nullable": "YES"
-    },
-    {
-      "schema_name": "public",
-      "table_name": "venues",
-      "column_name": "zip",
-      "data_type": "text",
-      "is_nullable": "YES"
-    }
-  ]
+  {
+    "table_name": "attachments",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "lead_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "communication_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "file_name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "file_type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "file_size",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "file_url",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "uploaded_by",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "attachments",
+    "column_name": "uploaded_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "communications",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "communications",
+    "column_name": "lead_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "type",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "content",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "sentiment",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "communications",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "gig_status",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "YES",
+    "column_default": "'pending'::gig_status"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "gig_date",
+    "data_type": "date",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "gig_details",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "venue",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "venue_address",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "venue_city",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "venue_state",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "venue_zip",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "contact_name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "contact_email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "contact_phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "load_in_time",
+    "data_type": "time without time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "sound_check_time",
+    "data_type": "time without time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "set_time",
+    "data_type": "time without time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "set_length",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "crew_hands_in",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "crew_hands_out",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "meal_included",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "hotel_included",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "deposit_amount",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "deposit_paid",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "contract_total",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "gigs",
+    "column_name": "open_balance",
+    "data_type": "numeric",
+    "is_nullable": "NO",
+    "column_default": "0"
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "lead_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "filename",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "file_path",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "file_type",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "file_size",
+    "data_type": "bigint",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "created_by_email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "lead_attachments",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "lead_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "content",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "created_by_email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "lead_notes",
+    "column_name": "is_private",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "uuid_generate_v4()"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "type",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "status",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": "'new'::lead_status"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "priority",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "NO",
+    "column_default": "'medium'::lead_priority"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "company",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "venue_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "contact_info",
+    "data_type": "jsonb",
+    "is_nullable": "NO",
+    "column_default": "'{}'::jsonb"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "tags",
+    "data_type": "ARRAY",
+    "is_nullable": "YES",
+    "column_default": "ARRAY[]::text[]"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "next_follow_up",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "expected_value",
+    "data_type": "numeric",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "last_contact_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "created_by_email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "assigned_to",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "leads",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "leads",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "prices",
+    "column_name": "id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "product_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "active",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "unit_amount",
+    "data_type": "bigint",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "currency",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "type",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "interval",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "interval_count",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "trial_period_days",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "metadata",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "prices",
+    "column_name": "created",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "prices",
+    "column_name": "updated",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "products",
+    "column_name": "id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "active",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "image",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "metadata",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "products",
+    "column_name": "created",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "products",
+    "column_name": "updated",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "full_name",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "avatar_url",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "stripe_customer_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "subscription_status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "subscription_price_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "profiles",
+    "column_name": "subscription_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "lead_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "due_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "completed",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "created_by",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "created_by_email",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "reminders",
+    "column_name": "priority",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "saved_venues",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "saved_venues",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "saved_venues",
+    "column_name": "venue_id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "saved_venues",
+    "column_name": "created_date",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "saved_venues",
+    "column_name": "last_updated",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "stage_plot_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "equipment_id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "position_x",
+    "data_type": "double precision",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "position_y",
+    "data_type": "double precision",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "width",
+    "data_type": "double precision",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "height",
+    "data_type": "double precision",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "rotation",
+    "data_type": "double precision",
+    "is_nullable": "YES",
+    "column_default": "0"
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "technical_requirements",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": "'{}'::jsonb"
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "customLabel",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plot_items",
+    "column_name": "showLabel",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "name",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "stage_width",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "stage_depth",
+    "data_type": "integer",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "stage_plots",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "now()"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "metadata",
+    "data_type": "jsonb",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "price_id",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "quantity",
+    "data_type": "integer",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "cancel_at_period_end",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "created",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "current_period_start",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "current_period_end",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "ended_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "cancel_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "canceled_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "trial_start",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "subscriptions",
+    "column_name": "trial_end",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tourconnect",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tourconnect",
+    "column_name": "tour_id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tourconnect",
+    "column_name": "gig_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tourconnect",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "tourconnect",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "id",
+    "data_type": "bigint",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "created_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "tours",
+    "column_name": "last_updated",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "NO",
+    "column_default": "timezone('utc'::text, now())"
+  },
+  {
+    "table_name": "tours",
+    "column_name": "user_id",
+    "data_type": "uuid",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "thumbnail",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "status",
+    "data_type": "USER-DEFINED",
+    "is_nullable": "YES",
+    "column_default": "'Building'::tour_status"
+  },
+  {
+    "table_name": "tours",
+    "column_name": "departure_date",
+    "data_type": "date",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "return_date",
+    "data_type": "date",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "tours",
+    "column_name": "is_default",
+    "data_type": "boolean",
+    "is_nullable": "YES",
+    "column_default": "false"
+  },
+  {
+    "table_name": "tours",
+    "column_name": "session_id",
+    "data_type": "uuid",
+    "is_nullable": "YES",
+    "column_default": "gen_random_uuid()"
+  },
+  {
+    "table_name": "venues",
+    "column_name": "id",
+    "data_type": "text",
+    "is_nullable": "NO",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "title",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "address",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "address2",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "city",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "state",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "zip",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "country",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "latitude",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "longitude",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "phone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "email",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "website",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "facebook",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "twitter",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "instagram",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "youtube",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "capacity",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "description",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "notes",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "agelimit",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "venuetype",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "bookingemail",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "bookingphone",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "bookingname",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "bookinginfo",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "daysopen",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "hoursofoperation",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "status",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "verified",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "featured",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "permanentlyclosed",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "source",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "sourceurl",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "sourceid",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "genres",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "images",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "rating",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "reviewcount",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "allowsunderagewithguardian",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "isprivateclub",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "yelp",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "eventful",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "votecount",
+    "data_type": "text",
+    "is_nullable": "YES",
+    "column_default": null
+  },
+  {
+    "table_name": "venues",
+    "column_name": "createdat",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "venues",
+    "column_name": "updated_at",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": "CURRENT_TIMESTAMP"
+  },
+  {
+    "table_name": "venues",
+    "column_name": "lastscraped",
+    "data_type": "timestamp with time zone",
+    "is_nullable": "YES",
+    "column_default": null
+  }
+]

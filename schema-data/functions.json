@@ -1,1136 +1,1757 @@
 [
     {
-      "schema_name": "public",
       "function_name": "array_to_halfvec",
-      "function_type": "Function",
-      "arguments": "numeric[], integer, boolean",
-      "return_type": "halfvec"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_halfvec",
-      "function_type": "Function",
-      "arguments": "real[], integer, boolean",
-      "return_type": "halfvec"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_halfvec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "integer[], integer, boolean",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_halfvec(integer[], integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_halfvec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "array_to_halfvec",
-      "function_type": "Function",
-      "arguments": "double precision[], integer, boolean",
-      "return_type": "halfvec"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_vector",
-      "function_type": "Function",
-      "arguments": "integer[], integer, boolean",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_vector",
-      "function_type": "Function",
-      "arguments": "numeric[], integer, boolean",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_vector",
-      "function_type": "Function",
-      "arguments": "double precision[], integer, boolean",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "array_to_vector",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "real[], integer, boolean",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_halfvec(real[], integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_halfvec$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "binary_quantize",
-      "function_type": "Function",
+      "function_name": "array_to_halfvec",
+      "function_language": "c",
+      "return_type": "halfvec",
+      "arguments": "double precision[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_halfvec(double precision[], integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_halfvec$function$\n"
+    },
+    {
+      "function_name": "array_to_halfvec",
+      "function_language": "c",
+      "return_type": "halfvec",
+      "arguments": "numeric[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_halfvec(numeric[], integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_halfvec$function$\n"
+    },
+    {
+      "function_name": "array_to_vector",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "double precision[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_vector(double precision[], integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_vector$function$\n"
+    },
+    {
+      "function_name": "array_to_vector",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "real[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_vector(real[], integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_vector$function$\n"
+    },
+    {
+      "function_name": "array_to_vector",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "numeric[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_vector(numeric[], integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_vector$function$\n"
+    },
+    {
+      "function_name": "array_to_vector",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "integer[], integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.array_to_vector(integer[], integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$array_to_vector$function$\n"
+    },
+    {
+      "function_name": "avg",
+      "function_language": "internal",
+      "return_type": "halfvec",
       "arguments": "halfvec",
-      "return_type": "bit"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "aggregate_dummy"
     },
     {
-      "schema_name": "public",
-      "function_name": "binary_quantize",
-      "function_type": "Function",
+      "function_name": "avg",
+      "function_language": "internal",
+      "return_type": "vector",
       "arguments": "vector",
-      "return_type": "bit"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "aggregate_dummy"
     },
     {
-      "schema_name": "public",
+      "function_name": "binary_quantize",
+      "function_language": "c",
+      "return_type": "bit",
+      "arguments": "vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.binary_quantize(vector)\n RETURNS bit\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$binary_quantize$function$\n"
+    },
+    {
+      "function_name": "binary_quantize",
+      "function_language": "c",
+      "return_type": "bit",
+      "arguments": "halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.binary_quantize(halfvec)\n RETURNS bit\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_binary_quantize$function$\n"
+    },
+    {
       "function_name": "connect_gig_to_default_tour",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "tourconnect",
       "arguments": "p_gig_id uuid",
-      "return_type": "tourconnect"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.connect_gig_to_default_tour(p_gig_id uuid)\n RETURNS tourconnect\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\ndeclare\r\n  default_tour tours;\r\n  new_connection tourconnect;\r\nbegin\r\n  -- Get the default tour\r\n  select *\r\n  into default_tour\r\n  from tours\r\n  where user_id = auth.uid()\r\n    and is_default = true\r\n  limit 1;\r\n  \r\n  if default_tour is null then\r\n    return null; -- No default tour set\r\n  end if;\r\n  \r\n  -- Create the connection\r\n  insert into tourconnect (tour_id, gig_id, user_id)\r\n  values (default_tour.id, p_gig_id, auth.uid())\r\n  returning * into new_connection;\r\n  \r\n  return new_connection;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "cosine_distance",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "cosine_distance",
-      "function_type": "Function",
-      "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "cosine_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.cosine_distance(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_cosine_distance$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "cosine_distance",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.cosine_distance(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$cosine_distance$function$\n"
+    },
+    {
+      "function_name": "cosine_distance",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "halfvec, halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.cosine_distance(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_cosine_distance$function$\n"
+    },
+    {
+      "function_name": "create_attachment",
+      "function_language": "plpgsql",
+      "return_type": "attachments",
+      "arguments": "attachment_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_attachment(attachment_data jsonb)\n RETURNS attachments\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n  new_attachment attachments;\r\nBEGIN\r\n  INSERT INTO attachments (\r\n    lead_id,\r\n    file_name,\r\n    file_type,\r\n    file_size,\r\n    type,\r\n    file_url,\r\n    uploaded_by,\r\n    uploaded_at\r\n  )\r\n  VALUES (\r\n    (attachment_data->>'lead_id')::uuid,\r\n    attachment_data->>'file_name',\r\n    attachment_data->>'file_type',\r\n    (attachment_data->>'file_size')::integer,\r\n    attachment_data->>'type',\r\n    attachment_data->>'file_url',\r\n    auth.uid(),\r\n    CURRENT_TIMESTAMP\r\n  )\r\n  RETURNING * INTO new_attachment;\r\n\r\n  RETURN new_attachment;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "create_communication",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "comm_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_communication(comm_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_comm_id UUID;\r\nBEGIN\r\n    INSERT INTO communications (\r\n        lead_id,\r\n        type,\r\n        content,\r\n        date,\r\n        sentiment,\r\n        user_id\r\n    ) VALUES (\r\n        (comm_data->>'lead_id')::UUID,\r\n        comm_data->>'type',\r\n        comm_data->>'content',\r\n        COALESCE((comm_data->>'date')::timestamptz, now()),\r\n        comm_data->>'sentiment',\r\n        auth.uid()\r\n    )\r\n    RETURNING id INTO new_comm_id;\r\n\r\n    RETURN new_comm_id;\r\nEND;\r\n$function$\n"
+    },
+    {
       "function_name": "create_lead",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
       "arguments": "lead_data jsonb",
-      "return_type": "leads"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead(lead_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_lead_id UUID;\r\n    current_user_id UUID;\r\n    current_user_email TEXT;\r\nBEGIN\r\n    -- Get the current user's ID and email from JWT\r\n    SELECT auth.uid(), (auth.jwt() ->> 'email')::TEXT \r\n    INTO current_user_id, current_user_email;\r\n\r\n    -- Insert the new lead\r\n    INSERT INTO leads (\r\n        title,\r\n        type,\r\n        status,\r\n        priority,\r\n        company,\r\n        description,\r\n        venue_id,\r\n        contact_info,\r\n        tags,\r\n        next_follow_up,\r\n        expected_value,\r\n        created_by,\r\n        created_by_email,\r\n        assigned_to,\r\n        created_at,\r\n        updated_at\r\n    ) VALUES (\r\n        lead_data->>'title',\r\n        (lead_data->>'type')::lead_type,\r\n        COALESCE((lead_data->>'status')::lead_status, 'new'),\r\n        COALESCE((lead_data->>'priority')::lead_priority, 'medium'),\r\n        lead_data->>'company',\r\n        lead_data->>'description',\r\n        (lead_data->>'venue_id')::TEXT,  -- Changed from UUID to TEXT\r\n        COALESCE(lead_data->'contact_info', '{}'::jsonb),\r\n        COALESCE(array(SELECT jsonb_array_elements_text(CASE WHEN lead_data ? 'tags' THEN lead_data->'tags' ELSE '[]'::jsonb END)), ARRAY[]::text[]),\r\n        (lead_data->>'next_follow_up')::timestamptz,\r\n        (lead_data->>'expected_value')::decimal,\r\n        current_user_id,\r\n        current_user_email,\r\n        (lead_data->>'assigned_to')::UUID,\r\n        now(),\r\n        now()\r\n    )\r\n    RETURNING id INTO new_lead_id;\r\n\r\n    RETURN new_lead_id;\r\nEND;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "create_lead_attachment",
+      "function_language": "plpgsql",
+      "return_type": "lead_attachments",
+      "arguments": "p_lead_id uuid, p_filename text, p_file_path text, p_file_type text DEFAULT NULL::text, p_file_size bigint DEFAULT NULL::bigint",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_attachment(p_lead_id uuid, p_filename text, p_file_path text, p_file_type text DEFAULT NULL::text, p_file_size bigint DEFAULT NULL::bigint)\n RETURNS lead_attachments\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n    v_result lead_attachments;\r\nBEGIN\r\n    INSERT INTO lead_attachments (\r\n        lead_id,\r\n        filename,\r\n        file_path,\r\n        file_type,\r\n        file_size,\r\n        created_by,\r\n        created_by_email\r\n    ) VALUES (\r\n        p_lead_id,\r\n        p_filename,\r\n        p_file_path,\r\n        p_file_type,\r\n        p_file_size,\r\n        '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid,\r\n        'arkansasdj@gmail.com'\r\n    )\r\n    RETURNING * INTO v_result;\r\n    \r\n    RETURN v_result;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "create_lead_communication",
+      "function_language": "plpgsql",
+      "return_type": "communications",
+      "arguments": "p_lead_id uuid, p_type text, p_content text, p_date timestamp with time zone DEFAULT now(), p_sentiment text DEFAULT NULL::text",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_communication(p_lead_id uuid, p_type text, p_content text, p_date timestamp with time zone DEFAULT now(), p_sentiment text DEFAULT NULL::text)\n RETURNS communications\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n  v_result communications;\r\nBEGIN\r\n  INSERT INTO communications (\r\n    lead_id,\r\n    type,\r\n    content,\r\n    date,\r\n    sentiment,\r\n    user_id\r\n  ) VALUES (\r\n    p_lead_id,\r\n    p_type,\r\n    p_content,\r\n    p_date,\r\n    p_sentiment,\r\n    '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid  -- Same user ID we verified works\r\n  )\r\n  RETURNING * INTO v_result;\r\n  \r\n  RETURN v_result;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "create_lead_note",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "note_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_note(note_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n    new_note_id UUID;\r\nBEGIN\r\n    INSERT INTO lead_notes (\r\n        lead_id,\r\n        content,\r\n        created_by,\r\n        created_by_email,\r\n        is_private\r\n    ) VALUES (\r\n        (note_data->>'lead_id')::UUID,\r\n        note_data->>'content',\r\n        auth.uid(),  -- No need to cast to text since the column is UUID\r\n        auth.jwt()->>'email',\r\n        coalesce((note_data->>'is_private')::boolean, false)\r\n    )\r\n    RETURNING id INTO new_note_id;\r\n\r\n    RETURN new_note_id;\r\nEND;\r\n$function$\n"
+    },
+    {
       "function_name": "create_lead_notes",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "void",
       "arguments": "p_lead_id uuid, p_notes json",
-      "return_type": "void"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_notes(p_lead_id uuid, p_notes json)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nbegin\r\n  insert into lead_notes (\r\n    lead_id,\r\n    content,\r\n    is_private,\r\n    created_by\r\n  )\r\n  select \r\n    p_lead_id,\r\n    (note->>'content')::text,\r\n    (note->>'is_private')::boolean,\r\n    auth.uid()\r\n  from json_array_elements(p_notes) as note;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "create_lead_reminder",
+      "function_language": "plpgsql",
+      "return_type": "reminders",
+      "arguments": "p_lead_id uuid, p_title text, p_description text, p_due_date timestamp with time zone, p_priority text DEFAULT 'medium'::text",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_reminder(p_lead_id uuid, p_title text, p_description text, p_due_date timestamp with time zone, p_priority text DEFAULT 'medium'::text)\n RETURNS reminders\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n  v_result reminders;\r\nBEGIN\r\n  INSERT INTO reminders (\r\n    lead_id,\r\n    title,\r\n    description,\r\n    due_date,\r\n    priority,\r\n    created_by,\r\n    created_by_email\r\n  ) VALUES (\r\n    p_lead_id,\r\n    p_title,\r\n    p_description,\r\n    p_due_date,\r\n    p_priority,\r\n    '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid,  -- Same user ID we verified works\r\n    'arkansasdj@gmail.com'\r\n  )\r\n  RETURNING * INTO v_result;\r\n  \r\n  RETURN v_result;\r\nEND;\r\n$function$\n"
+    },
+    {
       "function_name": "create_lead_reminders",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "p_lead_id uuid, p_reminders jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders jsonb)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    reminder_record JSONB;\r\nBEGIN    \r\n    -- Insert each reminder\r\n    FOR reminder_record IN SELECT * FROM jsonb_array_elements(p_reminders)\r\n    LOOP\r\n        INSERT INTO reminders (\r\n            lead_id,\r\n            title,\r\n            description,\r\n            due_date,\r\n            priority,\r\n            created_by,\r\n            created_by_email,\r\n            created_at\r\n        ) VALUES (\r\n            p_lead_id,\r\n            reminder_record->>'title',\r\n            reminder_record->>'description',\r\n            (reminder_record->>'due_date')::timestamptz,\r\n            reminder_record->>'priority',\r\n            auth.uid(),\r\n            (auth.jwt() ->> 'email')::TEXT,\r\n            now()\r\n        );\r\n    END LOOP;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "create_lead_reminders",
+      "function_language": "plpgsql",
+      "return_type": "setof SETOF reminders",
+      "arguments": "p_lead_id uuid, p_reminders jsonb[]",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders jsonb[])\n RETURNS SETOF reminders\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n  v_reminder JSONB;\r\n  v_result reminders;\r\nBEGIN\r\n  FOR v_reminder IN SELECT * FROM jsonb_array_elements(p_reminders::jsonb)\r\n  LOOP\r\n    INSERT INTO reminders (\r\n      lead_id,\r\n      title,\r\n      description,\r\n      due_date,\r\n      priority,\r\n      status,\r\n      created_by_email\r\n    ) VALUES (\r\n      p_lead_id,\r\n      v_reminder->>'title',\r\n      v_reminder->>'description',\r\n      (v_reminder->>'due_date')::timestamp with time zone,\r\n      COALESCE(v_reminder->>'priority', 'medium'),\r\n      'pending',\r\n      'arkansasdj@gmail.com'  -- Using the lead owner's email\r\n    )\r\n    RETURNING * INTO v_result;\r\n\r\n    RETURN NEXT v_result;\r\n  END LOOP;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "create_lead_reminders",
+      "function_language": "plpgsql",
+      "return_type": "void",
       "arguments": "p_lead_id uuid, p_reminders json",
-      "return_type": "void"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders json)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nbegin\r\n  insert into reminders (\r\n    lead_id,\r\n    title,\r\n    description,\r\n    due_date,\r\n    priority,\r\n    status,\r\n    created_by,\r\n    assigned_to\r\n  )\r\n  select \r\n    p_lead_id,\r\n    (reminder->>'title')::text,\r\n    (reminder->>'description')::text,\r\n    (reminder->>'due_date')::timestamp,\r\n    (reminder->>'priority')::text,\r\n    (reminder->>'status')::text,\r\n    auth.uid(),\r\n    auth.uid()\r\n  from json_array_elements(p_reminders) as reminder;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "create_reminder",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "reminder_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_reminder(reminder_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_reminder_id UUID;\r\nBEGIN\r\n    INSERT INTO reminders (\r\n        lead_id,\r\n        title,\r\n        description,\r\n        due_date,\r\n        completed,\r\n        created_by,\r\n        created_by_email\r\n    ) VALUES (\r\n        (reminder_data->>'lead_id')::UUID,\r\n        reminder_data->>'title',\r\n        reminder_data->>'description',\r\n        (reminder_data->>'due_date')::timestamptz,\r\n        COALESCE((reminder_data->>'completed')::boolean, false),\r\n        auth.uid(),\r\n        auth.jwt()->>'email'\r\n    )\r\n    RETURNING id INTO new_reminder_id;\r\n\r\n    RETURN new_reminder_id;\r\nEND;\r\n$function$\n"
+    },
+    {
       "function_name": "create_tour",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "tours",
       "arguments": "tour_data jsonb",
-      "return_type": "tours"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.create_tour(tour_data jsonb)\n RETURNS tours\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\ndeclare\r\n  new_tour tours;\r\nbegin\r\n  insert into tours (\r\n    user_id,\r\n    title,\r\n    description,\r\n    departure_date,\r\n    return_date,\r\n    status\r\n  )\r\n  values (\r\n    auth.uid(),\r\n    tour_data->>'title',\r\n    tour_data->>'description',\r\n    (tour_data->>'departure_date')::date,\r\n    (tour_data->>'return_date')::date,\r\n    (tour_data->>'status')::tour_status\r\n  )\r\n  returning * into new_tour;\r\n\r\n  return new_tour;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "delete_tour",
-      "function_type": "Function",
-      "arguments": "tour_id bigint",
-      "return_type": "void"
+      "function_name": "delete_attachment",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "p_attachment_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_attachment(p_attachment_id uuid)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nBEGIN\r\n  DELETE FROM attachments\r\n  WHERE id = p_attachment_id\r\n  AND uploaded_by = auth.uid();\r\n\r\n  IF NOT FOUND THEN\r\n    RAISE EXCEPTION 'Attachment not found or permission denied';\r\n  END IF;\r\nEND;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "get_default_tour",
-      "function_type": "Function",
-      "arguments": "",
-      "return_type": "tours"
+      "function_name": "delete_communication",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "comm_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_communication(comm_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    DELETE FROM communications\r\n    WHERE id = comm_id\r\n    AND user_id = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "get_lead_details",
-      "function_type": "Function",
+      "function_name": "delete_lead",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
       "arguments": "p_lead_id uuid",
-      "return_type": "json"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_lead(p_lead_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n    v_user_email text;\r\nBEGIN\r\n    -- Get the user's email from the JWT token\r\n    v_user_email := auth.jwt()->>'email';\r\n    \r\n    -- First verify if the lead exists and belongs to the user\r\n    IF NOT EXISTS (\r\n        SELECT 1 FROM leads \r\n        WHERE id = p_lead_id \r\n        AND created_by_email = v_user_email\r\n    ) THEN\r\n        RETURN false;\r\n    END IF;\r\n\r\n    -- Delete associated records first\r\n    DELETE FROM lead_notes WHERE lead_id = p_lead_id;\r\n    DELETE FROM reminders WHERE lead_id = p_lead_id;\r\n    DELETE FROM communications WHERE lead_id = p_lead_id;\r\n    DELETE FROM attachments WHERE lead_id = p_lead_id;\r\n    \r\n    -- Delete the lead itself\r\n    DELETE FROM leads WHERE id = p_lead_id AND created_by_email = v_user_email;\r\n    \r\n    RETURN true;\r\nEND;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "delete_lead_note",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "note_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_lead_note(note_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    DELETE FROM lead_notes\r\n    WHERE id = note_id\r\n    AND created_by = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "delete_reminder",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "reminder_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_reminder(reminder_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    DELETE FROM reminders\r\n    WHERE id = reminder_id\r\n    AND created_by = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "delete_tour",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "tour_id bigint",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.delete_tour(tour_id bigint)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nbegin\r\n  delete from tours\r\n  where id = tour_id\r\n    and user_id = auth.uid();\r\n\r\n  if not found then\r\n    raise exception 'Tour not found or you do not have permission to delete it';\r\n  end if;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_default_tour",
+      "function_language": "plpgsql",
+      "return_type": "tours",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_default_tour()\n RETURNS tours\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\ndeclare\r\n  default_tour tours;\r\nbegin\r\n  select *\r\n  into default_tour\r\n  from tours\r\n  where user_id = auth.uid()\r\n    and is_default = true\r\n  limit 1;\r\n  \r\n  return default_tour;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_lead_by_id",
+      "function_language": "plpgsql",
+      "return_type": "leads",
+      "arguments": "p_lead_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_lead_by_id(p_lead_id uuid)\n RETURNS leads\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  v_user_id uuid;\r\n  v_user_email text;\r\n  v_lead leads;\r\nBEGIN\r\n  -- Get the authenticated user's ID and email\r\n  v_user_id := auth.uid();\r\n  v_user_email := auth.jwt()->>'email';\r\n  \r\n  -- Get the lead if the user has access to it\r\n  SELECT *\r\n  INTO v_lead\r\n  FROM leads\r\n  WHERE id = p_lead_id\r\n    AND (created_by = v_user_id OR assigned_to = v_user_id);\r\n    \r\n  RETURN v_lead;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_lead_details",
+      "function_language": "plpgsql",
+      "return_type": "json",
+      "arguments": "p_lead_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_lead_details(p_lead_id uuid)\n RETURNS json\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\ndeclare\r\n  result json;\r\nbegin\r\n  select json_build_object(\r\n    'lead', row_to_json(l),\r\n    'communications', (\r\n      select json_agg(row_to_json(c))\r\n      from communications c\r\n      where c.lead_id = l.id\r\n      order by c.date desc\r\n    ),\r\n    'reminders', (\r\n      select json_agg(row_to_json(r))\r\n      from reminders r\r\n      where r.lead_id = l.id\r\n      order by r.due_date\r\n    ),\r\n    'notes', (\r\n      select json_agg(row_to_json(n))\r\n      from lead_notes n\r\n      where n.lead_id = l.id\r\n      and (not n.is_private or n.created_by = auth.uid())\r\n      order by n.created_at desc\r\n    ),\r\n    'attachments', (\r\n      select json_agg(row_to_json(a))\r\n      from attachments a\r\n      where a.lead_id = l.id\r\n      order by a.uploaded_at desc\r\n    )\r\n  ) into result\r\n  from leads l\r\n  where l.id = p_lead_id;\r\n  \r\n  return result;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_lead_with_details",
+      "function_language": "plpgsql",
+      "return_type": "json",
+      "arguments": "p_lead_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_lead_with_details(p_lead_id uuid)\n RETURNS json\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  v_user_id uuid;\r\n  v_user_email text;\r\n  v_result json;\r\nBEGIN\r\n  -- Get the authenticated user's ID and email\r\n  v_user_id := auth.uid();\r\n  v_user_email := auth.jwt()->>'email';\r\n  \r\n  -- Get the lead and its related records if the user has access to it\r\n  WITH lead_data AS (\r\n    SELECT l.*,\r\n           json_agg(DISTINCT ln.*) FILTER (WHERE ln.id IS NOT NULL) AS lead_notes,\r\n           json_agg(DISTINCT r.*) FILTER (WHERE r.id IS NOT NULL) AS reminders,\r\n           json_agg(DISTINCT c.*) FILTER (WHERE c.id IS NOT NULL) AS communications,\r\n           json_agg(DISTINCT a.*) FILTER (WHERE a.id IS NOT NULL) AS attachments\r\n    FROM leads l\r\n    LEFT JOIN lead_notes ln ON l.id = ln.lead_id\r\n    LEFT JOIN reminders r ON l.id = r.lead_id\r\n    LEFT JOIN communications c ON l.id = c.lead_id\r\n    LEFT JOIN attachments a ON l.id = a.lead_id\r\n    WHERE l.id = p_lead_id\r\n      AND (l.created_by = v_user_id OR l.assigned_to = v_user_id)\r\n    GROUP BY l.id\r\n  )\r\n  SELECT row_to_json(ld.*)\r\n  INTO v_result\r\n  FROM lead_data ld;\r\n  \r\n  -- Return null arrays instead of null for empty relations\r\n  IF v_result IS NULL THEN\r\n    RETURN NULL;\r\n  END IF;\r\n  \r\n  IF v_result->>'lead_notes' IS NULL THEN\r\n    v_result := jsonb_set(v_result::jsonb, '{lead_notes}', '[]'::jsonb)::json;\r\n  END IF;\r\n  \r\n  IF v_result->>'reminders' IS NULL THEN\r\n    v_result := jsonb_set(v_result::jsonb, '{reminders}', '[]'::jsonb)::json;\r\n  END IF;\r\n  \r\n  IF v_result->>'communications' IS NULL THEN\r\n    v_result := jsonb_set(v_result::jsonb, '{communications}', '[]'::jsonb)::json;\r\n  END IF;\r\n  \r\n  IF v_result->>'attachments' IS NULL THEN\r\n    v_result := jsonb_set(v_result::jsonb, '{attachments}', '[]'::jsonb)::json;\r\n  END IF;\r\n  \r\n  RETURN v_result;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "get_leads",
+      "function_language": "plpgsql",
+      "return_type": "setof SETOF leads",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_leads()\n RETURNS SETOF leads\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  v_user_id uuid;\r\n  v_user_email text;\r\nBEGIN\r\n  -- Get the authenticated user's ID and email\r\n  v_user_id := auth.uid();\r\n  v_user_email := auth.jwt()->>'email';\r\n  \r\n  -- Return leads that the user created or is assigned to\r\n  RETURN QUERY\r\n  SELECT *\r\n  FROM leads\r\n  WHERE created_by = v_user_id\r\n     OR assigned_to = v_user_id\r\n  ORDER BY updated_at DESC;\r\nEND;\r\n$function$\n"
+    },
+    {
       "function_name": "get_page_parents",
-      "function_type": "Function",
+      "function_language": "sql",
+      "return_type": "setof TABLE(id integer, parent_page_id integer, path character varying, meta jsonb)",
       "arguments": "page_id integer",
-      "return_type": "TABLE(id integer, parent_page_id integer, path character varying, meta jsonb)"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_page_parents(page_id integer)\n RETURNS TABLE(id integer, parent_page_id integer, path character varying, meta jsonb)\n LANGUAGE sql\nAS $function$\r\n    SELECT id, parent_page_id, path, meta\r\n    FROM nods_page\r\n    WHERE id = page_id;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "get_user_tours",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "setof SETOF tours",
       "arguments": "",
-      "return_type": "SETOF tours"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.get_user_tours()\n RETURNS SETOF tours\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nbegin\r\n  return query\r\n  select *\r\n  from tours\r\n  where user_id = auth.uid()\r\n  order by departure_date desc nulls last;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gin_extract_query_trgm",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "text, internal, smallint, internal, internal, internal, internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_extract_query_trgm$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gin_extract_value_trgm",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "text, internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gin_extract_value_trgm(text, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_extract_value_trgm$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gin_trgm_consistent",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "internal, smallint, text, integer, internal, internal, internal, internal",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_trgm_consistent$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gin_trgm_triconsistent",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "\"char\"",
       "arguments": "internal, smallint, text, integer, internal, internal, internal",
-      "return_type": "\"char\""
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)\n RETURNS \"char\"\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gin_trgm_triconsistent$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_compress",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_compress(internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_compress$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_consistent",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "internal, text, smallint, oid, internal",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_consistent(internal, text, smallint, oid, internal)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_consistent$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_decompress",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_decompress(internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_decompress$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "internal, text, smallint, oid, internal",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_distance(internal, text, smallint, oid, internal)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "gtrgm",
       "arguments": "cstring",
-      "return_type": "gtrgm"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_in(cstring)\n RETURNS gtrgm\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_options",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "void",
       "arguments": "internal",
-      "return_type": "void"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_options(internal)\n RETURNS void\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE\nAS '$libdir/pg_trgm', $function$gtrgm_options$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_out",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "cstring",
       "arguments": "gtrgm",
-      "return_type": "cstring"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_out(gtrgm)\n RETURNS cstring\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_out$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_penalty",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal, internal, internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_penalty(internal, internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_penalty$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_picksplit",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal, internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_picksplit(internal, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_picksplit$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_same",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "gtrgm, gtrgm, internal",
-      "return_type": "internal"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_same(gtrgm, gtrgm, internal)\n RETURNS internal\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_same$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "gtrgm_union",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "gtrgm",
       "arguments": "internal, internal",
-      "return_type": "gtrgm"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.gtrgm_union(internal, internal)\n RETURNS gtrgm\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$gtrgm_union$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "halfvec, integer, boolean",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec(halfvec, integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_accum",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision[]",
       "arguments": "double precision[], halfvec",
-      "return_type": "double precision[]"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_accum(double precision[], halfvec)\n RETURNS double precision[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_accum$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_add",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "halfvec, halfvec",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_add(halfvec, halfvec)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_add$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_avg",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "double precision[]",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_avg(double precision[])\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_avg$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_cmp",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "integer",
       "arguments": "halfvec, halfvec",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_cmp(halfvec, halfvec)\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_cmp$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_combine",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision[]",
       "arguments": "double precision[], double precision[]",
-      "return_type": "double precision[]"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_combine(double precision[], double precision[])\n RETURNS double precision[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_combine$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_concat",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "halfvec, halfvec",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_concat(halfvec, halfvec)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_concat$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_eq",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_eq(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_eq$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_ge",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_ge(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_ge$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_gt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_gt(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_gt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "cstring, oid, integer",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_in(cstring, oid, integer)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_l2_squared_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_l2_squared_distance(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_l2_squared_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_le",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_le(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_le$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_lt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_lt(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_lt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_mul",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "halfvec, halfvec",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_mul(halfvec, halfvec)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_mul$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_ne",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "halfvec, halfvec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_ne(halfvec, halfvec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_ne$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_negative_inner_product",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_negative_inner_product(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_negative_inner_product$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_out",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "cstring",
       "arguments": "halfvec",
-      "return_type": "cstring"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_out(halfvec)\n RETURNS cstring\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_out$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_recv",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "internal, oid, integer",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_recv(internal, oid, integer)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_recv$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_send",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "bytea",
       "arguments": "halfvec",
-      "return_type": "bytea"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_send(halfvec)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_send$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_spherical_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_spherical_distance(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_spherical_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_sub",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "halfvec, halfvec",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_sub(halfvec, halfvec)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_sub$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_to_float4",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real[]",
       "arguments": "halfvec, integer, boolean",
-      "return_type": "real[]"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_to_float4(halfvec, integer, boolean)\n RETURNS real[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_to_float4$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_to_sparsevec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "sparsevec",
       "arguments": "halfvec, integer, boolean",
-      "return_type": "sparsevec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_to_sparsevec(halfvec, integer, boolean)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_to_sparsevec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_to_vector",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "halfvec, integer, boolean",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_to_vector(halfvec, integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_to_vector$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "halfvec_typmod_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "integer",
       "arguments": "cstring[]",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.halfvec_typmod_in(cstring[])\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_typmod_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "hamming_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "bit, bit",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.hamming_distance(bit, bit)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$hamming_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "handle_new_tour",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
       "arguments": "",
-      "return_type": "trigger"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_new_tour()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nbegin\r\n  new.user_id := auth.uid();\r\n  return new;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "handle_new_user",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
       "arguments": "",
-      "return_type": "trigger"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_new_user()\n RETURNS trigger\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nbegin\r\n  insert into public.profiles (id, email, full_name)\r\n  values (new.id, new.email, new.raw_user_meta_data->>'full_name');\r\n  return new;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "handle_updated_at",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
       "arguments": "",
-      "return_type": "trigger"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.handle_updated_at()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nbegin\r\n  new.updated_at = now();\r\n  return new;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "hnsw_bit_support",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.hnsw_bit_support(internal)\n RETURNS internal\n LANGUAGE c\nAS '$libdir/vector', $function$hnsw_bit_support$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "hnsw_halfvec_support",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.hnsw_halfvec_support(internal)\n RETURNS internal\n LANGUAGE c\nAS '$libdir/vector', $function$hnsw_halfvec_support$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "hnsw_sparsevec_support",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.hnsw_sparsevec_support(internal)\n RETURNS internal\n LANGUAGE c\nAS '$libdir/vector', $function$hnsw_sparsevec_support$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "hnswhandler",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "index_am_handler",
       "arguments": "internal",
-      "return_type": "index_am_handler"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.hnswhandler(internal)\n RETURNS index_am_handler\n LANGUAGE c\nAS '$libdir/vector', $function$hnswhandler$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "inner_product",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.inner_product(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_inner_product$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "inner_product",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "inner_product",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.inner_product(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_inner_product$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "inner_product",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.inner_product(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$inner_product$function$\n"
+    },
+    {
       "function_name": "ivfflat_bit_support",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.ivfflat_bit_support(internal)\n RETURNS internal\n LANGUAGE c\nAS '$libdir/vector', $function$ivfflat_bit_support$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "ivfflat_halfvec_support",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "internal",
       "arguments": "internal",
-      "return_type": "internal"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.ivfflat_halfvec_support(internal)\n RETURNS internal\n LANGUAGE c\nAS '$libdir/vector', $function$ivfflat_halfvec_support$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "ivfflathandler",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "index_am_handler",
       "arguments": "internal",
-      "return_type": "index_am_handler"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.ivfflathandler(internal)\n RETURNS index_am_handler\n LANGUAGE c\nAS '$libdir/vector', $function$ivfflathandler$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "jaccard_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "bit, bit",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.jaccard_distance(bit, bit)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$jaccard_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "l1_distance",
-      "function_type": "Function",
-      "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "l1_distance",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "l1_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l1_distance(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_l1_distance$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "l2_distance",
-      "function_type": "Function",
-      "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "l2_distance",
-      "function_type": "Function",
+      "function_name": "l1_distance",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "vector, vector",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l1_distance(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$l1_distance$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "l2_distance",
-      "function_type": "Function",
+      "function_name": "l1_distance",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "halfvec, halfvec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l1_distance(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_l1_distance$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "l2_distance",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "sparsevec, sparsevec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_distance(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_l2_distance$function$\n"
+    },
+    {
+      "function_name": "l2_distance",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_distance(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$l2_distance$function$\n"
+    },
+    {
+      "function_name": "l2_distance",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "halfvec, halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_distance(halfvec, halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_l2_distance$function$\n"
+    },
+    {
       "function_name": "l2_norm",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
+      "arguments": "halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_norm(halfvec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_l2_norm$function$\n"
+    },
+    {
+      "function_name": "l2_norm",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_norm(sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_l2_norm$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "l2_norm",
-      "function_type": "Function",
-      "arguments": "halfvec",
-      "return_type": "double precision"
-    },
-    {
-      "schema_name": "public",
       "function_name": "l2_normalize",
-      "function_type": "Function",
-      "arguments": "halfvec",
-      "return_type": "halfvec"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "l2_normalize",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "vector",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_normalize(vector)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$l2_normalize$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "l2_normalize",
-      "function_type": "Function",
-      "arguments": "sparsevec",
-      "return_type": "sparsevec"
+      "function_language": "c",
+      "return_type": "halfvec",
+      "arguments": "halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_normalize(halfvec)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_l2_normalize$function$\n"
     },
     {
-      "schema_name": "public",
+      "function_name": "l2_normalize",
+      "function_language": "c",
+      "return_type": "sparsevec",
+      "arguments": "sparsevec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.l2_normalize(sparsevec)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_l2_normalize$function$\n"
+    },
+    {
       "function_name": "match_page_sections",
-      "function_type": "Function",
+      "function_language": "sql",
+      "return_type": "setof TABLE(id integer, page_id integer, slug character varying, heading character varying, content text, similarity double precision)",
       "arguments": "embedding vector, match_threshold double precision, match_count integer, min_content_length integer",
-      "return_type": "TABLE(id integer, page_id integer, slug character varying, heading character varying, content text, similarity double precision)"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.match_page_sections(embedding vector, match_threshold double precision, match_count integer, min_content_length integer)\n RETURNS TABLE(id integer, page_id integer, slug character varying, heading character varying, content text, similarity double precision)\n LANGUAGE sql\nAS $function$\r\n    SELECT id, page_id, slug, heading, content, 1.0 AS similarity\r\n    FROM nods_page_section\r\n    WHERE token_count >= min_content_length\r\n    ORDER BY similarity DESC\r\n    LIMIT match_count;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "search_leads",
-      "function_type": "Function",
-      "arguments": "p_query text DEFAULT NULL::text, p_status text[] DEFAULT NULL::text[], p_priority text[] DEFAULT NULL::text[], p_type text[] DEFAULT NULL::text[], p_assigned_to uuid[] DEFAULT NULL::uuid[], p_tags text[] DEFAULT NULL::text[], p_date_start timestamp without time zone DEFAULT NULL::timestamp without time zone, p_date_end timestamp without time zone DEFAULT NULL::timestamp without time zone",
-      "return_type": "SETOF leads"
-    },
-    {
-      "schema_name": "public",
       "function_name": "set_default_tour",
-      "function_type": "Function",
+      "function_language": "plpgsql",
+      "return_type": "void",
       "arguments": "p_tour_id integer",
-      "return_type": "void"
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.set_default_tour(p_tour_id integer)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\ndeclare\r\n  v_user_id uuid;\r\nbegin\r\n  -- Get the user_id from the tour\r\n  select user_id into v_user_id\r\n  from public.tours\r\n  where id = p_tour_id;\r\n\r\n  -- First, unset default for all other tours of this user\r\n  update public.tours\r\n  set is_default = false\r\n  where user_id = v_user_id\r\n  and id != p_tour_id;\r\n\r\n  -- Then set this tour as default\r\n  update public.tours\r\n  set is_default = true\r\n  where id = p_tour_id;\r\nend;\r\n$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "set_limit",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "real",
-      "return_type": "real"
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.set_limit(real)\n RETURNS real\n LANGUAGE c\n STRICT\nAS '$libdir/pg_trgm', $function$set_limit$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "show_limit",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "",
-      "return_type": "real"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.show_limit()\n RETURNS real\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$show_limit$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "show_trgm",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "text[]",
       "arguments": "text",
-      "return_type": "text[]"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.show_trgm(text)\n RETURNS text[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$show_trgm$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "similarity",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "similarity_dist",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.similarity_dist(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity_dist$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "similarity_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "text, text",
-      "return_type": "boolean"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$similarity_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "sparsevec",
       "arguments": "sparsevec, integer, boolean",
-      "return_type": "sparsevec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec(sparsevec, integer, boolean)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_cmp",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "integer",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_cmp(sparsevec, sparsevec)\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_cmp$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_eq",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_eq(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_eq$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_ge",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_ge(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_ge$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_gt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_gt(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_gt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "sparsevec",
       "arguments": "cstring, oid, integer",
-      "return_type": "sparsevec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_in(cstring, oid, integer)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_l2_squared_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_l2_squared_distance(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_l2_squared_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_le",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_le(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_le$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_lt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_lt(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_lt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_ne",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_ne(sparsevec, sparsevec)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_ne$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_negative_inner_product",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "sparsevec, sparsevec",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_negative_inner_product(sparsevec, sparsevec)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_negative_inner_product$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_out",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "cstring",
       "arguments": "sparsevec",
-      "return_type": "cstring"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_out(sparsevec)\n RETURNS cstring\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_out$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_recv",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "sparsevec",
       "arguments": "internal, oid, integer",
-      "return_type": "sparsevec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_recv(internal, oid, integer)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_recv$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_send",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "bytea",
       "arguments": "sparsevec",
-      "return_type": "bytea"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_send(sparsevec)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_send$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_to_halfvec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "sparsevec, integer, boolean",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_to_halfvec(sparsevec, integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_to_halfvec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_to_vector",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "sparsevec, integer, boolean",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_to_vector(sparsevec, integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_to_vector$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "sparsevec_typmod_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "integer",
       "arguments": "cstring[]",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.sparsevec_typmod_in(cstring[])\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$sparsevec_typmod_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "strict_word_similarity",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "strict_word_similarity_commutator_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "text, text",
-      "return_type": "boolean"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_commutator_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_commutator_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "strict_word_similarity_dist_commutator_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_commutator_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_dist_commutator_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "strict_word_similarity_dist_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_dist_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "strict_word_similarity_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "text, text",
-      "return_type": "boolean"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.strict_word_similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$strict_word_similarity_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "subvector",
-      "function_type": "Function",
-      "arguments": "halfvec, integer, integer",
-      "return_type": "halfvec"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "subvector",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "vector, integer, integer",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.subvector(vector, integer, integer)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$subvector$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "update_last_updated_column",
-      "function_type": "Function",
-      "arguments": "",
-      "return_type": "trigger"
+      "function_name": "subvector",
+      "function_language": "c",
+      "return_type": "halfvec",
+      "arguments": "halfvec, integer, integer",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.subvector(halfvec, integer, integer)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_subvector$function$\n"
     },
     {
-      "schema_name": "public",
-      "function_name": "update_saved_venues_last_updated",
-      "function_type": "Function",
-      "arguments": "",
-      "return_type": "trigger"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "update_tour",
-      "function_type": "Function",
-      "arguments": "tour_id bigint, tour_data jsonb",
-      "return_type": "tours"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "update_tours_last_updated",
-      "function_type": "Function",
-      "arguments": "",
-      "return_type": "trigger"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "update_updated_at_column",
-      "function_type": "Function",
-      "arguments": "",
-      "return_type": "trigger"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector",
-      "function_type": "Function",
-      "arguments": "vector, integer, boolean",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_accum",
-      "function_type": "Function",
-      "arguments": "double precision[], vector",
-      "return_type": "double precision[]"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_add",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_avg",
-      "function_type": "Function",
-      "arguments": "double precision[]",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_cmp",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "integer"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_combine",
-      "function_type": "Function",
-      "arguments": "double precision[], double precision[]",
-      "return_type": "double precision[]"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_concat",
-      "function_type": "Function",
-      "arguments": "vector, vector",
-      "return_type": "vector"
-    },
-    {
-      "schema_name": "public",
-      "function_name": "vector_dims",
-      "function_type": "Function",
+      "function_name": "sum",
+      "function_language": "internal",
+      "return_type": "vector",
       "arguments": "vector",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "aggregate_dummy"
     },
     {
-      "schema_name": "public",
-      "function_name": "vector_dims",
-      "function_type": "Function",
+      "function_name": "sum",
+      "function_language": "internal",
+      "return_type": "halfvec",
       "arguments": "halfvec",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "aggregate_dummy"
     },
     {
-      "schema_name": "public",
+      "function_name": "test_create_communication",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "auth_uid uuid, auth_email text, comm_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_communication(auth_uid uuid, auth_email text, comm_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_comm_id UUID;\r\nBEGIN\r\n    INSERT INTO communications (\r\n        lead_id,\r\n        type,\r\n        content,\r\n        date,\r\n        sentiment,\r\n        user_id,\r\n        created_at\r\n    ) VALUES (\r\n        (comm_data->>'lead_id')::UUID,\r\n        comm_data->>'type',\r\n        comm_data->>'content',\r\n        COALESCE((comm_data->>'date')::timestamptz, now()),\r\n        comm_data->>'sentiment',\r\n        auth_uid,\r\n        now()\r\n    )\r\n    RETURNING id INTO new_comm_id;\r\n\r\n    RETURN new_comm_id;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_lead",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "auth_uid uuid, auth_email text, lead_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_lead(auth_uid uuid, auth_email text, lead_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_lead_id UUID;\r\nBEGIN\r\n    INSERT INTO leads (\r\n        title,\r\n        type,\r\n        status,\r\n        priority,\r\n        company,\r\n        description,\r\n        venue_id,\r\n        contact_info,\r\n        tags,\r\n        next_follow_up,\r\n        expected_value,\r\n        created_by,\r\n        created_by_email,\r\n        assigned_to\r\n    ) VALUES (\r\n        lead_data->>'title',\r\n        (lead_data->>'type')::lead_type,\r\n        COALESCE((lead_data->>'status')::lead_status, 'new'),\r\n        COALESCE((lead_data->>'priority')::lead_priority, 'medium'),\r\n        lead_data->>'company',\r\n        lead_data->>'description',\r\n        lead_data->>'venue_id',\r\n        COALESCE(lead_data->'contact_info', '{}'::jsonb),\r\n        COALESCE(\r\n            (SELECT array_agg(x::text) FROM jsonb_array_elements_text(lead_data->'tags') x),\r\n            ARRAY[]::text[]\r\n        ),\r\n        (lead_data->>'next_follow_up')::timestamptz,\r\n        (lead_data->>'expected_value')::decimal,\r\n        auth_uid,\r\n        auth_email,\r\n        (lead_data->>'assigned_to')::UUID\r\n    )\r\n    RETURNING id INTO new_lead_id;\r\n\r\n    RETURN new_lead_id;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_lead_note",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "auth_uid uuid, auth_email text, note_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_lead_note(auth_uid uuid, auth_email text, note_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_note_id UUID;\r\nBEGIN\r\n    INSERT INTO lead_notes (\r\n        lead_id,\r\n        content,\r\n        created_by,\r\n        created_by_email\r\n    ) VALUES (\r\n        (note_data->>'lead_id')::UUID,\r\n        note_data->>'content',\r\n        auth_uid,\r\n        auth_email\r\n    )\r\n    RETURNING id INTO new_note_id;\r\n\r\n    RETURN new_note_id;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_lead_notes",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "p_lead_id uuid, p_user_id uuid, p_user_email text, p_notes jsonb[]",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_lead_notes(p_lead_id uuid, p_user_id uuid, p_user_email text, p_notes jsonb[])\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    note_data JSONB;\r\nBEGIN\r\n    -- Insert each note\r\n    FOREACH note_data IN ARRAY p_notes\r\n    LOOP\r\n        INSERT INTO lead_notes (\r\n            lead_id,\r\n            content,\r\n            created_by,\r\n            created_by_email,\r\n            created_at\r\n        ) VALUES (\r\n            p_lead_id,\r\n            note_data->>'content',\r\n            p_user_id,\r\n            p_user_email,\r\n            now()\r\n        );\r\n    END LOOP;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_lead_notes",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "p_lead_id uuid, p_notes jsonb, p_user_id uuid, p_user_email text",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_lead_notes(p_lead_id uuid, p_notes jsonb, p_user_id uuid, p_user_email text)\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    note_record JSONB;\r\nBEGIN    \r\n    -- Insert each note\r\n    FOR note_record IN SELECT * FROM jsonb_array_elements(p_notes)\r\n    LOOP\r\n        INSERT INTO lead_notes (\r\n            lead_id,\r\n            content,\r\n            created_by,\r\n            created_by_email,\r\n            created_at\r\n        ) VALUES (\r\n            p_lead_id,\r\n            note_record->>'content',\r\n            p_user_id,\r\n            p_user_email,\r\n            now()\r\n        );\r\n    END LOOP;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_lead_reminders",
+      "function_language": "plpgsql",
+      "return_type": "void",
+      "arguments": "p_lead_id uuid, p_user_id uuid, p_user_email text, p_reminders jsonb[]",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_lead_reminders(p_lead_id uuid, p_user_id uuid, p_user_email text, p_reminders jsonb[])\n RETURNS void\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    reminder_data JSONB;\r\nBEGIN\r\n    -- Insert each reminder\r\n    FOREACH reminder_data IN ARRAY p_reminders\r\n    LOOP\r\n        INSERT INTO reminders (\r\n            lead_id,\r\n            title,\r\n            description,\r\n            due_date,\r\n            priority,\r\n            created_by,\r\n            created_by_email,\r\n            created_at\r\n        ) VALUES (\r\n            p_lead_id,\r\n            reminder_data->>'title',\r\n            reminder_data->>'description',\r\n            (reminder_data->>'due_date')::timestamptz,\r\n            reminder_data->>'priority',\r\n            p_user_id,\r\n            p_user_email,\r\n            now()\r\n        );\r\n    END LOOP;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_create_reminder",
+      "function_language": "plpgsql",
+      "return_type": "uuid",
+      "arguments": "auth_uid uuid, auth_email text, reminder_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_create_reminder(auth_uid uuid, auth_email text, reminder_data jsonb)\n RETURNS uuid\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n    new_reminder_id UUID;\r\nBEGIN\r\n    INSERT INTO reminders (\r\n        lead_id,\r\n        title,\r\n        description,\r\n        due_date,\r\n        completed,\r\n        created_by,\r\n        created_by_email,\r\n        created_at\r\n    ) VALUES (\r\n        (reminder_data->>'lead_id')::UUID,\r\n        reminder_data->>'title',\r\n        reminder_data->>'description',\r\n        (reminder_data->>'due_date')::timestamptz,\r\n        COALESCE((reminder_data->>'completed')::boolean, false),\r\n        auth_uid,\r\n        auth_email,\r\n        now()\r\n    )\r\n    RETURNING id INTO new_reminder_id;\r\n\r\n    RETURN new_reminder_id;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "test_delete_lead",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "auth_uid uuid, lead_id uuid",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.test_delete_lead(auth_uid uuid, lead_id uuid)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    DELETE FROM leads\r\n    WHERE id = lead_id\r\n    AND created_by = auth_uid;\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_communication",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "comm_id uuid, comm_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_communication(comm_id uuid, comm_data jsonb)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    UPDATE communications\r\n    SET\r\n        type = COALESCE(comm_data->>'type', type),\r\n        content = COALESCE(comm_data->>'content', content),\r\n        date = COALESCE((comm_data->>'date')::timestamptz, date),\r\n        sentiment = COALESCE(comm_data->>'sentiment', sentiment)\r\n    WHERE id = comm_id\r\n    AND user_id = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_last_updated_column",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_last_updated_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nbegin\r\n  new.last_updated = timezone('utc'::text, now());\r\n  return new;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_lead",
+      "function_language": "plpgsql",
+      "return_type": "leads",
+      "arguments": "p_lead_id uuid, p_lead_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_lead(p_lead_id uuid, p_lead_data jsonb)\n RETURNS leads\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nDECLARE\r\n  v_user_id uuid;\r\n  v_user_email text;\r\n  v_lead leads;\r\nBEGIN\r\n  -- Get the authenticated user's ID and email\r\n  v_user_id := auth.uid();\r\n  v_user_email := auth.jwt()->>'email';\r\n  \r\n  -- Update the lead if the user has access to it\r\n  UPDATE leads\r\n  SET\r\n    title = COALESCE((p_lead_data->>'title')::text, title),\r\n    type = COALESCE((p_lead_data->>'type')::lead_type, type),\r\n    status = COALESCE((p_lead_data->>'status')::lead_status, status),\r\n    priority = COALESCE((p_lead_data->>'priority')::lead_priority, priority),\r\n    company = COALESCE((p_lead_data->>'company')::text, company),\r\n    description = COALESCE((p_lead_data->>'description')::text, description),\r\n    venue_id = COALESCE(p_lead_data->>'venue_id', venue_id),\r\n    contact_info = COALESCE((p_lead_data->>'contact_info')::jsonb, contact_info),\r\n    tags = COALESCE(array(SELECT jsonb_array_elements_text(CASE WHEN p_lead_data ? 'tags' THEN p_lead_data->'tags' ELSE '[]'::jsonb END)), tags),\r\n    next_follow_up = COALESCE((p_lead_data->>'next_follow_up')::timestamptz, next_follow_up),\r\n    expected_value = COALESCE((p_lead_data->>'expected_value')::numeric, expected_value),\r\n    assigned_to = CASE \r\n        WHEN p_lead_data->>'assigned_to' = '' THEN NULL \r\n        WHEN p_lead_data->>'assigned_to' IS NULL THEN assigned_to\r\n        ELSE (p_lead_data->>'assigned_to')::uuid \r\n    END,\r\n    updated_at = now()\r\n  WHERE id = p_lead_id\r\n    AND (created_by = v_user_id OR assigned_to = v_user_id)\r\n  RETURNING * INTO v_lead;\r\n  \r\n  RETURN v_lead;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_lead_note",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "note_id uuid, note_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_lead_note(note_id uuid, note_data jsonb)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    UPDATE lead_notes\r\n    SET\r\n        content = COALESCE(note_data->>'content', content)\r\n    WHERE id = note_id\r\n    AND created_by = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_lead_status",
+      "function_language": "plpgsql",
+      "return_type": "leads",
+      "arguments": "p_lead_id uuid, p_status text",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_lead_status(p_lead_id uuid, p_status text)\n RETURNS leads\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\nDECLARE\r\n    v_user_id uuid;\r\n    v_lead leads;\r\nBEGIN\r\n    -- Get the authenticated user's ID\r\n    v_user_id := auth.uid();\r\n    IF v_user_id IS NULL THEN\r\n        RAISE EXCEPTION 'Not authenticated';\r\n    END IF;\r\n\r\n    -- Update the lead status if the user has access to it\r\n    UPDATE leads\r\n    SET \r\n        status = p_status::lead_status,\r\n        updated_at = NOW()\r\n    WHERE id = p_lead_id\r\n    AND (\r\n        created_by = v_user_id \r\n        OR assigned_to = v_user_id\r\n        OR EXISTS (\r\n            SELECT 1 \r\n            FROM auth.users \r\n            WHERE id = v_user_id \r\n            AND (raw_user_meta_data->>'role') = 'admin'\r\n        )\r\n    )\r\n    RETURNING * INTO v_lead;\r\n\r\n    -- Verify the update was successful\r\n    IF NOT FOUND THEN\r\n        RAISE EXCEPTION 'Lead not found or permission denied';\r\n    END IF;\r\n\r\n    RETURN v_lead;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_reminder",
+      "function_language": "plpgsql",
+      "return_type": "boolean",
+      "arguments": "reminder_id uuid, reminder_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_reminder(reminder_id uuid, reminder_data jsonb)\n RETURNS boolean\n LANGUAGE plpgsql\n SECURITY DEFINER\nAS $function$\r\nBEGIN\r\n    UPDATE reminders\r\n    SET\r\n        title = COALESCE(reminder_data->>'title', title),\r\n        description = COALESCE(reminder_data->>'description', description),\r\n        due_date = COALESCE((reminder_data->>'due_date')::timestamptz, due_date),\r\n        completed = COALESCE((reminder_data->>'completed')::boolean, completed)\r\n    WHERE id = reminder_id\r\n    AND created_by = auth.uid();\r\n\r\n    RETURN FOUND;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_saved_venues_last_updated",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_saved_venues_last_updated()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n    NEW.last_updated = CURRENT_TIMESTAMP;\r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_tour",
+      "function_language": "plpgsql",
+      "return_type": "tours",
+      "arguments": "tour_id bigint, tour_data jsonb",
+      "volatility": "VOLATILE",
+      "security": "SECURITY DEFINER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_tour(tour_id bigint, tour_data jsonb)\n RETURNS tours\n LANGUAGE plpgsql\n SECURITY DEFINER\n SET search_path TO 'public'\nAS $function$\r\ndeclare\r\n  updated_tour tours;\r\nbegin\r\n  update tours\r\n  set\r\n    title = tour_data->>'title',\r\n    description = tour_data->>'description',\r\n    departure_date = (tour_data->>'departure_date')::date,\r\n    return_date = (tour_data->>'return_date')::date,\r\n    status = (tour_data->>'status')::tour_status\r\n  where id = tour_id\r\n    and user_id = auth.uid()\r\n  returning * into updated_tour;\r\n\r\n  if updated_tour is null then\r\n    raise exception 'Tour not found or you do not have permission to update it';\r\n  end if;\r\n\r\n  return updated_tour;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_tours_last_updated",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_tours_last_updated()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nbegin\r\n  new.last_updated = now();\r\n  return new;\r\nend;\r\n$function$\n"
+    },
+    {
+      "function_name": "update_updated_at_column",
+      "function_language": "plpgsql",
+      "return_type": "trigger",
+      "arguments": "",
+      "volatility": "VOLATILE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.update_updated_at_column()\n RETURNS trigger\n LANGUAGE plpgsql\nAS $function$\r\nBEGIN\r\n    NEW.updated_At = CURRENT_TIMESTAMP;\r\n    RETURN NEW;\r\nEND;\r\n$function$\n"
+    },
+    {
+      "function_name": "vector",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "vector, integer, boolean",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector(vector, integer, boolean)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector$function$\n"
+    },
+    {
+      "function_name": "vector_accum",
+      "function_language": "c",
+      "return_type": "double precision[]",
+      "arguments": "double precision[], vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_accum(double precision[], vector)\n RETURNS double precision[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_accum$function$\n"
+    },
+    {
+      "function_name": "vector_add",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_add(vector, vector)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_add$function$\n"
+    },
+    {
+      "function_name": "vector_avg",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "double precision[]",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_avg(double precision[])\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_avg$function$\n"
+    },
+    {
+      "function_name": "vector_cmp",
+      "function_language": "c",
+      "return_type": "integer",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_cmp(vector, vector)\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_cmp$function$\n"
+    },
+    {
+      "function_name": "vector_combine",
+      "function_language": "c",
+      "return_type": "double precision[]",
+      "arguments": "double precision[], double precision[]",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_combine(double precision[], double precision[])\n RETURNS double precision[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_combine$function$\n"
+    },
+    {
+      "function_name": "vector_concat",
+      "function_language": "c",
+      "return_type": "vector",
+      "arguments": "vector, vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_concat(vector, vector)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_concat$function$\n"
+    },
+    {
+      "function_name": "vector_dims",
+      "function_language": "c",
+      "return_type": "integer",
+      "arguments": "vector",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_dims(vector)\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_dims$function$\n"
+    },
+    {
+      "function_name": "vector_dims",
+      "function_language": "c",
+      "return_type": "integer",
+      "arguments": "halfvec",
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_dims(halfvec)\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$halfvec_vector_dims$function$\n"
+    },
+    {
       "function_name": "vector_eq",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_eq(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_eq$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_ge",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_ge(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_ge$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_gt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_gt(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_gt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "cstring, oid, integer",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_in(cstring, oid, integer)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_l2_squared_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "vector, vector",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_l2_squared_distance(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_l2_squared_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_le",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_le(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_le$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_lt",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_lt(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_lt$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_mul",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "vector, vector",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_mul(vector, vector)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_mul$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_ne",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "vector, vector",
-      "return_type": "boolean"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_ne(vector, vector)\n RETURNS boolean\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_ne$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_negative_inner_product",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "vector, vector",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_negative_inner_product(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_negative_inner_product$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_norm",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "vector",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_norm(vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_norm$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_out",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "cstring",
       "arguments": "vector",
-      "return_type": "cstring"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_out(vector)\n RETURNS cstring\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_out$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_recv",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "internal, oid, integer",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_recv(internal, oid, integer)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_recv$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_send",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "bytea",
       "arguments": "vector",
-      "return_type": "bytea"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_send(vector)\n RETURNS bytea\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_send$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_spherical_distance",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "double precision",
       "arguments": "vector, vector",
-      "return_type": "double precision"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_spherical_distance(vector, vector)\n RETURNS double precision\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_spherical_distance$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_sub",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "vector",
       "arguments": "vector, vector",
-      "return_type": "vector"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_sub(vector, vector)\n RETURNS vector\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_sub$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_to_float4",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real[]",
       "arguments": "vector, integer, boolean",
-      "return_type": "real[]"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_to_float4(vector, integer, boolean)\n RETURNS real[]\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_to_float4$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_to_halfvec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "halfvec",
       "arguments": "vector, integer, boolean",
-      "return_type": "halfvec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_to_halfvec(vector, integer, boolean)\n RETURNS halfvec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_to_halfvec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_to_sparsevec",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "sparsevec",
       "arguments": "vector, integer, boolean",
-      "return_type": "sparsevec"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_to_sparsevec(vector, integer, boolean)\n RETURNS sparsevec\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_to_sparsevec$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "vector_typmod_in",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "integer",
       "arguments": "cstring[]",
-      "return_type": "integer"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.vector_typmod_in(cstring[])\n RETURNS integer\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/vector', $function$vector_typmod_in$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "word_similarity",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.word_similarity(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "word_similarity_commutator_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "text, text",
-      "return_type": "boolean"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.word_similarity_commutator_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_commutator_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "word_similarity_dist_commutator_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.word_similarity_dist_commutator_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_dist_commutator_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "word_similarity_dist_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "real",
       "arguments": "text, text",
-      "return_type": "real"
+      "volatility": "IMMUTABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.word_similarity_dist_op(text, text)\n RETURNS real\n LANGUAGE c\n IMMUTABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_dist_op$function$\n"
     },
     {
-      "schema_name": "public",
       "function_name": "word_similarity_op",
-      "function_type": "Function",
+      "function_language": "c",
+      "return_type": "boolean",
       "arguments": "text, text",
-      "return_type": "boolean"
+      "volatility": "STABLE",
+      "security": "SECURITY INVOKER",
+      "definition": "CREATE OR REPLACE FUNCTION public.word_similarity_op(text, text)\n RETURNS boolean\n LANGUAGE c\n STABLE PARALLEL SAFE STRICT\nAS '$libdir/pg_trgm', $function$word_similarity_op$function$\n"
     }
   ]
