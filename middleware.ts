@@ -3,9 +3,16 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
+  // Debug logging
+  console.log('Middleware executing for path:', request.nextUrl.pathname)
+  console.log('Host:', request.headers.get('host'))
+  
   // Check if we're in production by looking at the hostname
   const isLocalhost = request.headers.get('host')?.includes('localhost') || request.headers.get('host')?.includes('127.0.0.1')
+  console.log('isLocalhost:', isLocalhost)
+  
   if (!isLocalhost && request.nextUrl.pathname === '/') {
+    console.log('Attempting to redirect to splash page')
     return NextResponse.redirect(new URL('/splash', request.url))
   }
 
