@@ -3,8 +3,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Skip auth check for auth-related routes
-  if (request.nextUrl.pathname.startsWith('/auth/')) {
+  // Only redirect to splash in production
+  const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
+  if (isProduction && request.nextUrl.pathname === '/') {
+    return NextResponse.redirect(new URL('/splash', request.url))
+  }
+
+  // Skip auth check for auth-related routes and splash page
+  if (request.nextUrl.pathname.startsWith('/auth/') || request.nextUrl.pathname.startsWith('/splash')) {
     return NextResponse.next()
   }
 
