@@ -1,9 +1,5 @@
 import { createClient } from '@supabase/supabase-js'
 import type { Venue } from '@/utils/db/venues'
-import * as dotenv from 'dotenv'
-
-// Load environment variables
-dotenv.config({ path: '.env.local' })
 
 const supabase = createClient(
   process.env.NEXT_PUBLIC_SUPABASE_URL!,
