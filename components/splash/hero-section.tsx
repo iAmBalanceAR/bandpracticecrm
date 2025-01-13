@@ -20,12 +20,12 @@ const heroSlides: HeroSlide[] = [
     title: "Band Practice CRM",
     subtitle: "Tour Management Simplified",
     bgImage: "https://plus.unsplash.com/premium_photo-1661299366011-bb9f86212bdb?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    ctaText: "Start Planning"
+    ctaText: "Find Out More"
   },
   {
     id: 2,
-    title: "AI Powered Tour Routing",
-    subtitle: "AI filtered Venues Along Your Route",
+    title: "Track Profitablity",
+    subtitle: "Automate Your Revenue Metrics",
     bgImage: "https://images.unsplash.com/photo-1533559662493-65ffecb14f7d?q=80&w=2095&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     ctaText: "Learn More"
   },

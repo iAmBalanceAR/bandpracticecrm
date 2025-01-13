@@ -2,64 +2,94 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Paths that don't need auth checking
+const PUBLIC_PATHS = [
+  '/auth',
+  '/splash',
+  '/api',
+  '/_next',
+  '/images',
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml'
+]
+
+// Check if the path is public
+const isPublicPath = (path: string) =>
+  PUBLIC_PATHS.some(publicPath => path.startsWith(publicPath))
+
 export async function middleware(request: NextRequest) {
-  // Debug logging
-  console.log('Middleware executing for path:', request.nextUrl.pathname)
-  console.log('Host:', request.headers.get('host'))
+  const { pathname } = request.nextUrl
+
+  // Skip middleware for public paths
+  if (isPublicPath(pathname)) {
+    return NextResponse.next()
+  }
   
   // Check if we're in production by looking at the hostname
-  const isLocalhost = request.headers.get('host')?.includes('localhost') || request.headers.get('host')?.includes('127.0.0.1')
-  console.log('isLocalhost:', isLocalhost)
+  const isLocalhost = request.headers.get('host')?.includes('localhost') || 
+                     request.headers.get('host')?.includes('127.0.0.1')
   
-  if (!isLocalhost && request.nextUrl.pathname === '/') {
-    console.log('Attempting to redirect to splash page')
+  // Redirect root to splash in production
+  if (!isLocalhost && pathname === '/') {
     return NextResponse.redirect(new URL('/splash', request.url))
   }
 
-  // Skip auth check for auth-related routes and splash page
-  if (request.nextUrl.pathname.startsWith('/auth/') || request.nextUrl.pathname.startsWith('/splash')) {
-    return NextResponse.next()
-  }
-
+  // Only proceed with auth check for protected routes
   let response = NextResponse.next({
     request: {
       headers: request.headers,
     },
   })
 
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return request.cookies.get(name)?.value
+  try {
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return request.cookies.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            response.cookies.set({
+              name,
+              value,
+              ...options,
+            })
+          },
+          remove(name: string, options: any) {
+            response.cookies.set({
+              name,
+              value: '',
+              ...options,
+            })
+          },
         },
-        set(name: string, value: string, options: any) {
-          response.cookies.set({
-            name,
-            value,
-            ...options,
-          })
-        },
-        remove(name: string, options: any) {
-          response.cookies.set({
-            name,
-            value: '',
-            ...options,
-          })
-        },
-      },
-    }
-  )
+      }
+    )
 
-  await supabase.auth.getSession()
+    // Only check session for HTML requests (not API, assets, etc)
+    const acceptHeader = request.headers.get('accept')
+    if (acceptHeader?.includes('text/html')) {
+      const { data: { session } } = await supabase.auth.getSession()
+      
+      // Redirect to login if no session
+      if (!session) {
+        return NextResponse.redirect(new URL('/auth/signin', request.url))
+      }
+    }
+  } catch (error) {
+    // Log error but don't break the request
+    console.error('Middleware auth error:', error)
+  }
 
   return response
 }
 
 export const config = {
   matcher: [
-    '/((?!_next/static|_next/image|favicon.ico).*)',
+    // Skip all static files
+    '/((?!_next/static|_next/image|favicon.ico|images|.*\\.(svg|png|jpg|jpeg|gif|webp|ico)).*)',
   ],
 } 
