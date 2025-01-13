@@ -3,7 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Button } from "../ui/button"
-import { ChevronDown } from 'lucide-react'
+import { ChevronDown, ChevronUp } from 'lucide-react'
+import Image from 'next/image'
 import Link from 'next/link'
 
 interface HeroSlide {
@@ -18,35 +19,73 @@ const heroSlides: HeroSlide[] = [
   {
     id: 1,
     title: "Band Practice CRM",
-    subtitle: "Tour Management Simplified",
-    bgImage: "https://plus.unsplash.com/premium_photo-1661299366011-bb9f86212bdb?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    subtitle: "Stop Managing Tours. Start Making Music.",
+    bgImage: "https://plus.unsplash.com/premium_photo-1661299366011-bb9f86212bdb",
     ctaText: "Find Out More"
   },
   {
-    id: 2,
-    title: "Track Profitablity",
-    subtitle: "Automate Your Revenue Metrics",
-    bgImage: "https://images.unsplash.com/photo-1533559662493-65ffecb14f7d?q=80&w=2095&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    id: 4,
+    title: "Know Your Numbers",
+    subtitle: "Turn Tour Data into Better Decisions",
+    bgImage: "https://images.unsplash.com/photo-1495651779359-881fde1808a6",
     ctaText: "Learn More"
   },
   {
     id: 3,
-    title: "50k+ Venue Database",
-    subtitle: "Current National Venue Data",
-    bgImage: "https://images.unsplash.com/photo-1540039155733-5bb30b53aa14",
-    ctaText: "Explore Venues"
+    title: "50,000+ Venues",
+    subtitle: "Book Better Shows, Fill Your Calendar",
+    bgImage: "https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4",
+    ctaText: "Get Started"
+  },
+  {
+    id: 2,
+    title: "Multiple Tours? No Problem",
+    subtitle: "One Dashboard for All Your Shows",
+    bgImage: "https://images.unsplash.com/photo-1533559662493-65ffecb14f7d",
+    ctaText: "Learn More"
+  },
+  {
+    id: 5,
+    title: "Built for Musicians",
+    subtitle: "Stage Plots to Settlement Sheets - We've Got You Covered",
+    bgImage: "https://plus.unsplash.com/premium_photo-1682125853703-896a05629709",
+    ctaText: "Get Started"
   }
 ]
 
 export default function HeroSection() {
   const [currentSlide, setCurrentSlide] = useState(0)
+  const [hasAnimatedLogo, setHasAnimatedLogo] = useState(false)
+  const [showBackToTop, setShowBackToTop] = useState(false)
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setShowBackToTop(window.scrollY > window.innerHeight / 2)
+    }
+    window.addEventListener('scroll', handleScroll)
+    return () => window.removeEventListener('scroll', handleScroll)
+  }, [])
+
+  const scrollToTop = () => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth' as const
+    })
+  }
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+      if (currentSlide === 0) {
+        setHasAnimatedLogo(true)
+        setTimeout(() => {
+          setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+        }, 1200)
+      } else {
+        setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+      }
     }, 8000)
     return () => clearInterval(timer)
-  }, [])
+  }, [currentSlide])
 
   const scrollToSection = (sectionId: string) => {
     const element = document.getElementById(sectionId);
@@ -60,13 +99,39 @@ export default function HeroSection() {
 
   return (
     <div className="relative h-screen w-full overflow-hidden">
+      {/* Fixed Logo */}
+      <AnimatePresence>
+        {hasAnimatedLogo && (
+          <motion.div
+            initial={{ opacity: 0, x: '100%' }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 1.2, ease: "easeInOut" }}
+            className="fixed z-50"
+            style={{ 
+              transformOrigin: 'top right',
+              top: '12px',
+              right: '12px'
+            }}
+          >
+            <Image 
+              src="/images/logo-full.png" 
+              alt="Band Practice CRM"
+              width={202}
+              height={37}
+              priority
+              className="scale-100"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence mode='wait'>
         <motion.div
           key={currentSlide}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          
-          exit={{ opacity:  0}}
+          exit={{ opacity: 0 }}
           transition={{ duration: 1 }}
           className="absolute inset-0"
           style={{
@@ -85,9 +150,28 @@ export default function HeroSection() {
           exit={{ opacity: 0, y: -55 }}
           className="relative z-10 flex flex-col items-center justify-center h-full text-white"
         >
-          <h1 className="text-6xl md:text-8xl font-mono mb-4 text-center text-shadow-md text-shadow-blur-4 text-shadow-black">
-            {heroSlides[currentSlide].title}
-          </h1>
+          {currentSlide === 0 ? (
+            <motion.div
+              initial={{ scale: 1 }}
+              exit={{ 
+                opacity: 0
+              }}
+              transition={{ duration: 1.2, ease: "easeInOut" }}
+            >
+              <Image 
+                src="/images/logo-full.png" 
+                alt="Band Practice CRM"
+                width={863}
+                height={160}
+                className="mb-4"
+                priority
+              />
+            </motion.div>
+          ) : (
+            <h1 className="text-6xl md:text-8xl font-mono mb-4 text-center text-shadow-md text-shadow-blur-4 text-shadow-black">
+              {heroSlides[currentSlide].title}
+            </h1>
+          )}
           <p className="text-xl md:text-2xl mb-8 text-center text-shadow-sm text-shadow-blur-4 text-shadow-black">
             {heroSlides[currentSlide].subtitle}
           </p>
@@ -117,6 +201,22 @@ export default function HeroSection() {
       >
         <ChevronDown className="w-8 h-8 text-white" />
       </div>
+
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+            className="fixed bottom-8 right-8 cursor-pointer z-50"
+            onClick={scrollToTop}
+          >
+            <div className="bg-blue-700 hover:bg-blue-600 rounded-full p-2 border border-black">
+              <ChevronUp className="w-8 h-8 text-white" />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 } 
