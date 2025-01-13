@@ -89,9 +89,8 @@ export async function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
-    // Match all paths except static files and public paths
-    '/((?!_next/static|_next/image|favicon.ico).*)',
-    // Exclude file extensions
-    '/(api|trpc)/:path*'
+    '/',
+    '/(dashboard|account|reporting|admin|gigs|venues|bands)/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)'
   ]
 } 
