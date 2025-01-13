@@ -3,15 +3,6 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(request: NextRequest) {
-  // Only redirect to splash in production
-  const isProduction = process.env.NEXT_PUBLIC_VERCEL_ENV === 'production'
-  if (isProduction && request.nextUrl.pathname === '/') {
-    // Preserve the protocol and host from the request
-    const url = new URL('/splash', request.url)
-    url.protocol = 'https:'
-    return NextResponse.redirect(url)
-  }
-
   // Skip auth check for auth-related routes and splash page
   if (request.nextUrl.pathname.startsWith('/auth/') || request.nextUrl.pathname.startsWith('/splash')) {
     return NextResponse.next()
