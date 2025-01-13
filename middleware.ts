@@ -2,9 +2,21 @@ import { createServerClient } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
+// Paths that don't need auth checking
+const PUBLIC_PATHS = [
+  '/auth',
+  '/splash',
+  '/api',
+  '/_next',
+  '/images',
+  '/favicon.ico',
+  '/robots.txt',
+  '/sitemap.xml'
+]
+
 export async function middleware(request: NextRequest) {
-  // Skip auth check for auth-related routes and splash page
-  if (request.nextUrl.pathname.startsWith('/auth/') || request.nextUrl.pathname.startsWith('/splash')) {
+  // Skip auth check for public paths
+  if (PUBLIC_PATHS.some(path => request.nextUrl.pathname.startsWith(path))) {
     return NextResponse.next()
   }
 
