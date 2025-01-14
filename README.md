@@ -346,3 +346,92 @@ The modals are built with accessibility in mind:
 - Click outside modal area to close
 
 Remember to always provide clear feedback to users through these modals and maintain consistency in their usage throughout the application.
+
+## Custom Common Components
+
+### CustomSectionHeader
+
+A reusable header component that provides a consistent layout with a title, underline, and content area.
+
+```typescript
+import { CustomSectionHeader } from '@/components/common/CustomSectionHeader';
+
+// Basic usage
+<CustomSectionHeader title="Your Page Title">
+  {/* Your content here */}
+</CustomSectionHeader>
+
+// With custom styling
+<CustomSectionHeader 
+  title="Your Page Title"
+  underlineColor="#00E396"
+  addclassName="your-custom-class"
+>
+  {/* Your content here */}
+</CustomSectionHeader>
+```
+
+Props:
+
+- `title`: string - The title to display in the header
+- `underlineColor?`: string - Optional color for the underline (default: #008ffb)
+- `addclassName?`: string - Optional additional CSS classes
+- `children`: React.ReactNode - The content to render inside the section
+
+### CustomCard
+
+A reusable card component that provides a consistent layout with a title and content area.
+
+```typescript
+import { CustomCard } from '@/components/common/CustomCard';
+
+// Basic usage
+<CustomCard title="Card Title">
+  {/* Your content here */}
+</CustomCard>
+
+// With custom styling
+<CustomCard 
+  title="Card Title"
+  cardColor="blue-500"
+  addclassName="your-custom-class"
+>
+  {/* Your content here */}
+</CustomCard>
+```
+
+Props:
+
+- `title`: string - The title to display in the card
+- `cardColor?`: string - Optional color for the title text (default: white)
+- `addclassName?`: string - Optional additional CSS classes
+- `children`: React.ReactNode - The content to render inside the card
+
+### Example Page Layout
+
+```typescript
+import { CustomSectionHeader } from '@/components/common/CustomSectionHeader';
+import { CustomCard } from '@/components/common/CustomCard';
+
+export default function YourPage() {
+  return (
+    <CustomSectionHeader title="Page Title" underlineColor="#00E396">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <CustomCard title="Section 1">
+          {/* Section 1 content */}
+        </CustomCard>
+        <CustomCard title="Section 2">
+          {/* Section 2 content */}
+        </CustomCard>
+      </div>
+    </CustomSectionHeader>
+  );
+}
+```
+
+This layout pattern provides:
+
+- Consistent page headers with customizable styling
+- Organized content sections with standardized card layouts
+- Responsive grid layouts for content organization
+- Maintainable and reusable component structure
