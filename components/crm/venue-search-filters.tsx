@@ -77,7 +77,7 @@ export default function VenueSearchFilters({
   }, [debouncedCity]);
 
   return (
-    <Card className="p-4 space-y-6 bg-[#030817] border-blue-800 border">
+    <Card className="p-4 space-y-6 bg-[#030817] border-blue-500 border">
       <div className="space-y-4">
         <div>
           <Label htmlFor="state">State</Label>

@@ -159,20 +159,20 @@ export default function DataTrackingPage() {
   return (
     <div className="w-full">
       {/* Start Common Header Component */}
-      <header className="flex items-center justify-between ml-8 pr-0 h-16">
+      <header className="flex items-center justify-between ml-0  pr-0 h-16 p-4 bg-[#0F1729] rounded-lg">
         <h1 className="text-4xl text-white">
           <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
             {currentTour?.title || 'No Tour Selected'} : Tour Analytics
           </span>
         </h1>
       </header>
-      <div className="clear-both border-[#d83b34] border-b-2 -mt-6 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
+      <div className="clear-both border-[#018FFB] border-b-2 -mt-6 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
       {/* End Common Header Component */}
 
       {/* Main Container */}
-      <div className="p-8">
+      <div className="p-4 bg-[#0F1729] rounded-lg">
         {/* Interior Container */}
-        <div className="bg-[#131d43] rounded-lg p-8">
+        <div className="bg-[#131d43] rounded-lg p-4 border border-blue-600">
           {loading ? (
             <div className="w-full h-full flex flex-col items-center justify-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-gray-400" />

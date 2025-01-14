@@ -13,7 +13,7 @@ export const metadata: Metadata = {
 
 export default function LeadsPage() {
   return (
-    <CustomSectionHeader title="Lead Management" underlineColor="#008ffb">
+    <CustomSectionHeader title="Lead Management" underlineColor="#D83B34">
       <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
         <CardHeader className="pb-0 mb-0">
           <CardTitle className="flex justify-between items-center text-3xl font-bold">

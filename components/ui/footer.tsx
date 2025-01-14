@@ -10,7 +10,7 @@ export default Xlogo;
 
 export function Footer() {
   return (
-    <footer className="w-full mt-4 ml-14 pb-0  text-white font-mono">
+    <footer className="mt-6 ml-6 pb-0  text-white font-mono">
 
       <div className="max -w-[1200px] pl-0 m-auto ml-2">
 
@@ -45,7 +45,7 @@ export function Footer() {
           <div className="flex-auto  px-4 mb-6">
 
             </div>
-          <div className="flex-auto px-0 mb-6 mr-24 -mt-2 ">
+          <div className="flex-auto px-0 mb-6 ml-12  -mt-2 ">
           <Image 
                   src="/images/logo-top-nav.png" 
                   alt="Band Practice" 

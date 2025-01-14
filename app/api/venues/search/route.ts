@@ -18,6 +18,19 @@ function getBoundingBox(lat: number, lng: number, radiusMiles: number) {
   };
 }
 
+// Helper function to calculate venue completeness score
+function getVenueCompletenessScore(venue: any) {
+  const fields = [
+    venue.phone && venue.phone !== 'null',
+    venue.email && venue.email !== 'null',
+    venue.description && venue.description !== 'null',
+    venue.capacity && venue.capacity !== 'null',
+    venue.venuetype && venue.venuetype !== 'null',
+    venue.latitude && venue.longitude && !isNaN(Number(venue.latitude)) && !isNaN(Number(venue.longitude))
+  ];
+  return fields.filter(Boolean).length;
+}
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -129,24 +142,37 @@ export async function GET(request: Request) {
       }
     }
 
-    // Apply pagination after range filtering
+    // Apply sorting
+    if (venues) {
+      if (sortBy === 'completeness' || !sortBy) {
+        // Sort by completeness first
+        venues = venues.sort((a, b) => {
+          const aScore = getVenueCompletenessScore(a);
+          const bScore = getVenueCompletenessScore(b);
+          if (aScore !== bScore) {
+            return sortOrder === 'asc' ? aScore - bScore : bScore - aScore;
+          }
+          // If completeness scores are equal, sort by title
+          return a.title.localeCompare(b.title);
+        });
+      } else if (sortBy === 'distance' && rangeMiles > 0) {
+        // Distance sorting would be handled here if needed
+        venues = venues.sort((a, b) => (sortOrder === 'asc' ? -1 : 1));
+      } else {
+        venues = venues.sort((a, b) => {
+          const aVal = a[sortBy] || '';
+          const bVal = b[sortBy] || '';
+          return sortOrder === 'asc' 
+            ? aVal.toString().localeCompare(bVal.toString())
+            : bVal.toString().localeCompare(aVal.toString());
+        });
+      }
+    }
+
+    // Apply pagination after sorting
     const start = (page - 1) * perPage;
     const end = start + perPage;
     const paginatedVenues = venues ? venues.slice(start, end) : [];
-    
-    // Apply sorting
-    if (sortBy === 'distance' && rangeMiles > 0) {
-      // Distance sorting would be handled here if needed
-      paginatedVenues.sort((a, b) => (sortOrder === 'asc' ? -1 : 1));
-    } else {
-      paginatedVenues.sort((a, b) => {
-        const aVal = a[sortBy] || '';
-        const bVal = b[sortBy] || '';
-        return sortOrder === 'asc' 
-          ? aVal.toString().localeCompare(bVal.toString())
-          : bVal.toString().localeCompare(aVal.toString());
-      });
-    }
 
     if (error) {
       console.error('Supabase query error:', error);

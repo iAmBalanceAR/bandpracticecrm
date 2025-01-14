@@ -5,10 +5,12 @@ import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/components/ui/use-toast';
 import { Venue } from '@/app/types/venue';
-import { Heart, MapPin, Users, Loader2 } from 'lucide-react';
+import { Heart, MapPin, Users, Loader2, Star } from 'lucide-react';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
+import { Badge } from '@/components/ui/badge';
+import { useSearchParams } from 'next/navigation';
 
 const Map = dynamic(() => import('@/components/ui/map'), {
   loading: () => <div className="h-48 bg-muted animate-pulse rounded-md" />,
@@ -23,6 +25,7 @@ interface VenueGridProps {
   perPage: number;
   onLoadMore: () => void;
   onVenueSaved?: () => void;
+  source?: string;
 }
 
 interface SavedVenue {
@@ -37,7 +40,8 @@ export default function VenueGrid({
   page = 1,
   perPage = 12,
   onLoadMore,
-  onVenueSaved
+  onVenueSaved,
+  source = 'search'
 }: VenueGridProps) {
   const { toast } = useToast();
   const [loadingMore, setLoadingMore] = useState(false);
@@ -53,6 +57,7 @@ export default function VenueGrid({
     message: '',
     type: 'success'
   });
+  const searchParams = useSearchParams();
 
   useEffect(() => {
     fetchSavedVenues();
@@ -128,9 +133,46 @@ export default function VenueGrid({
     setLoadingMore(false);
   };
 
+  const isVenueComplete = (venue: any) => {
+    const requiredFields = [
+      venue.phone && venue.phone !== 'null',
+      venue.email && venue.email !== 'null',
+      venue.description && venue.description !== 'null',
+      venue.capacity && venue.capacity !== 'null',
+      venue.venuetype && venue.venuetype !== 'null'
+    ];
+    return requiredFields.filter(Boolean).length >= 3;
+  };
+
+  const hasMapData = (venue: any) => {
+    return venue.latitude && 
+           venue.longitude && 
+           !isNaN(Number(venue.latitude)) && 
+           !isNaN(Number(venue.longitude));
+  };
+
+  const sortVenues = (venues: any[]) => {
+    return [...venues].sort((a, b) => {
+      const aComplete = isVenueComplete(a);
+      const bComplete = isVenueComplete(b);
+      const aHasMap = hasMapData(a);
+      const bHasMap = hasMapData(b);
+
+      if (aComplete !== bComplete) return aComplete ? -1 : 1;
+      if (aHasMap !== bHasMap) return aHasMap ? -1 : 1;
+      return 0;
+    });
+  };
+
+  const getVenueDetailUrl = (venueId: string) => {
+    const currentParams = new URLSearchParams(searchParams.toString());
+    currentParams.set('source', source);
+    return `/venues/${venueId}?${currentParams.toString()}`;
+  };
+
   if (loading && venues.length === 0) {
     return (
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {Array.from({ length: perPage }).map((_, index) => (
           <Card key={index} className="bg-[#030817] border-blue-800 border rounded-md">
             <CardHeader className="p-0">
@@ -165,10 +207,18 @@ export default function VenueGrid({
 
   return (
     <div className="space-y-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {venues.map((venue) => (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {sortVenues(venues).map((venue) => (
           <Card key={venue.id} className="bg-[#030817] border-blue-400 border-2 rounded-md overflow-hidden group relative">
-            <Link href={`/venues/${venue.id}`} className="block">
+            {isVenueComplete(venue) && (
+              <div className="absolute top-2 right-2 z-10">
+                <Badge variant="default" className="bg-blue-500">
+                  <Star className="h-3 w-3 mr-1" />
+                  Complete
+                </Badge>
+              </div>
+            )}
+            <Link href={getVenueDetailUrl(venue.id)} className="block">
               <CardHeader className="p-0 relative">
                 {venue.latitude && 
                  venue.longitude && 
@@ -212,7 +262,7 @@ export default function VenueGrid({
                 </div>
                 <div className="flex items-center text-sm text-gray-400">
                   <Users className="h-4 w-4 mr-1" />
-                  Capacity: {venue.capacity?.toLocaleString() || 'N/A'}
+                  {venue.capacity && String(venue.capacity) !== 'null' ? `Capacity: ${Number(venue.capacity).toLocaleString()}` : null}
                 </div>
               </CardContent>
             </Link>

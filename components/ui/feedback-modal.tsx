@@ -52,6 +52,15 @@ export function FeedbackModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
+      <style jsx global>{`
+        .leaflet-pane {
+          z-index: 1 !important;
+        }
+        .leaflet-top,
+        .leaflet-bottom {
+          z-index: 2 !important;
+        }
+      `}</style>
       <DialogPortal>
         <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
         <DialogContent className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">

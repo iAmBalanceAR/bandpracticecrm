@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { VenueSearchFilters } from '@/app/types/venue';
 import VenueSearchHeader from '@/components/crm/venue-search-header';
@@ -16,6 +16,9 @@ export default function VenuesSearchMain() {
     const [totalCount, setTotalCount] = useState(0);
     const [hasSearched, setHasSearched] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
+    const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'search');
+    const searchScrollPosition = useRef(0);
+    const searchContainerRef = useRef<HTMLDivElement>(null);
     const [localFilters, setLocalFilters] = useState<VenueSearchFilters>({
       query: searchParams.get('query') ?? '',
       city: searchParams.get('city') ?? '',
@@ -67,6 +70,7 @@ export default function VenuesSearchMain() {
   
     const handleSearch = async (newFilters: Partial<VenueSearchFilters>) => {
       setLoading(true);
+      setHasSearched(true);
       const updatedFilters = { ...localFilters, ...newFilters, page: 1 };
       setLocalFilters(updatedFilters);
       
@@ -85,7 +89,6 @@ export default function VenuesSearchMain() {
         const data = await response.json();
         setVenues(data.venues);
         setTotalCount(data.total);
-        setHasSearched(true);
         setCurrentPage(1);
         
         // Update URL after data is loaded
@@ -133,10 +136,30 @@ export default function VenuesSearchMain() {
       }
     }, []);
 
+    // Save scroll position when switching tabs
+    const handleTabChange = (value: string) => {
+        if (activeTab === 'search' && searchContainerRef.current) {
+            searchScrollPosition.current = searchContainerRef.current.scrollTop;
+        }
+        setActiveTab(value);
+        
+        // Update URL with new tab value
+        const currentParams = new URLSearchParams(searchParams.toString());
+        currentParams.set('tab', value);
+        router.push(`/venues?${currentParams.toString()}`);
+    };
+
+    // Restore scroll position when returning to search tab
+    useEffect(() => {
+        if (activeTab === 'search' && searchContainerRef.current) {
+            searchContainerRef.current.scrollTop = searchScrollPosition.current;
+        }
+    }, [activeTab]);
+
     return (
-      <div className="mx-auto max-w-7xl px-2 sm:px-3 lg:px-4 py-4">
+      <div className="mx-auto max-w-7xl px-0 sm:px-3 lg:px-0 py0">
         <div className="flex justify-center mb-8">
-          <Tabs defaultValue="search" className="w-full">
+          <Tabs value={activeTab} onValueChange={handleTabChange} className="w-full">
             <div className="flex justify-center">
               <TabsList className="w-full max-w-lg">
                 <TabsTrigger value="search" className="flex-1">Search Venues</TabsTrigger>
@@ -148,19 +171,24 @@ export default function VenuesSearchMain() {
                 query={localFilters.query}
                 onSearch={(query) => handleSearch({ query })}
               />
-              <div className="flex flex-col lg:flex-row gap-8">
+              <div className="flex flex-col lg:flex-row gap-4">
                 <div className="w-full lg:w-64 flex-none">
                   <VenueSearchFiltersComponent
                     filters={localFilters}
                     onFilterChange={handleSearch}
                   />
                 </div>
-                <div className="flex-1">
+                <div className="flex-1" ref={searchContainerRef}>
                   {!hasSearched ? (
                     <div className="text-center py-12">
                       <h2 className="text-xl text-gray-400">
                         Enter a search term or apply filters to find venues
                       </h2>
+                    </div>
+                  ) : loading && venues.length === 0 ? (
+                    <div className="flex flex-col items-center justify-center py-12">
+                      <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
+                      <p className="text-lg text-gray-400">Searching venues...</p>
                     </div>
                   ) : (
                     <>
@@ -177,6 +205,7 @@ export default function VenuesSearchMain() {
                         perPage={localFilters.per_page}
                         onLoadMore={handleLoadMore}
                         onVenueSaved={fetchSavedVenues}
+                        source="search"
                       />
                     </>
                   )}
@@ -202,6 +231,7 @@ export default function VenuesSearchMain() {
                     perPage={savedVenues.length}
                     onLoadMore={() => {}}
                     onVenueSaved={fetchSavedVenues}
+                    source="saved"
                   />
                 )}
               </div>

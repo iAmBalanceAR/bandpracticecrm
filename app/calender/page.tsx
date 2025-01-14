@@ -6,7 +6,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 
 export default function Page() {
   return (
-      <CustomSectionHeader title="Gig Calendar" underlineColor="#131d43">
+      <CustomSectionHeader title="Gig Calendar" underlineColor="#D9862F">
         <Card className="bg-[#111C44] border-none p-0 m-0">
         <CardHeader className="pb-0 mb-0">
           <CardTitle className="flex justify-between items-center text-3xl font-bold">

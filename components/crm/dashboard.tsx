@@ -20,13 +20,13 @@ export function Dashboard() {
       <div className="w-full">
         {/* Start Common Header Component  */} 
         <header className="flex items-center justify-between ml-8 pr-0 h-16">
-          <h1 className="text-4xl text-white">
-            <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+          <h1 className="text-5xl text-white">
+            <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800 ">
               {isLoading ? 'Loading...' : currentTour?.title || 'No Tour Selected'} : Dashboard
             </span>
           </h1>
         </header>
-        <div className="clear-both border-[#d83b34] border-b-2 -mt-6 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
+        <div className="clear-both border-[#018FFB] border-b-2 -mt-5 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
         {/* End Common Header Component  */}
         <main className="clearboth p-4">
           <div className="w-full bg-[#0f1729] p-4">

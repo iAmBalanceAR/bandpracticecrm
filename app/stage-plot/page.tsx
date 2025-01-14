@@ -90,7 +90,7 @@ export default function StagePlotPage() {
   }
 
   return (
-    <CustomSectionHeader title="Stage Plot Generator" underlineColor="#0f1729">
+    <CustomSectionHeader title="Stage Plot Generator" underlineColor="#FF9921">
       <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
         <CardHeader className="pb-4 mb-2">
           <CardTitle className="flex justify-end ittems-center text-3xl font-bold">

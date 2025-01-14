@@ -15,7 +15,7 @@ import { Loader2 } from "lucide-react";
 export default function VenuesPage() {
 
   return (
-    <CustomSectionHeader title="Venue Database Search" underlineColor="#008ffb">
+    <CustomSectionHeader title="Venue Database Search" underlineColor="#00E396">
     <Card className="bg-[#111C44]  min-h-[500px] border-none p-0 m-0">
     <CardHeader className="pb-0 mb-0">
       <CardTitle className="flex justify-between items-center text-3xl font-bold">

@@ -84,7 +84,7 @@ export default function VenueSearchHeader({ query = '', onSearch }: VenueSearchH
 
   return (
     <div className="relative w-full">
-      <div className="mx-auto max-w-7xl pb-2 bg-[#0a1129] border-blue-800 border rounded-md mb-4 shadow-lg">
+      <div className="mx-auto max-w-7xl pb-2 bg-[#0a1129] border-blue-500 border rounded-md mb-4 shadow-lg">
         <div className="max-w-full m-4">
           <h2 className="text-3xl font-bold mt-0 text-white mb-2">
             Search Venues:
@@ -112,7 +112,7 @@ export default function VenueSearchHeader({ query = '', onSearch }: VenueSearchH
                     }
                   }}
                   placeholder="Search venues by name, location, or type..."
-                  className="pl-10"
+                  className="pl-10 border border-white"
                 />
               </div>
               {showSuggestions && (
