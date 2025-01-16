@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Lead } from '@/app/types/lead';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -56,7 +56,7 @@ type RealtimeLeadPayload = RealtimePostgresChangesPayload<{
 export default function LeadsDataView() {
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
+  const { supabase } = useSupabase();
   const router = useRouter();
 
   const fetchLeads = async () => {
@@ -68,7 +68,8 @@ export default function LeadsDataView() {
 
       if (error) {
         console.error('Error fetching leads:', error);
-        throw error;
+        toast.error('Failed to fetch leads');
+        return;
       }
       
       setLeads((data || []) as Lead[]);

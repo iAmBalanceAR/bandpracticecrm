@@ -9,6 +9,7 @@ import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { format } from 'date-fns'
 import { Loader2 } from "lucide-react"
 import { FeedbackModal } from '@/components/ui/feedback-modal'
+import { useAuth } from '@/components/providers/auth-provider'
 
 interface RouteInfo {
   totalMileage: number;
@@ -25,6 +26,7 @@ type FeedbackModalState = {
 
 export default function AnalyticsCard() {
   const { currentTour } = useTour()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [gigs, setGigs] = React.useState<Gig[]>([])
   const [loading, setLoading] = React.useState(true)
   const [routeInfo, setRouteInfo] = React.useState<RouteInfo>({
@@ -41,6 +43,11 @@ export default function AnalyticsCard() {
 
   // Fetch gigs and calculate route info
   React.useEffect(() => {
+    if (!isAuthenticated) {
+      setLoading(false)
+      return
+    }
+
     const loadGigs = async () => {
       if (!currentTour) return
       setLoading(true)
@@ -101,7 +108,7 @@ export default function AnalyticsCard() {
     }
 
     loadGigs()
-  }, [currentTour])
+  }, [currentTour, isAuthenticated])
 
   // Calculate financial summary statistics
   const summaryStats = React.useMemo(() => {
@@ -138,7 +145,16 @@ export default function AnalyticsCard() {
   return (
     <CustomCard title="Tour Analytics Overview" cardColor="[#ff9920]">
       <div className="h-[430px] p-4">
-        {loading ? (
+        {authLoading ? (
+          <div className="w-full h-full flex flex-col items-center justify-center gap-2">
+            <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+            <p className="text-gray-400">Loading...</p>
+          </div>
+        ) : !isAuthenticated ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <p className="text-gray-400">Please sign in to view analytics</p>
+          </div>
+        ) : loading ? (
           <div className="w-full h-full flex flex-col items-center justify-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
             <p className="text-gray-400">Loading analytics data...</p>

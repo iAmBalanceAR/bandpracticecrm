@@ -21,7 +21,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { toast } from 'sonner';
 import LeadDialog from '@/app/leads/components/forms/lead-dialog';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
@@ -53,7 +53,7 @@ const priorityColors = {
 
 export default function LeadHeader({ lead }: LeadHeaderProps) {
   const router = useRouter();
-  const supabase = createClient();
+  const { supabase } = useSupabase();
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     title: string;

@@ -1,3 +1,5 @@
+'use client'
+
 import * as React from "react"
 import { Heart, Loader2 } from 'lucide-react'
 import { Button } from "@/components/ui/button"
@@ -9,15 +11,38 @@ import { FeedbackModal } from "@/components/ui/feedback-modal"
 import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation"
 import { Table, TableHeader, TableBody, TableHead, TableRow, TableCell } from "@/components/ui/table"
 import { cn } from "@/lib/utils"
+import { useAuth } from '@/components/providers/auth-provider'
+import { useSupabase } from '@/components/providers/supabase-client-provider'
 
 interface SavedVenuesCardProps {
   onVenueSaved?: () => void;
+}
+
+interface SavedVenueResponse {
+  id: number;
+  venue_id: string;
+  created_date: string;
+  venue: {
+    id: string;
+    title: string;
+    address: string;
+    city: string;
+    state: string;
+    zip: string;
+    latitude: string;
+    longitude: string;
+    capacity: string;
+    verified: string;
+    [key: string]: any; // for other fields
+  };
 }
 
 export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) {
   const [venues, setVenues] = useState<Venue[]>([]);
   const [loading, setLoading] = useState(true);
   const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { supabase } = useSupabase()
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -31,18 +56,45 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
   });
 
   const fetchSavedVenues = async () => {
+    if (!isAuthenticated) return;
+    
+    setLoading(true);
     try {
-      const response = await fetch('/api/venues/saved/list');
-      if (!response.ok) throw new Error('Failed to fetch saved venues');
-      const data = await response.json();
-      // Only take the 5 most recent venues
-      setVenues(data.venues?.slice(0, 5) || []);
+      const { data: savedVenues, error } = await supabase
+        .from('saved_venues')
+        .select(`
+          id,
+          venue_id,
+          created_date,
+          venue:venues (*)
+        `)
+        .order('created_date', { ascending: false })
+        .limit(5) as { data: SavedVenueResponse[] | null, error: any };
+
+      if (error) throw error;
+
+      const venues = (savedVenues || []).map(sv => ({
+        id: sv.venue_id,
+        title: sv.venue.title || '',
+        address: sv.venue.address || '',
+        city: sv.venue.city || '',
+        state: sv.venue.state || '',
+        zip: sv.venue.zip || '',
+        latitude: sv.venue.latitude,
+        longitude: sv.venue.longitude,
+        verified: sv.venue.verified === 'true',
+        capacity: sv.venue.capacity ? parseInt(sv.venue.capacity) : undefined,
+        created_at: sv.created_date,
+        updated_at: sv.created_date
+      } satisfies Venue));
+      
+      setVenues(venues);
     } catch (error) {
       console.error('Error fetching saved venues:', error);
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
-        message: 'Failed to load saved venues',
+        message: 'Failed to load saved venues. Please try again.',
         type: 'error'
       });
     } finally {
@@ -51,24 +103,33 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
   };
 
   useEffect(() => {
-    fetchSavedVenues();
-  }, []);
+    if (isAuthenticated) {
+      fetchSavedVenues();
+    }
+  }, [isAuthenticated]);
 
   const handleUnsaveVenue = async (venueId: string) => {
+    if (!isAuthenticated) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Authentication Required',
+        message: 'Please sign in to manage saved venues',
+        type: 'error'
+      });
+      return;
+    }
+
     showDeleteConfirmation(venueId, {
       title: 'Remove Saved Venue',
       message: 'Are you sure you want to remove this venue from your saved list? This action cannot be undone.',
       onConfirm: async () => {
         try {
-          const response = await fetch('/api/venues/saved', {
-            method: 'DELETE',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ venue_id: venueId }),
-          });
+          const { error } = await supabase
+            .from('saved_venues')
+            .delete()
+            .eq('venue_id', venueId);
 
-          if (!response.ok) throw new Error('Failed to unsave venue');
+          if (error) throw error;
 
           setFeedbackModal({
             isOpen: true,
@@ -100,7 +161,7 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
         addclassName="h-[350x] bg-[#020817]"
       >
         <div className="bg-[#020817] h-[calc(370px-3.5rem)] overflow-y-auto">
-          <Table className="w-full ">
+          <Table className="w-full">
             <TableHeader className="text-black border-0 bg-white sticky top-0 z-10">
               <TableRow>
                 <TableHead className="bg-white p-[7px] pl-4 text-left text-xs font-medium">Venue</TableHead>
@@ -110,7 +171,21 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
               </TableRow>
             </TableHeader>
             <TableBody>
-              {loading ? (
+              {authLoading ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="px-4 py-8">
+                    <div className="flex justify-center items-center">
+                      <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ) : !isAuthenticated ? (
+                <TableRow>
+                  <TableCell colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400">
+                    Please sign in to view saved venues
+                  </TableCell>
+                </TableRow>
+              ) : loading ? (
                 <TableRow>
                   <TableCell colSpan={4} className="px-4 py-8">
                     <div className="flex justify-center items-center">

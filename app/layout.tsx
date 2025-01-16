@@ -18,17 +18,9 @@ export const viewport: Viewport = {
 }
 
 export const metadata: Metadata = {
-  title: 'Band Practice Agent',
-  description: 'Your band practice companion',
-  viewport: {
-    width: 'device-width',
-    initialScale: 1,
-    maximumScale: 1,
-    userScalable: false,
-    viewportFit: 'cover',
-  },
-  themeColor: '#000000',
-  metadataBase: new URL('http://localhost:3000'),
+  title: 'Band Practice CRM',
+  description: 'Tour Management Simplified',
+   metadataBase: new URL('http://localhost:3000'),
   formatDetection: {
     telephone: true,
     date: true,
@@ -45,22 +37,24 @@ interface RootLayoutProps {
 }
 
 async function getSupabaseSession() {
-  const supabase = createClient()
-  
-  try {
-    const [userResponse, sessionResponse] = await Promise.all([
-      supabase.auth.getUser(),
-      supabase.auth.getSession()
-    ])
+  const supabase = createClient();
 
-    return {
-      user: userResponse.data.user,
-      session: sessionResponse.data.session,
-      error: userResponse.error
+  try {
+    const { data: { user }, error } = await supabase.auth.getUser();
+
+    if (error) {
+      console.error('Error fetching user:', error);
+      return { user: null, session: null, error };
     }
+
+    // If you need the session object for other purposes, you can still retrieve it
+    // after ensuring the user is authenticated.
+    const { data: { session } } = await supabase.auth.getSession();
+
+    return { user, session, error: null };
   } catch (error) {
-    console.error('Error fetching Supabase session:', error)
-    return { user: null, session: null, error }
+    console.error('Error fetching Supabase session:', error);
+    return { user: null, session: null, error };
   }
 }
 

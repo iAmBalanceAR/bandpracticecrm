@@ -1,22 +1,23 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lead, LeadNote } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
-import createClient from '@/utils/supabase/client';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreVertical } from 'lucide-react';
+import { MoreVertical, Loader2 } from 'lucide-react';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 interface LeadNotesProps {
@@ -34,6 +35,7 @@ type FeedbackModalState = {
 };
 
 export default function LeadNotes({ lead }: LeadNotesProps) {
+  const [notes, setNotes] = useState<Partial<LeadNote>[]>(lead.lead_notes || []);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
     isOpen: false,
@@ -42,20 +44,59 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
     type: 'success'
   });
   const router = useRouter();
-  const supabase = createClient();
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  // Subscribe to realtime changes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('lead_notes_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'lead_notes',
+          filter: `lead_id=eq.${lead.id}`
+        }, 
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setNotes(prev => [payload.new as LeadNote, ...prev]);
+          } else if (payload.eventType === 'DELETE' && payload.old.id) {
+            setNotes(prev => prev.filter(note => note.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to notes changes:', status);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, lead.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+
+    if (!isAuthenticated) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to add notes',
+        type: 'error'
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const formData = new FormData(e.currentTarget);
-      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-        throw new Error('No session found');
-      }
-
       const { data, error } = await supabase
         .rpc('create_lead_note', {
           note_data: {
@@ -88,6 +129,16 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
   };
 
   const handleDelete = async (noteId: string) => {
+    if (!isAuthenticated) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to delete notes',
+        type: 'error'
+      });
+      return;
+    }
+
     setFeedbackModal({
       isOpen: true,
       title: 'Delete Note',
@@ -95,12 +146,6 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
       type: 'delete',
       onConfirm: async () => {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (!session) {
-            throw new Error('No session found');
-          }
-
           const { error } = await supabase
             .rpc('delete_lead_note', {
               note_id: noteId
@@ -127,6 +172,22 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
       }
     });
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-400 mb-4">Please sign in to view and manage notes</p>
+      </div>
+    );
+  }
 
   return (
     <div className="relative">
@@ -155,12 +216,12 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
         </form>
 
         <div className="space-y-4">
-          {!lead.lead_notes?.length ? (
+          {!notes?.length ? (
             <p className="text-center text-muted-foreground py-4">
               No notes yet. Add your first note above.
             </p>
           ) : (
-            lead.lead_notes
+            notes
               .sort((a, b) => {
                 const dateA = a.created_at ? new Date(a.created_at).getTime() : 0;
                 const dateB = b.created_at ? new Date(b.created_at).getTime() : 0;
@@ -187,7 +248,7 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end" className="w-[200px] bg-[#111C44]">
                         <DropdownMenuItem
-                          onClick={() => handleDelete(note.id)}
+                          onClick={() => note.id && handleDelete(note.id)}
                           className="text-red-600 cursor-pointer"
                         >
                           Delete Note

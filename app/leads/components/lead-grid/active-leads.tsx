@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Lead } from '@/app/types/lead';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
@@ -11,9 +11,9 @@ import { Building2, Mail, Phone, Calendar } from 'lucide-react';
 import { toast } from 'react-hot-toast';
 
 export default function ActiveLeads() {
+  const { supabase } = useSupabase();
   const [leads, setLeads] = useState<Lead[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const supabase = createClient();
 
   const fetchActiveLeads = async () => {
     setIsLoading(true);

@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Plus, GripVertical, Calendar, Loader2, FileDown } from 'lucide-react'
 import { gigHelpers } from '@/utils/db/gigs'
 import { Label } from "@/components/ui/label"
-import createClient from '@/utils/supabase/client'
+import { useSupabase } from '@/components/providers/supabase-client-provider'
+import { useAuth } from '@/components/providers/auth-provider'
 import type { Venue } from '@/types/venue'
 import { FeedbackModal } from "@/components/ui/feedback-modal"
 import {
@@ -167,6 +168,8 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete, sa
 }
 
 export default function TourManagement() {
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [tourStops, setTourStops] = useState<TourStop[]>([])
   const [routeInfo, setRouteInfo] = useState<RouteInfo>({ stops: [], distances: [], totalMileage: 0 })
   const [route, setRoute] = useState<[number, number][]>([])
@@ -204,64 +207,68 @@ export default function TourManagement() {
   )
 
   useEffect(() => {
-    const loadGigData = async () => {
-      setLoading(true)
-      try {
-        // First, get all gigs and sort them by date
-        const gigs = await gigHelpers.getGigs()
-        const sortedGigs = gigs.sort((a, b) => 
-          new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime()
+    if (isAuthenticated) {
+      loadGigData();
+    }
+  }, [isAuthenticated]);
+
+  const loadGigData = async () => {
+    if (!isAuthenticated) return;
+    
+    setLoading(true);
+    try {
+      // First, get all gigs and sort them by date
+      const gigs = await gigHelpers.getGigs()
+      const sortedGigs = gigs.sort((a, b) => 
+        new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime()
+      )
+
+      // Convert gigs to tour stops
+      const gigStops = await Promise.all(sortedGigs.map(async (gig) => {
+        // Get coordinates for the gig
+        const coordinates = await getCoordinates(
+          `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`
         )
 
-        // Convert gigs to tour stops
-        const gigStops = await Promise.all(sortedGigs.map(async (gig) => {
-          // Get coordinates for the gig
-          const coordinates = await getCoordinates(
-            `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`
-          )
-
-          return {
-            id: gig.id,
-            name: gig.venue,
-            lat: coordinates[0],
-            lng: coordinates[1],
-            city: gig.venue_city,
-            state: gig.venue_state,
-            address: gig.venue_address,
-            zip: gig.venue_zip,
-            savedToGigs: true,
-            gig_date: gig.gig_date
-          }
-        }))
-
-        // Get saved stops from localStorage
-        const savedStopsString = localStorage.getItem('tourStops')
-        let unsavedStops: TourStop[] = []
-        
-        if (savedStopsString) {
-          const parsedStops = JSON.parse(savedStopsString)
-          // Get all unsaved stops
-          unsavedStops = parsedStops.filter((stop: TourStop) => !stop.savedToGigs)
+        return {
+          id: gig.id,
+          name: gig.venue,
+          lat: coordinates[0],
+          lng: coordinates[1],
+          city: gig.venue_city,
+          state: gig.venue_state,
+          address: gig.venue_address,
+          zip: gig.venue_zip,
+          savedToGigs: true,
+          gig_date: gig.gig_date
         }
+      }))
 
-        // Combine stops: saved gigs and unsaved stops
-        const combinedStops = [...gigStops, ...unsavedStops]
-        setTourStops(combinedStops)
-        localStorage.setItem('tourStops', JSON.stringify(combinedStops))
-      } catch (error) {
-        console.error('Error loading gig data:', error)
-        // If there's an error, load from localStorage
-        const savedStopsString = localStorage.getItem('tourStops')
-        if (savedStopsString) {
-          setTourStops(JSON.parse(savedStopsString))
-        }
-      } finally {
-        setLoading(false)
+      // Get saved stops from localStorage
+      const savedStopsString = localStorage.getItem('tourStops')
+      let unsavedStops: TourStop[] = []
+      
+      if (savedStopsString) {
+        const parsedStops = JSON.parse(savedStopsString)
+        // Get all unsaved stops
+        unsavedStops = parsedStops.filter((stop: TourStop) => !stop.savedToGigs)
       }
-    }
 
-    loadGigData()
-  }, [])
+      // Combine stops: saved gigs and unsaved stops
+      const combinedStops = [...gigStops, ...unsavedStops]
+      setTourStops(combinedStops)
+      localStorage.setItem('tourStops', JSON.stringify(combinedStops))
+    } catch (error) {
+      console.error('Error loading gig data:', error)
+      // If there's an error, load from localStorage
+      const savedStopsString = localStorage.getItem('tourStops')
+      if (savedStopsString) {
+        setTourStops(JSON.parse(savedStopsString))
+      }
+    } finally {
+      setLoading(false)
+    }
+  }
 
   useEffect(() => {
     if (tourStops.length > 0) {
@@ -327,35 +334,19 @@ export default function TourManagement() {
   }
 
   const handleVenueSearch = async (value: string) => {
-    setSearchValue(value)
-    if (value === '') {
-      setVenues([])
-      return
+    try {
+      const { data, error } = await supabase
+        .from('venues')
+        .select('*')
+        .textSearch('title', value)
+        .limit(5);
+
+      if (error) throw error;
+      setVenues(data || []);
+    } catch (error) {
+      console.error('Error searching venues:', error);
     }
-    if (value.length > 2) {
-      try {
-        const supabase = createClient()
-        console.log('Searching for venues with query:', value)
-        const { data, error } = await supabase
-          .from('venues')
-          .select('id, title, address, city, state, zip')
-          .ilike('title', `%${value}%`)
-          .limit(5)
-        
-        if (error) {
-          console.error('Supabase error:', error)
-          throw error
-        }
-        console.log('Found venues:', data)
-        setVenues(data || [])
-      } catch (error) {
-        console.error('Error searching venues:', error)
-        setVenues([])
-      }
-    } else {
-      setVenues([])
-    }
-  }
+  };
 
   const handleVenueSelect = (venue: Venue) => {
     console.log('Selected venue:', venue)
@@ -461,171 +452,86 @@ export default function TourManagement() {
   }
 
   const handleAddToCalendar = async (stop: TourStop) => {
+    if (!stop) return;
+    setSavingStop(stop.id);
+
     try {
-      setSavingStop(stop.id);
-      const gigData = {
-        title: stop.name,
-        venue: stop.name,
-        venue_address: stop.address,
-        venue_city: stop.city,
-        venue_state: stop.state,
-        venue_zip: stop.zip,
-        gig_date: new Date().toISOString().split('T')[0], // Default to today, will be changed in gig form
-        contact_name: '',
-        contact_email: '',
-        contact_phone: '',
-        load_in_time: '18:00',
-        sound_check_time: '18:30',
-        set_time: '20:00',
-        set_length: '45 minutes',
-        crew_hands_in: false,
-        crew_hands_out: false,
-        meal_included: false,
-        hotel_included: false,
-        deposit_amount: 0,
-        deposit_paid: false,
-        contract_total: 0,
-        open_balance: 0,
-        gig_details: '',
-        gig_status: 'pending' as const,
-        user_id: '' // Will be set by backend
-      }
+      // Create a new gig
+      const { data: newGig, error: gigError } = await supabase
+        .rpc('create_gig', {
+          gig_data: {
+            venue: stop.name,
+            venue_address: stop.address,
+            venue_city: stop.city,
+            venue_state: stop.state,
+            venue_zip: stop.zip,
+            gig_date: new Date().toISOString().split('T')[0],
+            load_in_time: '18:00',
+            sound_check_time: '19:00',
+            set_time: '20:00',
+            set_length: '45',
+            gig_details: 'Added from tour route',
+            crew_hands_in: false,
+            crew_hands_out: false,
+            meal_included: false,
+            hotel_included: false,
+            deposit_amount: 0,
+            deposit_paid: false,
+            contract_total: 0,
+            open_balance: 0,
+            gig_status: 'pending'
+          }
+        });
 
-      // Create the gig
-      const newGig = await gigHelpers.createGig(gigData);
+      if (gigError) throw gigError;
 
-      // Get the current default tour and user ID
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-      const { data: defaultTour } = await supabase
-        .from('tours')
-        .select('id')
-        .eq('is_default', true)
-        .single();
-
-      if (defaultTour && user) {
-        // Connect the gig to the default tour with user_id
-        const { error: connectError } = await supabase
-          .from('tourconnect')
-          .insert([{
-            gig_id: newGig.id,
-            tour_id: defaultTour.id,
-            user_id: user.id
-          }]);
-
-        if (connectError) {
-          console.error('Error connecting gig to tour:', connectError);
-          throw connectError;
-        }
-      }
-      
-      // Mark the stop as saved in the UI
-      setTourStops(prevStops => 
-        prevStops.map(s => 
-          s.id === stop.id ? { ...s, savedToGigs: true } : s
-        )
+      // Update the stop in tourStops
+      const updatedStops = tourStops.map(s => 
+        s.id === stop.id 
+          ? { ...s, savedToGigs: true, gig_date: new Date().toISOString() }
+          : s
       );
+
+      setTourStops(updatedStops);
+      localStorage.setItem('tourStops', JSON.stringify(updatedStops));
 
       setFeedbackModal({
         isOpen: true,
         title: 'Success',
-        message: 'Successfully added to calendar!',
+        message: 'Stop has been added to your calendar',
         type: 'success'
       });
-
-      // Reload gig data to refresh the view
-      const loadGigData = async () => {
-        const gigs = await gigHelpers.getGigs();
-        const sortedGigs = gigs.sort((a, b) => 
-          new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime()
-        );
-
-        const gigStops = await Promise.all(sortedGigs.map(async (gig) => {
-          const coordinates = await getCoordinates(
-            `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`
-          );
-          return {
-            id: gig.id,
-            name: gig.venue,
-            lat: coordinates[0],
-            lng: coordinates[1],
-            city: gig.venue_city,
-            state: gig.venue_state,
-            address: gig.venue_address,
-            zip: gig.venue_zip,
-            savedToGigs: true,
-            gig_date: gig.gig_date
-          };
-        }));
-
-        setTourStops(prevStops => {
-          const unsavedStops = prevStops.filter(s => !s.savedToGigs);
-          return [...gigStops, ...unsavedStops];
-        });
-      };
-
-      await loadGigData();
-
     } catch (error) {
-      console.error('Error adding to calendar:', error);
+      console.error('Error saving gig:', error);
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
-        message: 'Failed to add to calendar. Please try again.',
+        message: 'Failed to add stop to calendar',
         type: 'error'
       });
     } finally {
       setSavingStop(null);
     }
-  }
+  };
 
   const getCoordinates = async (location: string): Promise<[number, number]> => {
     try {
-      const params = new URLSearchParams({
-        format: 'json',
-        q: location,
-        addressdetails: '1',
-        countrycodes: 'us',
-        limit: '5'
-      })
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          location
+        )}`
+      );
+      const data: NominatimResult[] = await response.json();
 
-      const url = `https://nominatim.openstreetmap.org/search?${params}`
-      
-      const response = await fetch(url, {
-        headers: {
-          'User-Agent': 'BandPracticeTourManager/1.0'
-        }
-      })
-      const data = await response.json()
-      
-      if (!data || data.length === 0) {
-        setFeedbackModal({
-          isOpen: true,
-          title: 'Error',
-          message: "Location not found. Please try adding more details.",
-          type: 'error'
-        })
-        return [0, 0]
+      if (data && data.length > 0) {
+        return [parseFloat(data[0].lat), parseFloat(data[0].lon)];
       }
-
-      const validResult = data.find((result: NominatimResult) => 
-        result.addresstype !== 'county' && 
-        result.display_name.toLowerCase().includes('united states')
-      )
-
-      const result = validResult || data[0]
-      return [parseFloat(result.lat), parseFloat(result.lon)]
+      throw new Error('Location not found');
     } catch (error) {
-      console.error('Geocoding error:', error)
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Error',
-        message: "There was a problem searching for this location.",
-        type: 'error'
-      })
-      return [0, 0]
+      console.error('Error getting coordinates:', error);
+      throw error;
     }
-  }
+  };
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event
@@ -697,18 +603,29 @@ export default function TourManagement() {
     })
   }
 
+  if (authLoading || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="bg-[#192555] border-blue-800">
+        <div className="p-6 text-center text-white">
+          <p className="mb-4">Please sign in to view tour route.</p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
-    <CustomSectionHeader title="Tour Route Management" underlineColor="#008ffb">
+    <>
     <Card className="bg-[#111C44]  min-h-[500px] border-none p-0 m-0">
     <CardHeader className="pb-0 mb-0">
       <CardTitle className="flex justify-between items-center text-3xl font-bold">
-        <div className="">
-          <div className="flex flex-auto tracking-tight text-3xl">
-            <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black mb-2">
-              Tour Map
-            </span>
-          </div>
-        </div>
       </CardTitle>
     </CardHeader>
     <CardContent>
@@ -814,7 +731,7 @@ export default function TourManagement() {
               <div>
                 <h3 className="text-2xl mb-6">
                   <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                    Tour Route Plan
+                    Tour Stopss
                   </span>
                   <div className="border-[#ff9920] border-b-2 -mt-2 mb-4 w-[100%] h-2"></div>
                 </h3>
@@ -890,6 +807,6 @@ export default function TourManagement() {
           </div>
         </div>
       )}
-    </CustomSectionHeader>
+    </>
   )
 }

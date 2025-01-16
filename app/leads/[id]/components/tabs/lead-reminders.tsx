@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lead, LeadReminder } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,8 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { format, formatDistanceToNow } from 'date-fns';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
@@ -44,6 +45,7 @@ type FeedbackModalState = {
 };
 
 export default function LeadReminders({ lead }: LeadRemindersProps) {
+  const [reminders, setReminders] = useState<LeadReminder[]>(lead.reminders || []);
   const [isLoading, setIsLoading] = useState(false);
   const [dueDate, setDueDate] = useState<Date>();
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
@@ -53,7 +55,44 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
     type: 'success'
   });
   const router = useRouter();
-  const supabase = createClient();
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  // Subscribe to realtime changes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('lead_reminders_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'reminders',
+          filter: `lead_id=eq.${lead.id}`
+        }, 
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setReminders(prev => [payload.new as LeadReminder, ...prev]);
+          } else if (payload.eventType === 'DELETE' && payload.old.id) {
+            setReminders(prev => prev.filter(reminder => reminder.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE' && payload.new.id) {
+            setReminders(prev => prev.map(reminder => 
+              reminder.id === payload.new.id ? (payload.new as LeadReminder) : reminder
+            ));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to reminders changes:', status);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, lead.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -265,12 +304,12 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
         </form>
 
         <div className="space-y-4">
-          {lead.reminders.length === 0 ? (
+          {reminders.length === 0 ? (
             <p className="text-center text-muted-foreground py-4">
               No reminders yet. Add your first reminder above.
             </p>
           ) : (
-            lead.reminders
+            reminders
               .sort((a, b) => {
                 const dateA = new Date(a.due_date).getTime();
                 const dateB = new Date(b.due_date).getTime();

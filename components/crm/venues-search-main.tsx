@@ -6,10 +6,15 @@ import VenueSearchFiltersComponent from '@/components/crm/venue-search-filters';
 import VenueGrid from '@/components/crm/venue-grid';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from "lucide-react";
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
+import { toast } from 'sonner';
 
 export default function VenuesSearchMain() {
     const searchParams = useSearchParams();
     const router = useRouter();
+    const { supabase } = useSupabase();
+    const { isAuthenticated } = useAuth();
     const [loading, setLoading] = useState(false);
     const [venues, setVenues] = useState<any[]>([]);
     const [savedVenues, setSavedVenues] = useState<any[]>([]);
@@ -41,22 +46,43 @@ export default function VenuesSearchMain() {
   
     // Fetch saved venues
     const fetchSavedVenues = async () => {
+      if (!isAuthenticated) return;
+
       try {
         setLoading(true);
-        const response = await fetch('/api/venues/saved/list');
-        if (!response.ok) throw new Error('Failed to fetch saved venues');
-        const data = await response.json();
-        setSavedVenues(data.venues || []);
+        console.log('Fetching saved venues...');
+        const { data: savedVenueData, error: savedError } = await supabase
+          .from('saved_venues')
+          .select('venue_id');
+
+        if (savedError) throw savedError;
+
+        if (savedVenueData && savedVenueData.length > 0) {
+          const venueIds = savedVenueData.map(sv => sv.venue_id);
+          const { data: venues, error: venuesError } = await supabase
+            .from('venues')
+            .select('*')
+            .in('id', venueIds);
+
+          if (venuesError) throw venuesError;
+          console.log('Saved venues response:', venues);
+          setSavedVenues(venues || []);
+        } else {
+          setSavedVenues([]);
+        }
       } catch (error) {
         console.error('Error fetching saved venues:', error);
+        toast.error('Failed to fetch saved venues');
       } finally {
         setLoading(false);
       }
     };
   
     useEffect(() => {
-      fetchSavedVenues();
-    }, []);
+      if (isAuthenticated) {
+        fetchSavedVenues();
+      }
+    }, [isAuthenticated]);
 
     const updateUrl = useCallback((filters: VenueSearchFilters) => {
       const params = new URLSearchParams();
@@ -69,32 +95,64 @@ export default function VenuesSearchMain() {
     }, [router]);
   
     const handleSearch = async (newFilters: Partial<VenueSearchFilters>) => {
+      if (!isAuthenticated) {
+        toast.error('Please sign in to search venues');
+        return;
+      }
+
       setLoading(true);
       setHasSearched(true);
       const updatedFilters = { ...localFilters, ...newFilters, page: 1 };
       setLocalFilters(updatedFilters);
       
-      // Build query string
-      const params = new URLSearchParams();
-      Object.entries(updatedFilters).forEach(([key, value]) => {
-        if (value) {
-          params.set(key, String(value));
-        }
-      });
-      
       try {
-        const response = await fetch(`/api/venues/search?${params.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch venues');
+        console.log('Searching venues with filters:', updatedFilters);
+        let query = supabase
+          .from('venues')
+          .select('*', { count: 'exact' });
+
+        // Apply filters
+        if (updatedFilters.query) {
+          query = query.ilike('title', `%${updatedFilters.query}%`);
+        }
+        if (updatedFilters.state) {
+          query = query.eq('state', updatedFilters.state);
+        }
+        if (updatedFilters.city) {
+          query = query.ilike('city', `%${updatedFilters.city}%`);
+        }
+        if (updatedFilters.venue_type) {
+          query = query.eq('venue_type', updatedFilters.venue_type);
+        }
+        const capacity = Number(updatedFilters.capacity);
+        if (!isNaN(capacity) && capacity > 0) {
+          query = query.gte('capacity', capacity);
+        }
+
+        // Apply sorting
+        query = query.order(updatedFilters.sort_by, {
+          ascending: updatedFilters.sort_order === 'asc'
+        });
+
+        // Apply pagination
+        const start = (updatedFilters.page - 1) * updatedFilters.per_page;
+        const end = start + updatedFilters.per_page - 1;
+        query = query.range(start, end);
+
+        const { data, error, count } = await query;
+        console.log('Search response:', { data, error, count });
+
+        if (error) throw error;
         
-        const data = await response.json();
-        setVenues(data.venues);
-        setTotalCount(data.total);
+        setVenues(data || []);
+        setTotalCount(count || 0);
         setCurrentPage(1);
         
         // Update URL after data is loaded
         updateUrl(updatedFilters);
       } catch (error) {
-        console.error('Error fetching venues:', error);
+        console.error('Error searching venues:', error);
+        toast.error('Failed to search venues');
         setVenues([]);
         setTotalCount(0);
       } finally {
@@ -103,58 +161,125 @@ export default function VenuesSearchMain() {
     };
   
     const handleLoadMore = async () => {
+      if (!isAuthenticated) return;
+
       setLoading(true);
       const nextPage = currentPage + 1;
-      
-      // Build query string with next page
-      const params = new URLSearchParams();
-      Object.entries({ ...localFilters, page: nextPage }).forEach(([key, value]) => {
-        if (value) {
-          params.set(key, String(value));
-        }
-      });
+      const updatedFilters = { ...localFilters, page: nextPage };
       
       try {
-        const response = await fetch(`/api/venues/search?${params.toString()}`);
-        if (!response.ok) throw new Error('Failed to fetch more venues');
+        console.log('Loading more venues with filters:', updatedFilters);
+        let query = supabase
+          .from('venues')
+          .select('*');
+
+        // Apply filters
+        if (updatedFilters.query) {
+          query = query.ilike('title', `%${updatedFilters.query}%`);
+        }
+        if (updatedFilters.state) {
+          query = query.eq('state', updatedFilters.state);
+        }
+        if (updatedFilters.city) {
+          query = query.ilike('city', `%${updatedFilters.city}%`);
+        }
+        if (updatedFilters.venue_type) {
+          query = query.eq('venue_type', updatedFilters.venue_type);
+        }
+        const capacity = Number(updatedFilters.capacity);
+        if (!isNaN(capacity) && capacity > 0) {
+          query = query.gte('capacity', capacity);
+        }
+
+        // Apply sorting
+        query = query.order(updatedFilters.sort_by, {
+          ascending: updatedFilters.sort_order === 'asc'
+        });
+
+        // Apply pagination
+        const start = (updatedFilters.page - 1) * updatedFilters.per_page;
+        const end = start + updatedFilters.per_page - 1;
+        query = query.range(start, end);
+
+        const { data, error } = await query;
+        console.log('Load more response:', { data, error });
+
+        if (error) throw error;
         
-        const data = await response.json();
-        setVenues([...venues, ...data.venues]);
-        setTotalCount(data.total);
+        setVenues([...venues, ...(data || [])]);
         setCurrentPage(nextPage);
       } catch (error) {
-        console.error('Error fetching more venues:', error);
+        console.error('Error loading more venues:', error);
+        toast.error('Failed to load more venues');
       } finally {
         setLoading(false);
       }
     };
   
-    // Only fetch initial results if there are search params
+    // Only fetch initial results if there are search params and user is authenticated
     useEffect(() => {
-      if (searchParams.toString()) {
+      if (searchParams.toString() && isAuthenticated) {
         handleSearch(localFilters);
       }
-    }, []);
+    }, [isAuthenticated]);
 
     // Save scroll position when switching tabs
     const handleTabChange = (value: string) => {
-        if (activeTab === 'search' && searchContainerRef.current) {
-            searchScrollPosition.current = searchContainerRef.current.scrollTop;
+      if (!isAuthenticated) {
+        toast.error('Please sign in to access saved venues');
+        return;
+      }
+
+      if (value === 'search') {
+        // Store current scroll position for saved tab
+        const container = searchContainerRef.current;
+        if (container) {
+          searchScrollPosition.current = container.scrollTop;
         }
-        setActiveTab(value);
-        
-        // Update URL with new tab value
-        const currentParams = new URLSearchParams(searchParams.toString());
-        currentParams.set('tab', value);
-        router.push(`/venues?${currentParams.toString()}`);
+      }
+      setActiveTab(value);
+      router.push(`/venues?tab=${value}`);
     };
 
-    // Restore scroll position when returning to search tab
+    // Subscribe to real-time updates for saved venues
     useEffect(() => {
-        if (activeTab === 'search' && searchContainerRef.current) {
-            searchContainerRef.current.scrollTop = searchScrollPosition.current;
-        }
+      if (!isAuthenticated) return;
+
+      const subscription = supabase
+        .channel('saved_venues_changes')
+        .on(
+          'postgres_changes',
+          {
+            event: '*',
+            schema: 'public',
+            table: 'saved_venues'
+          },
+          () => {
+            fetchSavedVenues();
+          }
+        )
+        .subscribe();
+
+      return () => {
+        subscription.unsubscribe();
+      };
+    }, [isAuthenticated]);
+
+    // Restore scroll position when component mounts
+    useEffect(() => {
+      const container = searchContainerRef.current;
+      if (container && searchScrollPosition.current > 0) {
+        container.scrollTop = searchScrollPosition.current;
+      }
     }, [activeTab]);
+
+    if (!isAuthenticated) {
+      return (
+        <div className="flex items-center justify-center h-[calc(100vh-4rem)]">
+          <p className="text-muted-foreground">Please sign in to access the venue database</p>
+        </div>
+      );
+    }
 
     return (
       <div className="mx-auto max-w-7xl px-0 sm:px-3 lg:px-0 py0">
@@ -239,5 +364,5 @@ export default function VenuesSearchMain() {
           </Tabs>
         </div>
       </div>
-  );
+    );
 }

@@ -8,6 +8,7 @@ import { Plus, Pencil, Trash2, Loader2, X, Calendar, Star } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 import { useDeleteConfirmation } from '@/hooks/use-delete-confirmation';
 import { Input } from "@/components/ui/input";
@@ -50,6 +51,7 @@ interface Tour {
 export default function TourList() {
   const router = useRouter();
   const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const [tours, setTours] = useState<Tour[]>([]);
   const [loading, setLoading] = useState(true);
   const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();
@@ -73,10 +75,14 @@ export default function TourList() {
   const [isDefault, setIsDefault] = useState(false);
 
   useEffect(() => {
-    fetchTours();
-  }, []);
+    if (isAuthenticated) {
+      fetchTours();
+    }
+  }, [isAuthenticated]);
 
   const fetchTours = async () => {
+    if (!isAuthenticated) return;
+    
     try {
       setLoading(true);
       const { data, error } = await supabase
@@ -292,12 +298,21 @@ export default function TourList() {
     }
   };
 
-  if (loading) {
+  if (authLoading || loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <Loader2 className="h-8 w-8 animate-spin text-blue-500 mb-4" />
-        <p className="text-muted-foreground">Loading tours...</p>
+      <div className="flex items-center justify-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="bg-[#192555] border-blue-800">
+        <div className="p-6 text-center text-white">
+          <p className="mb-4">Please sign in to view tours.</p>
+        </div>
+      </Card>
     );
   }
 

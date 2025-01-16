@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Lead, LeadCommunication } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -14,10 +14,11 @@ import {
 } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
-import createClient from '@/utils/supabase/client';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, MessageSquare, Calendar, MoreVertical } from 'lucide-react';
+import { Mail, Phone, MessageSquare, Calendar, MoreVertical, Loader2 } from 'lucide-react';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,6 +48,7 @@ type FeedbackModalState = {
 };
 
 export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
+  const [communications, setCommunications] = useState<Partial<LeadCommunication>[]>(lead.communications || []);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
     isOpen: false,
@@ -55,20 +57,59 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
     type: 'success'
   });
   const router = useRouter();
-  const supabase = createClient();
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  // Subscribe to realtime changes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('lead_communications_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'communications',
+          filter: `lead_id=eq.${lead.id}`
+        }, 
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setCommunications(prev => [payload.new as LeadCommunication, ...prev]);
+          } else if (payload.eventType === 'DELETE' && payload.old.id) {
+            setCommunications(prev => prev.filter(comm => comm.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to communications changes:', status);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, lead.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to add communications',
+        type: 'error'
+      });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const formData = new FormData(e.currentTarget);
-      const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session) {
-        throw new Error('No session found');
-      }
-
       const { data, error } = await supabase
         .rpc('create_communication', {
           comm_data: {
@@ -104,6 +145,16 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
   };
 
   const handleDelete = async (communicationId: string) => {
+    if (!isAuthenticated) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to delete communications',
+        type: 'error'
+      });
+      return;
+    }
+
     setFeedbackModal({
       isOpen: true,
       title: 'Delete Communication',
@@ -111,12 +162,6 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
       type: 'delete',
       onConfirm: async () => {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
-          
-          if (!session) {
-            throw new Error('No session found');
-          }
-
           const { error } = await supabase
             .rpc('delete_communication', {
               comm_id: communicationId
@@ -143,6 +188,22 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
       }
     });
   };
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-400 mb-4">Please sign in to view and manage communications</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -200,12 +261,12 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
         </form>
 
         <div className="space-y-4">
-          {lead.communications.length === 0 ? (
+          {communications.length === 0 ? (
             <p className="text-center text-muted-foreground py-4">
               No communications yet. Add your first communication above.
             </p>
           ) : (
-            lead.communications
+            communications
               .sort((a, b) => {
                 const dateA = a.date ? new Date(a.date).getTime() : 0;
                 const dateB = b.date ? new Date(b.date).getTime() : 0;

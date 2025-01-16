@@ -1,6 +1,8 @@
 "use client"
 
-import React from 'react'
+import React, { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/providers/auth-provider'
 import { Card } from "@/components/ui/card"
 import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { useTour } from '@/components/providers/tour-provider'
@@ -24,6 +26,8 @@ interface RouteInfo {
 }
 
 export default function DataTrackingPage() {
+  const router = useRouter()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const { currentTour } = useTour()
   const [gigs, setGigs] = React.useState<Gig[]>([])
   const [loading, setLoading] = React.useState(true)
@@ -33,9 +37,16 @@ export default function DataTrackingPage() {
     stops: []
   })
 
+  // Authentication check
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin')
+    }
+  }, [isAuthenticated, authLoading, router])
+
   React.useEffect(() => {
     const loadGigs = async () => {
-      if (!currentTour) return
+      if (!currentTour || !isAuthenticated) return
       setLoading(true)
       try {
         const tourGigs = await gigHelpers.getGigs(currentTour.id)
@@ -83,8 +94,10 @@ export default function DataTrackingPage() {
       }
     }
 
-    loadGigs()
-  }, [currentTour])
+    if (isAuthenticated) {
+      loadGigs()
+    }
+  }, [currentTour, isAuthenticated])
 
   // Calculate summary statistics
   const summaryStats = React.useMemo(() => {
@@ -158,6 +171,18 @@ export default function DataTrackingPage() {
 
   return (
     <div className="w-full">
+      {authLoading ? (
+        <div className="flex justify-center items-center min-h-[200px]">
+          <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        </div>
+      ) : !isAuthenticated ? (
+        <Card className="bg-[#192555] border-blue-800">
+          <div className="p-6 text-center text-white">
+            <p className="mb-4">Please sign in to access tour analytics.</p>
+          </div>
+        </Card>
+      ) : (
+        <>
       {/* Start Common Header Component */}
       <header className="flex items-center justify-between ml-0  pr-0 h-16 p-4 bg-[#0F1729] rounded-lg">
         <h1 className="text-4xl text-white">
@@ -520,6 +545,8 @@ export default function DataTrackingPage() {
           )}
         </div>
       </div>
+        </>
+      )}
     </div>
   )
 }            

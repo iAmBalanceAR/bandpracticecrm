@@ -30,9 +30,9 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { useAuth } from "@/components/providers/auth-provider"
+import { useSupabase } from "@/components/providers/supabase-client-provider"
 import { useDeleteConfirmation } from "@/hooks/use-delete-confirmation"
 import { useDebounce } from '@/hooks/use-debounce'
-import createClient from '@/utils/supabase/client'
 import {
   Dialog,
   DialogContent,
@@ -185,8 +185,8 @@ interface GigWithTour extends Omit<Gig, 'tours'> {
 }
 
 export default function GigManagement() {
-  const supabase = createClient()
-  const { isAuthenticated, loading } = useAuth()
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
   const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation()
   // State
   const [gigs, setGigs] = useState<GigWithTour[]>([])
@@ -223,6 +223,10 @@ export default function GigManagement() {
   const [isSaving, setIsSaving] = useState(false)
   const [deletingGigId, setDeletingGigId] = useState<string | null>(null)
   const [tourInfo, setTourInfo] = useState<TourInfo | null>(null)
+  const [depositAmount, setDepositAmount] = useState<number>(0)
+  const [contractTotal, setContractTotal] = useState<number>(0)
+  const [openBalance, setOpenBalance] = useState<number>(0)
+  const [isDepositPaid, setIsDepositPaid] = useState(false)
 
   const debouncedSearch = useDebounce(searchValue, 300)
 
@@ -296,10 +300,10 @@ export default function GigManagement() {
       }
     }
     
-    if (!loading) {
+    if (!authLoading) {
       loadGigs()
     }
-  }, [isAuthenticated, loading])
+  }, [isAuthenticated, authLoading])
 
   const handleVenueSearch = async (value: string) => {
     setSearchValue(value)
@@ -480,6 +484,12 @@ export default function GigManagement() {
         state: gig.venue_state,
         zip: gig.venue_zip,
       })
+      
+      // Set financial fields
+      setDepositAmount(gig.deposit_amount || 0)
+      setContractTotal(gig.contract_total || 0)
+      setOpenBalance(gig.open_balance || 0)
+      setIsDepositPaid(gig.deposit_paid || false)
 
       // Set form date
       if (gig.gig_date) {
@@ -563,6 +573,11 @@ export default function GigManagement() {
   const handleCloseForm = () => {
     setIsFormVisible(false)
     setCurrentGig(null)
+    // Reset financial fields
+    setDepositAmount(0)
+    setContractTotal(0)
+    setOpenBalance(0)
+    setIsDepositPaid(false)
   }
 
   const handleVenueSelect = (venue: Venue) => {
@@ -601,6 +616,15 @@ export default function GigManagement() {
     </div>
   )
 
+  // Add calculation effect
+  useEffect(() => {
+    let calculatedBalance = contractTotal
+    if (isDepositPaid && depositAmount > 0) {
+      calculatedBalance = contractTotal - depositAmount
+    }
+    setOpenBalance(calculatedBalance)
+  }, [contractTotal, depositAmount, isDepositPaid])
+
   return (
         <>
           <div className=" flex-auto  relative float-right  -top-8">
@@ -611,7 +635,7 @@ export default function GigManagement() {
               <Plus className="mr-2 h-4 w-4" /> Add New Gig
             </Button>
           </div>
-          {loading ? (
+          {authLoading ? (
             <div className="flex justify-center items-center h-64">
               <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
             </div>
@@ -1050,6 +1074,38 @@ export default function GigManagement() {
                               />
                             </div>
                           </div>
+                          <div className="flex items-center space-x-2 mt-4 mb-4">
+                            <div className="flex items-center space-x-2 mt-4">
+                              <Checkbox 
+                                className="border-white border" 
+                                id="hotelIncluded" 
+                                name="hotelIncluded" 
+                                defaultChecked={currentGig?.hotel_included} 
+                              />
+                              <Label htmlFor="hotelIncluded">Hotel Included</Label>
+                            </div>
+                            <div className="flex items-center space-x-2 mt-3">
+                              <Checkbox 
+                                className="border-white border" 
+                                id="mealIncluded" 
+                                name="mealIncluded" 
+                                defaultChecked={currentGig?.meal_included} 
+                              />
+                              <Label htmlFor="mealIncluded">Meal Included</Label>
+                            </div>
+                          </div>
+                          <div className="mb-4">
+                            <Label htmlFor="totalPayout">Contract Total</Label>
+                            <Input 
+                              id="totalPayout" 
+                              name="contractTotal" 
+                              type="number" 
+                              value={contractTotal}
+                              onChange={(e) => setContractTotal(Number(e.target.value))}
+                              required 
+                              className="bg-[#1B2559]" 
+                            />
+                          </div>
                           <div className="mb-4">
                             <Label htmlFor="depositAmount">Deposit Amount (USD)</Label>
                             <Input 
@@ -1057,33 +1113,47 @@ export default function GigManagement() {
                               id="depositAmount" 
                               name="depositAmount" 
                               type="number" 
-                              defaultValue={getInputValue(currentGig?.deposit_amount)}
+                              value={depositAmount}
+                              onChange={(e) => setDepositAmount(Number(e.target.value))}
                               required 
                             />
                           </div>
-                          <div className="mt-2">
-                            <div className="flex items-center space-x-2 ">
-                              <Checkbox className="border-white border" id="depositPaid" name="depositPaid" defaultChecked={currentGig?.deposit_paid} />
-                              <Label htmlFor="depositPaid">Deposit Paid</Label>
+                          <div className="mt-2 mb-4">
+                            <div className="flex items-center space-x-2">
+                              <Checkbox 
+                                className="border-white border" 
+                                id="depositPaid" 
+                                name="depositPaid" 
+                                checked={isDepositPaid}
+                                onChange={(e) => {
+                                  const newCheckedState = e.target.checked;
+                                  setIsDepositPaid(newCheckedState);
+                                  // Recalculate open balance immediately
+                                  const newBalance = newCheckedState && depositAmount > 0 
+                                    ? contractTotal - depositAmount 
+                                    : contractTotal;
+                                  setOpenBalance(newBalance);
+                                }}
+                              />
+                              <Label 
+                                htmlFor="depositPaid" 
+                                className="cursor-pointer select-none"
+                              >
+                                Deposit Paid
+                              </Label>
                             </div>
-                          </div>
-                          <div className="flex items-center space-x-2 mt-4 mb-4">
-                            <div className="flex items-center space-x-2 mt-4">
-                              <Checkbox className="border-white border" id="hotelIncluded" name="hotelIncluded" defaultChecked={currentGig?.hotel_included} />
-                              <Label htmlFor="hotelIncluded">Hotel Included</Label>
-                            </div>
-                            <div className="flex items-center space-x-2 mt-3">
-                              <Checkbox className="border-white border" id="mealIncluded" name="mealIncluded" defaultChecked={currentGig?.meal_included} />
-                              <Label htmlFor="mealIncluded">Meal Included</Label>
-                            </div>
-                          </div>
-                          <div className="mb-4">
-                            <Label htmlFor="totalPayout">Contract Total</Label>
-                            <Input id="totalPayout" name="contractTotal" type="number" defaultValue={currentGig?.contract_total} required className="bg-[#1B2559]" />
                           </div>
                           <div className="mb-4">
                             <Label htmlFor="OpenBalance">Open Balance</Label>
-                            <Input id="openBalance" name="openBalance" type="number" defaultValue={currentGig?.open_balance} required className="bg-[#1B2559]" />
+                            <Input 
+                              id="openBalance" 
+                              name="openBalance" 
+                              type="number" 
+                              value={openBalance}
+                              disabled
+                              required 
+                              className="bg-[#1B2559] opacity-50" 
+                            />
                           </div>                  
                           <div className="mb-3">
                             <Label htmlFor="gigDetails">Gig Details</Label>

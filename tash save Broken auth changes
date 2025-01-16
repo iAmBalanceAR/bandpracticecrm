@@ -1,0 +1,154 @@
+[1mdiff --git a/components/providers/supabase-client-provider.tsx b/components/providers/supabase-client-provider.tsx[m
+[1mindex f1d0a2d..561c912 100644[m
+[1m--- a/components/providers/supabase-client-provider.tsx[m
+[1m+++ b/components/providers/supabase-client-provider.tsx[m
+[36m@@ -2,7 +2,7 @@[m
+ [m
+ import createClient from '@/utils/supabase/client'[m
+ import { useRouter, usePathname } from 'next/navigation'[m
+[31m-import { createContext, useContext, useEffect, useState } from 'react'[m
+[32m+[m[32mimport { createContext, useContext, useEffect, useState, useCallback, useMemo, useRef } from 'react'[m
+ import { createBrowserClient } from '@supabase/ssr'[m
+ import type { Database } from '@/types/supabase'[m
+ [m
+[36m@@ -35,47 +35,67 @@[m [mexport default function SupabaseProvider({[m
+   const [isLoading, setIsLoading] = useState(!initialSession)[m
+   const router = useRouter()[m
+   const pathname = usePathname()[m
+[32m+[m[41m  [m
+[32m+[m[32m  // Add refs to track initialization and prevent double setup[m
+[32m+[m[32m  const isInitialized = useRef(false)[m
+[32m+[m[32m  const authListener = useRef<{ data: { subscription: { unsubscribe: () => void } } } | null>(null)[m
+[32m+[m[32m  const lastAuthCheck = useRef<number>(Date.now())[m
+[32m+[m[32m  const AUTH_CHECK_INTERVAL = 5 * 60 * 1000 // 5 minutes[m
+ [m
+[31m-  const refreshUser = async () => {[m
+[32m+[m[32m  // Debounced refresh to prevent multiple calls[m
+[32m+[m[32m  const refreshUser = useCallback(async () => {[m
+[32m+[m[32m    const now = Date.now()[m
+[32m+[m[32m    // Only refresh if enough time has passed since last check[m
+[32m+[m[32m    if (now - lastAuthCheck.current < AUTH_CHECK_INTERVAL) {[m
+[32m+[m[32m      return[m
+[32m+[m[32m    }[m
+[32m+[m[41m    [m
+     try {[m
+[31m-      const { data: { user: currentUser }, error } = await supabase.auth.getUser()[m
+[32m+[m[32m      const { data: { session: currentSession }, error } = await supabase.auth.getSession()[m
+[32m+[m[32m      lastAuthCheck.current = now[m
+[32m+[m[41m      [m
+       if (error) {[m
+[31m-        console.error('Error refreshing user:', error)[m
+[32m+[m[32m        console.error('Error refreshing session:', error)[m
+         setUser(null)[m
+         setSession(null)[m
+       } else {[m
+[31m-        setUser(currentUser)[m
+[31m-        const { data: { session: currentSession } } = await supabase.auth.getSession()[m
+[32m+[m[32m        setUser(currentSession?.user ?? null)[m
+         setSession(currentSession)[m
+       }[m
+     } catch (error) {[m
+[31m-      console.error('Error in user refresh:', error)[m
+[32m+[m[32m      console.error('Error in session refresh:', error)[m
+       setUser(null)[m
+       setSession(null)[m
+     }[m
+[31m-  }[m
+[32m+[m[32m  }, [supabase.auth])[m
+ [m
+   useEffect(() => {[m
+[32m+[m[32m    // Prevent double initialization in development[m
+[32m+[m[32m    if (isInitialized.current) return[m
+[32m+[m[32m    isInitialized.current = true[m
+[32m+[m
+     if (initialSession) {[m
+       setUser(initialSession.user)[m
+       setSession(initialSession)[m
+       setIsLoading(false)[m
+[32m+[m[32m      lastAuthCheck.current = Date.now()[m
+       return[m
+     }[m
+ [m
+     const initializeAuth = async () => {[m
+       try {[m
+[31m-        const { data: { user: currentUser }, error } = await supabase.auth.getUser()[m
+[32m+[m[32m        const { data: { session: currentSession }, error } = await supabase.auth.getSession()[m
+[32m+[m[32m        lastAuthCheck.current = Date.now()[m
+[32m+[m[41m        [m
+         if (error) {[m
+[31m-          console.error('Error fetching user:', error)[m
+[32m+[m[32m          console.error('Error fetching session:', error)[m
+           setUser(null)[m
+           setSession(null)[m
+           if (!pathname.includes('/auth/')) {[m
+             router.push('/auth/signin')[m
+           }[m
+         } else {[m
+[31m-          setUser(currentUser)[m
+[31m-          const { data: { session: currentSession } } = await supabase.auth.getSession()[m
+[32m+[m[32m          setUser(currentSession?.user ?? null)[m
+           setSession(currentSession)[m
+         }[m
+       } catch (error) {[m
+[36m@@ -89,9 +109,16 @@[m [mexport default function SupabaseProvider({[m
+ [m
+     initializeAuth()[m
+ [m
+[31m-    const {[m
+[31m-      data: { subscription },[m
+[31m-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {[m
+[32m+[m[32m    // Clean up previous listener if it exists[m
+[32m+[m[32m    if (authListener.current) {[m
+[32m+[m[32m      authListener.current.data.subscription.unsubscribe()[m
+[32m+[m[32m    }[m
+[32m+[m
+[32m+[m[32m    // Set up new auth listener[m
+[32m+[m[32m    authListener.current = supabase.auth.onAuthStateChange(async (event, newSession) => {[m
+[32m+[m[32m      // Update last auth check timestamp for auth events[m
+[32m+[m[32m      lastAuthCheck.current = Date.now()[m
+[32m+[m[41m      [m
+       if (event === 'SIGNED_IN') {[m
+         setUser(newSession?.user ?? null)[m
+         setSession(newSession)[m
+[36m@@ -105,10 +132,12 @@[m [mexport default function SupabaseProvider({[m
+           router.push('/auth/signin')[m
+         }[m
+       } else if (event === 'TOKEN_REFRESHED' && newSession) {[m
+[32m+[m[32m        // Just update the session, no need for additional refresh[m
+[32m+[m[32m        setUser(newSession.user)[m
+         setSession(newSession)[m
+[31m-        await refreshUser()[m
+[31m-      } else if (event === 'USER_UPDATED') {[m
+[31m-        await refreshUser()[m
+[32m+[m[32m      } else if (event === 'USER_UPDATED' && newSession?.user.id !== user?.id) {[m
+[32m+[m[32m        setUser(newSession?.user ?? null)[m
+[32m+[m[32m        setSession(newSession ?? null)[m
+       }[m
+ [m
+       // Only refresh on sign in/out and avoid refreshing on error pages[m
+[36m@@ -123,12 +152,22 @@[m [mexport default function SupabaseProvider({[m
+     })[m
+ [m
+     return () => {[m
+[31m-      subscription.unsubscribe()[m
+[32m+[m[32m      if (authListener.current) {[m
+[32m+[m[32m        authListener.current.data.subscription.unsubscribe()[m
+[32m+[m[32m      }[m
+     }[m
+[31m-  }, [supabase, router, pathname, initialSession])[m
+[32m+[m[32m  }, [initialSession, pathname, router, supabase.auth, refreshUser, user?.id])[m
+[32m+[m
+[32m+[m[32m  const value = useMemo(() => ({[m
+[32m+[m[32m    supabase,[m
+[32m+[m[32m    user,[m
+[32m+[m[32m    session,[m
+[32m+[m[32m    isLoading,[m
+[32m+[m[32m    refreshUser[m
+[32m+[m[32m  }), [supabase, user, session, isLoading, refreshUser])[m
+ [m
+   return ([m
+[31m-    <Context.Provider value={{ supabase, user, session, isLoading, refreshUser }}>[m
+[32m+[m[32m    <Context.Provider value={value}>[m
+       {children}[m
+     </Context.Provider>[m
+   )[m

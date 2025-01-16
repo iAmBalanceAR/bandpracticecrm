@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { Lead, LeadStatus, LeadPriority, LeadType } from '@/app/types/lead';
 import * as Dialog from '@radix-ui/react-dialog';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,6 @@ import { Loader2 } from 'lucide-react';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem } from '@/components/ui/command';
 import { cn } from '@/lib/utils';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
-import { useSupabase } from '@/components/providers/supabase-client-provider';
 
 interface LeadDialogProps {
   children: React.ReactNode;
@@ -73,8 +72,7 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
   const [venues, setVenues] = useState<any[]>([]);
   const [selectedVenue, setSelectedVenue] = useState<any>(null);
   const router = useRouter();
-  const supabase = createClient();
-  const { user } = useSupabase();
+  const { supabase, user } = useSupabase();
 
   // Effect to fetch venue details if editing a lead with a venue
   useEffect(() => {

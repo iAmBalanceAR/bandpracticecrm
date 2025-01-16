@@ -7,6 +7,8 @@ import { Loader2 } from "lucide-react"
 import StageGrid from '@/app/stage-plot/components/stage-grid'
 import { listStagePlots, getStagePlot } from '@/app/stage-plot/utils/db'
 import type { StagePlot, StagePlotItem } from '@/app/stage-plot/types'
+import { useAuth } from '@/components/providers/auth-provider'
+import { useSupabase } from '@/components/providers/supabase-client-provider'
 
 interface StagePlotWithItems extends StagePlot {
   items: StagePlotItem[]
@@ -19,6 +21,8 @@ export default function StagePlotCard() {
   const [selectedPlotData, setSelectedPlotData] = useState<StagePlotWithItems | null>(null)
   const [visibleRecords, setVisibleRecords] = useState(5)
   const tableRef = useRef<HTMLDivElement>(null)
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { supabase } = useSupabase()
 
   // Calculate dimensions based on 16:9 ratio
   const cardHeight = 430 // Same as analytics card
@@ -45,22 +49,68 @@ export default function StagePlotCard() {
   }, [plotHeight])
 
   const loadPlots = async () => {
+    if (!isAuthenticated) return
+    
     setIsLoading(true)
     try {
-      const plotList = await listStagePlots()
-      const plotsWithItems = await Promise.all(
-        plotList.map(async (plot) => {
-          const { items } = await getStagePlot(plot.id)
-          return { ...plot, items }
-        })
-      )
+      const { data: plotList, error: plotError } = await supabase
+        .from('stage_plots')
+        .select(`
+          id,
+          name,
+          created_at,
+          updated_at,
+          user_id,
+          stage_width,
+          stage_depth,
+          stage_plot_items (
+            id,
+            stage_plot_id,
+            equipment_id,
+            position_x,
+            position_y,
+            width,
+            height,
+            rotation,
+            technical_requirements,
+            customLabel,
+            showLabel,
+            created_at
+          )
+        `)
+        .order('created_at', { ascending: false })
+      
+      if (plotError) throw plotError
+
+      const plotsWithItems = plotList?.map(plot => ({
+        id: plot.id,
+        name: plot.name,
+        created_at: plot.created_at,
+        updated_at: plot.updated_at,
+        user_id: plot.user_id,
+        stage_width: plot.stage_width || 800,
+        stage_depth: plot.stage_depth || 600,
+        items: plot.stage_plot_items?.map(item => ({
+          id: item.id,
+          stage_plot_id: item.stage_plot_id,
+          equipment_id: item.equipment_id,
+          position_x: item.position_x || 0,
+          position_y: item.position_y || 0,
+          width: item.width || 50,
+          height: item.height || 50,
+          rotation: item.rotation || 0,
+          technical_requirements: item.technical_requirements || {},
+          customLabel: item.customLabel || '',
+          showLabel: item.showLabel ?? true,
+          created_at: item.created_at
+        })) || []
+      })) || []
+      
       setPlots(plotsWithItems)
       
       // Select the most recent plot by default
       if (plotsWithItems.length > 0) {
-        const mostRecent = plotsWithItems.reduce((latest, current) => 
-          new Date(current.created_at) > new Date(latest.created_at) ? current : latest
-        )
+        const mostRecent = plotsWithItems[0]
         setSelectedPlot(mostRecent.id)
         setSelectedPlotData(mostRecent)
       }
@@ -72,10 +122,15 @@ export default function StagePlotCard() {
   }
 
   useEffect(() => {
-    loadPlots()
-  }, [])
+    if (isAuthenticated) {
+      loadPlots()
+    } else {
+      setIsLoading(false)
+    }
+  }, [isAuthenticated])
 
   const handlePlotSelect = async (plot: StagePlotWithItems) => {
+    if (!isAuthenticated) return
     setSelectedPlot(plot.id)
     setSelectedPlotData(plot)
   }
@@ -86,7 +141,18 @@ export default function StagePlotCard() {
   return (
     <CustomCard title="Stage Plot Overview" cardColor="[#ff9920]">
       <div className="h-[430px] p-4 flex gap-4">
-        {isLoading ? (
+        {authLoading ? (
+          <div className="w-full flex items-center justify-center">
+            <div className="flex flex-col items-center gap-2">
+              <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+              <span className="text-sm text-gray-400">Loading...</span>
+            </div>
+          </div>
+        ) : !isAuthenticated ? (
+          <div className="w-full flex items-center justify-center text-gray-400">
+            <p>Please sign in to view stage plots</p>
+          </div>
+        ) : isLoading ? (
           <div className="w-full flex items-center justify-center">
             <div className="flex flex-col items-center gap-2">
               <Loader2 className="h-8 w-8 animate-spin text-blue-500" />

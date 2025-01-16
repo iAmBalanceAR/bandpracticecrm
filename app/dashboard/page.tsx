@@ -1,53 +1,86 @@
-import React from 'react'
-import { createClient } from '@/utils/supabase/server'
-import { redirect } from 'next/navigation'
+'use client'
+
+import { useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import { useAuth } from '@/components/providers/auth-provider'
+import { useSupabase } from '@/components/providers/supabase-client-provider'
 import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { Loader2 } from 'lucide-react'
 import Link from 'next/link'
+import TourMapCard from "@/components/crm/tour-map-card"
+import GigCalendarCard from "@/components/crm/gig-calendar-card"
+import SavedVenuesCard from "@/components/crm/savedVenues"
+import ContactsLeadsCard from "@/components/crm/contacts-leads-card"
+import AnalyticsCard from "@/components/crm/analytics-card"
+import StagePlotCard from "@/components/crm/stage-plot-card"
+import { CustomDialog } from "@/components/ui/custom-dialog"
+import { useTour } from "@/components/providers/tour-provider"
 
-export default async function Dashboard() {
-  const supabase = createClient()
-  
-  const { data: { user }, error: userError } = await supabase.auth.getUser()
+export default function Dashboard() {
+  const router = useRouter()
+  const { isAuthenticated, loading: authLoading, user } = useAuth()
+  const { supabase } = useSupabase()
 
-  if (userError || !user) {
-    redirect('/auth/signin')
+  useEffect(() => {
+    if (!authLoading && !isAuthenticated) {
+      router.push('/auth/signin')
+    }
+  }, [isAuthenticated, authLoading, router])
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-screen">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    )
   }
 
-  const { data: profile } = await supabase
-    .from('profiles')
-    .select('*')
-    .eq('id', user.id)
-    .single()
+  if (!isAuthenticated) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen">
+        <p className="text-gray-400 mb-4">Please sign in to view your dashboard</p>
+        <Button asChild>
+          <Link href="/auth/signin">Sign In</Link>
+        </Button>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen">
       <div className="max-w-7xl mx-auto py-6 sm:px-6 lg:px-8">
         <div className="px-4 py-6 sm:px-0">
-          <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <h1 className="text-3xl font-bold text-white mb-6">Dashboard</h1>
           
-          <div className="mt-6">
-            <div className="bg-[#111c44] shadow overflow-hidden sm:rounded-lg">
-              <div className="px-4 py-5 sm:px-6">
-                <h3 className="text-xl font-mono leading-6 font-medium text-white">
-                  Account Information
-                </h3>
-              </div>
-              <div className="border-t border-green-600 px-4 py-5 sm:px-6">
-                <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-white">Email</dt>
-                    <dd className="mt-1 text-sm text-white">{user.email}</dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-white">Profile Status</dt>
-                    <dd className="mt-1 text-sm text-white">
-                      Active
-                    </dd>
-                  </div>
-                </dl>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <TourMapCard />
+            <GigCalendarCard />
+            <SavedVenuesCard />
+            <ContactsLeadsCard />
+            <AnalyticsCard />
+            <StagePlotCard />
           </div>
+
+          <Card className="mt-6">
+            <CardHeader>
+              <CardTitle>Account Information</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <dl className="grid grid-cols-1 gap-x-4 gap-y-8 sm:grid-cols-2">
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-400">Email</dt>
+                  <dd className="mt-1 text-sm text-white">{user?.email}</dd>
+                </div>
+                <div className="sm:col-span-1">
+                  <dt className="text-sm font-medium text-gray-400">Profile Status</dt>
+                  <dd className="mt-1 text-sm text-white">
+                    Active
+                  </dd>
+                </div>
+              </dl>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>

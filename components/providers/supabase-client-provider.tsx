@@ -38,15 +38,27 @@ export default function SupabaseProvider({
 
   const refreshUser = async () => {
     try {
-      const { data: { user: currentUser }, error } = await supabase.auth.getUser()
-      if (error) {
-        console.error('Error refreshing user:', error)
+      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+      if (userError) {
+        console.error('Error refreshing user:', userError)
         setUser(null)
         setSession(null)
-      } else {
+        return
+      }
+
+      if (currentUser) {
+        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
+        if (sessionError) {
+          console.error('Error getting session:', sessionError)
+          setUser(null)
+          setSession(null)
+          return
+        }
         setUser(currentUser)
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
         setSession(currentSession)
+      } else {
+        setUser(null)
+        setSession(null)
       }
     } catch (error) {
       console.error('Error in user refresh:', error)
@@ -65,18 +77,36 @@ export default function SupabaseProvider({
 
     const initializeAuth = async () => {
       try {
-        const { data: { user: currentUser }, error } = await supabase.auth.getUser()
-        if (error) {
-          console.error('Error fetching user:', error)
+        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
+        if (userError) {
+          console.error('Error fetching user:', userError)
           setUser(null)
           setSession(null)
           if (!pathname.includes('/auth/')) {
             router.push('/auth/signin')
           }
-        } else {
+          return
+        }
+
+        if (currentUser) {
+          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
+          if (sessionError) {
+            console.error('Error getting session:', sessionError)
+            setUser(null)
+            setSession(null)
+            if (!pathname.includes('/auth/')) {
+              router.push('/auth/signin')
+            }
+            return
+          }
           setUser(currentUser)
-          const { data: { session: currentSession } } = await supabase.auth.getSession()
           setSession(currentSession)
+        } else {
+          setUser(null)
+          setSession(null)
+          if (!pathname.includes('/auth/')) {
+            router.push('/auth/signin')
+          }
         }
       } catch (error) {
         console.error('Error in auth initialization:', error)

@@ -4,10 +4,11 @@ import * as React from "react"
 import { useEffect, useState } from "react"
 import { Mail, Phone, Loader2 } from 'lucide-react'
 import CustomCard from '@/components/common/CustomCard'
-import createClient from '@/utils/supabase/client'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
 import { Lead } from '@/app/types/lead'
+import { useAuth } from '@/components/providers/auth-provider'
+import { useSupabase } from '@/components/providers/supabase-client-provider'
 import {
   Table,
   TableBody,
@@ -20,14 +21,14 @@ import {
 export default function ContactsLeadsCard() {
   const [leads, setLeads] = useState<Lead[]>([])
   const [isLoading, setIsLoading] = useState(true)
-  const supabase = createClient()
+  const { isAuthenticated, loading: authLoading } = useAuth()
+  const { supabase } = useSupabase()
 
   const fetchLeads = async () => {
+    if (!isAuthenticated) return;
+
     console.log('Fetching leads...')
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      console.log('Current user:', session?.user?.email)
-
       console.log('Executing leads query...')
       const { data, error } = await supabase
         .rpc('get_leads')
@@ -49,6 +50,11 @@ export default function ContactsLeadsCard() {
   }
 
   useEffect(() => {
+    if (!isAuthenticated) {
+      setIsLoading(false)
+      return
+    }
+
     fetchLeads()
 
     const channel = supabase
@@ -72,7 +78,7 @@ export default function ContactsLeadsCard() {
       console.log('Cleaning up subscription')
       supabase.removeChannel(channel)
     }
-  }, [])
+  }, [isAuthenticated])
 
   return (
     <CustomCard 
@@ -91,7 +97,21 @@ export default function ContactsLeadsCard() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {isLoading ? (
+            {authLoading ? (
+              <TableRow className="border-0">
+                <TableCell colSpan={4} className="px-4 py-8 border-0">
+                  <div className="flex justify-center items-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+                  </div>
+                </TableCell>
+              </TableRow>
+            ) : !isAuthenticated ? (
+              <TableRow>
+                <TableCell colSpan={4} className="border-0 px-4 py-8 text-center text-sm text-gray-400">
+                  Please sign in to view leads
+                </TableCell>
+              </TableRow>
+            ) : isLoading ? (
               <TableRow className="border-0">
                 <TableCell colSpan={4} className="px-4 py-8 border-0">
                   <div className="flex justify-center items-center">

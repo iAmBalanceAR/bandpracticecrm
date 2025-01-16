@@ -1,17 +1,43 @@
-import { Metadata } from 'next';
+'use client';
+
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/providers/auth-provider';
 import LeadsDataView from '@/app/leads/components/leads-data-view';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Plus, Loader2 } from 'lucide-react';
 import LeadDialog from './components/forms/lead-dialog';
 import CustomSectionHeader from '@/components/common/CustomSectionHeader';
 
-export const metadata: Metadata = {
-  title: 'Lead Management',
-  description: 'Manage and track your leads effectively',
-};
-
 export default function LeadsPage() {
+  const router = useRouter();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin');
+    }
+  }, [isAuthenticated, authLoading, router]);
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <Card className="bg-[#192555] border-blue-800">
+        <div className="p-6 text-center text-white">
+          <p className="mb-4">Please sign in to view leads.</p>
+        </div>
+      </Card>
+    );
+  }
+
   return (
     <CustomSectionHeader title="Lead Management" underlineColor="#D83B34">
       <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">

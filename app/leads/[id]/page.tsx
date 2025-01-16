@@ -1,18 +1,16 @@
-import { Metadata } from 'next';
-import { createClient } from '@/utils/supabase/server';
+'use client';
+
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/components/providers/auth-provider';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { notFound } from 'next/navigation';
 import LeadHeader from '@/app/leads/[id]/components/lead-header';
 import LeadTabs from '@/app/leads/[id]/components/lead-tabs';
 import CustomSectionHeader from '@/components/common/CustomSectionHeader';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
-import { ArrowLeft, Mail, Phone } from 'lucide-react';
-
-export const metadata: Metadata = {
-  title: 'Lead Details',
-  description: 'View and manage lead details',
-};
+import { ArrowLeft, Mail, Phone, Loader2 } from 'lucide-react';
 
 interface LeadPageProps {
   params: {
@@ -20,21 +18,68 @@ interface LeadPageProps {
   };
 }
 
-export default async function LeadPage({ params }: LeadPageProps) {
-  const supabase = createClient();
+export default function LeadPage({ params }: LeadPageProps) {
+  const router = useRouter();
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [lead, setLead] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: lead, error } = await supabase
-    .rpc('get_lead_with_details', { p_lead_id: params.id });
+  useEffect(() => {
+    if (!isAuthenticated && !authLoading) {
+      router.push('/auth/signin');
+    }
+  }, [isAuthenticated, authLoading, router]);
 
-  if (error) {
-    console.error('Error fetching lead:', error);
-    notFound();
+  useEffect(() => {
+    async function fetchLead() {
+      if (!isAuthenticated) return;
+
+      try {
+        const { data, error } = await supabase
+          .rpc('get_lead_with_details', { p_lead_id: params.id });
+
+        if (error) {
+          console.error('Error fetching lead:', error);
+          notFound();
+        }
+
+        if (!data) {
+          console.error('Lead not found');
+          notFound();
+        }
+
+        setLead(data);
+      } catch (error) {
+        console.error('Error:', error);
+        notFound();
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchLead();
+  }, [isAuthenticated, params.id, supabase]);
+
+  if (authLoading || isLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
   }
 
-  if (!lead) {
-    console.error('Lead not found');
-    notFound();
+  if (!isAuthenticated) {
+    return (
+      <Card className="bg-[#192555] border-blue-800">
+        <div className="p-6 text-center text-white">
+          <p className="mb-4">Please sign in to view lead details.</p>
+        </div>
+      </Card>
+    );
   }
+
+  if (!lead) return null;
 
   return (
     <CustomSectionHeader title="Lead Management" underlineColor="#008ffb">

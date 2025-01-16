@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Lead, Attachment } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -13,7 +13,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { formatDistanceToNow } from 'date-fns';
-import createClient from '@/utils/supabase/client';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useAuth } from '@/components/providers/auth-provider';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import {
@@ -24,6 +25,7 @@ import {
   FileSpreadsheet,
   Download,
   Trash2,
+  Loader2,
 } from 'lucide-react';
 
 function formatBytes(bytes: number, decimals = 2) {
@@ -53,15 +55,22 @@ const fileTypeIcons: Record<string, React.ReactNode> = {
 };
 
 export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
+  const { supabase } = useSupabase();
+  const { isAuthenticated, loading: authLoading } = useAuth();
+  const [attachments, setAttachments] = useState<Attachment[]>(lead.attachments || []);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadType, setUploadType] = useState<Attachment['type']>('document');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-  const supabase = createClient();
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (!isAuthenticated) {
+      toast.error('Please sign in to upload files');
+      return;
+    }
 
     const formData = new FormData();
     formData.append('file', file);
@@ -125,6 +134,11 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
   };
 
   const handleDelete = async (attachment: Attachment) => {
+    if (!isAuthenticated) {
+      toast.error('Please sign in to delete files');
+      return;
+    }
+
     const confirmed = window.confirm('Are you sure you want to delete this file?');
     if (!confirmed) return;
 
@@ -157,6 +171,54 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
       toast.error('Failed to delete file');
     }
   };
+
+  // Subscribe to realtime changes
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const channel = supabase
+      .channel('lead_attachments_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'attachments',
+          filter: `lead_id=eq.${lead.id}`
+        }, 
+        async (payload) => {
+          if (payload.eventType === 'INSERT') {
+            setAttachments(prev => [payload.new as Attachment, ...prev]);
+          } else if (payload.eventType === 'DELETE' && payload.old.id) {
+            setAttachments(prev => prev.filter(attachment => attachment.id !== payload.old.id));
+          }
+        }
+      )
+      .subscribe((status) => {
+        if (status !== 'SUBSCRIBED') {
+          console.error('Failed to subscribe to attachments changes:', status);
+        }
+      });
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAuthenticated, lead.id, supabase]);
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center min-h-[200px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-400 mb-4">Please sign in to view and manage attachments</p>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -203,12 +265,12 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
           </div>
 
           <div className="space-y-4">
-            {lead.attachments.length === 0 ? (
+            {attachments.length === 0 ? (
               <p className="text-center text-muted-foreground py-4">
                 No attachments yet. Upload your first file above.
               </p>
             ) : (
-              lead.attachments
+              attachments
                 .sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
                 .map((attachment) => (
                   <div

@@ -7,6 +7,7 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
 import { ReportPreview } from '@/app/tour-route/exports/components/report-preview'
 import { useTour } from '@/components/providers/tour-provider'
+import { useAuth } from '@/components/providers/auth-provider'
 import { Loader2, Sparkles } from 'lucide-react'
 import { generateTourReport, generatePDF } from '@/app/tour-route/exports/utils/report-generator'
 import html2canvas from 'html2canvas'
@@ -33,7 +34,8 @@ const formatDate = (dateString: string | null) => {
   }
 };
 export function TourReportGenerator() {
-  const { currentTour, isLoading } = useTour()
+  const { currentTour, isLoading: tourLoading } = useTour()
+  const { isAuthenticated, loading: authLoading } = useAuth()
   const [isGenerating, setIsGenerating] = useState(false)
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
@@ -55,7 +57,7 @@ export function TourReportGenerator() {
   const [previewData, setPreviewData] = useState<any>(null)
 
   const handleGenerateReport = async () => {
-    if (!currentTour?.id) return
+    if (!currentTour?.id || !isAuthenticated) return
 
     // Create loading overlay container
     const loadingContainer = document.createElement('div')
@@ -87,7 +89,7 @@ export function TourReportGenerator() {
   }
 
   const handleDownloadPDF = async () => {
-    if (!previewData) return
+    if (!previewData || !isAuthenticated) return
 
     // Create loading overlay container
     const loadingContainer = document.createElement('div')
@@ -131,10 +133,18 @@ export function TourReportGenerator() {
     )
   }
 
-  if (isLoading) {
+  if (authLoading || tourLoading) {
     return (
       <div className="flex items-center justify-center h-48">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="text-center text-gray-400 py-8">
+        Please sign in to generate reports.
       </div>
     )
   }

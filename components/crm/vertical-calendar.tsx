@@ -23,7 +23,8 @@ import {
   DollarSign,
   Receipt,
   CreditCard,
-  X
+  X,
+  Loader2
 } from 'lucide-react'
 import { HoverCard, HoverCardContent, HoverCardTrigger } from "@/components/ui/hover-card"
 import { CustomDialog } from "@/components/ui/custom-dialog"
@@ -32,6 +33,7 @@ import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import { createPortal } from 'react-dom'
 import { useTour } from '@/components/providers/tour-provider'
+import { useAuth } from '@/components/providers/auth-provider'
 
 const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"]
 
@@ -241,11 +243,16 @@ const VerticalCalendar = () => {
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [api, setApi] = useState<any>()
   const [error, setError] = useState<string | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const { isAuthenticated, loading: authLoading } = useAuth()
 
   useEffect(() => {
+    if (!isAuthenticated) return
+
     const loadGigs = async () => {
       try {
         setError(null)
+        setIsLoading(true)
         const gigs = await gigHelpers.getGigs()
         const groupedGigs = gigs.reduce((acc: Record<string, Gig[]>, gig: Gig) => {
           const date = gig.gig_date.split('T')[0]
@@ -256,14 +263,49 @@ const VerticalCalendar = () => {
           return acc
         }, {})
         setGigsByDate(groupedGigs)
-      } catch (err: any) {
+      } catch (err) {
         console.error('Error loading gigs:', err)
-        setError(err.message)
+        setError('Failed to load gigs')
+      } finally {
+        setIsLoading(false)
       }
     }
 
     loadGigs()
-  }, [])
+  }, [isAuthenticated])
+
+  if (authLoading) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+      </div>
+    )
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <p className="text-gray-400">Please sign in to view the calendar</p>
+      </div>
+    )
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
+        <span className="ml-2 text-gray-400">Loading calendar...</span>
+      </div>
+    )
+  }
+
+  if (error) {
+    return (
+      <div className="flex justify-center items-center h-[400px]">
+        <p className="text-red-400">{error}</p>
+      </div>
+    )
+  }
 
   const getDaysInMonth = (date: Date) => {
     return new Date(date.getFullYear(), date.getMonth() + 1, 0).getDate()
