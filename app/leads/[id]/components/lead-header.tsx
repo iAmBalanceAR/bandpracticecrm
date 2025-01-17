@@ -27,12 +27,8 @@ import LeadDialog from '@/app/leads/components/forms/lead-dialog';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 interface LeadHeaderProps {
-  lead: Lead & {
-    communications: any[];
-    reminders: any[];
-    lead_notes: any[];
-    attachments: any[];
-  };
+  lead: Lead;
+  onUpdate: () => Promise<void>;
 }
 
 const statusColors = {

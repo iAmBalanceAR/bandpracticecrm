@@ -456,34 +456,62 @@ export default function TourManagement() {
     setSavingStop(stop.id);
 
     try {
-      // Create a new gig
-      const { data: newGig, error: gigError } = await supabase
-        .rpc('create_gig', {
-          gig_data: {
-            venue: stop.name,
-            venue_address: stop.address,
-            venue_city: stop.city,
-            venue_state: stop.state,
-            venue_zip: stop.zip,
-            gig_date: new Date().toISOString().split('T')[0],
-            load_in_time: '18:00',
-            sound_check_time: '19:00',
-            set_time: '20:00',
-            set_length: '45',
-            gig_details: 'Added from tour route',
-            crew_hands_in: false,
-            crew_hands_out: false,
-            meal_included: false,
-            hotel_included: false,
-            deposit_amount: 0,
-            deposit_paid: false,
-            contract_total: 0,
-            open_balance: 0,
-            gig_status: 'pending'
-          }
-        });
+      // Create a new gig using gigHelpers with all required fields
+      const gigData = {
+        title: stop.name,
+        venue: stop.name,
+        venue_address: stop.address,
+        venue_city: stop.city,
+        venue_state: stop.state,
+        venue_zip: stop.zip,
+        gig_date: new Date().toISOString().split('T')[0],
+        load_in_time: '18:00:00',
+        sound_check_time: '19:00:00',
+        set_time: '20:00:00',
+        set_length: '45',
+        gig_details: 'Added from tour route',
+        crew_hands_in: false,
+        crew_hands_out: false,
+        meal_included: false,
+        hotel_included: false,
+        deposit_amount: 0,
+        deposit_paid: false,
+        contract_total: 0,
+        open_balance: 0,
+        contact_name: 'TBD',
+        contact_email: '',
+        contact_phone: '',
+        gig_status: 'pending'
+      } as const;
 
-      if (gigError) throw gigError;
+      const newGig = await gigHelpers.createGig(gigData);
+
+      // Get the authenticated user
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('No authenticated user');
+
+      // Get the default tour
+      const { data: defaultTour } = await supabase
+        .from('tours')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .single();
+
+      if (defaultTour) {
+        // Connect the gig to the default tour
+        const { error: connectError } = await supabase
+          .from('tourconnect')
+          .insert([{
+            gig_id: newGig.id,
+            tour_id: defaultTour.id,
+            user_id: user.id
+          }]);
+
+        if (connectError) {
+          console.error('Error connecting gig to default tour:', connectError);
+        }
+      }
 
       // Update the stop in tourStops
       const updatedStops = tourStops.map(s => 
@@ -512,7 +540,7 @@ export default function TourManagement() {
     } finally {
       setSavingStop(null);
     }
-  };
+  }
 
   const getCoordinates = async (location: string): Promise<[number, number]> => {
     try {

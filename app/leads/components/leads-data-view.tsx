@@ -87,6 +87,7 @@ export default function LeadsDataView() {
 
   // Subscribe to realtime changes
   useEffect(() => {
+    console.log('Setting up real-time subscriptions for leads');
     const channel = supabase
       .channel('leads_changes')
       .on('postgres_changes', 
@@ -96,42 +97,109 @@ export default function LeadsDataView() {
           table: 'leads',
         }, 
         async (payload: RealtimeLeadPayload) => {
-          const leadId = ((payload.new as LeadPayload) || (payload.old as LeadPayload))?.id;
-          if (!leadId) return;
+          console.log('Received lead change event:', payload.eventType);
+          // For inserts and updates, fetch the complete lead data
+          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
+            console.log('Fetching updated leads data');
+            const { data: updatedLeads, error } = await supabase
+              .rpc('get_leads')
+              .order('updated_at', { ascending: false });
 
-          const { data, error } = await supabase
-            .rpc('get_leads')
-            .eq('id', leadId)
-            .single();
+            if (error) {
+              console.error('Error fetching updated leads:', error);
+              return;
+            }
 
-          if (error) {
-            console.error('Error fetching updated lead:', error);
-            return;
-          }
-
-          const updatedLead = data as Lead;
-          
-          if (payload.eventType === 'INSERT') {
-            setLeads(prev => [updatedLead, ...prev]);
-          } else if (payload.eventType === 'DELETE' && ((payload as RealtimeLeadPayload).old as LeadPayload)?.id) {
-            setLeads(prev => prev.filter(lead => lead.id !== ((payload as RealtimeLeadPayload).old as LeadPayload).id));
-          } else if (payload.eventType === 'UPDATE') {
-            setLeads(prev => prev.map(lead => 
-              lead.id === updatedLead.id ? updatedLead : lead
-            ));
+            console.log('Setting updated leads:', updatedLeads?.length);
+            setLeads(updatedLeads as Lead[]);
+          } 
+          // For deletes, just remove from the local state
+          else if (payload.eventType === 'DELETE' && (payload.old as LeadPayload)?.id) {
+            console.log('Removing deleted lead from state');
+            setLeads(prev => prev.filter(lead => lead.id !== (payload.old as LeadPayload)?.id));
           }
         }
       )
       .subscribe((status) => {
+        console.log('Leads subscription status:', status);
         if (status !== 'SUBSCRIBED') {
           console.error('Failed to subscribe to leads changes:', status);
         }
       });
 
+    // Also subscribe to related tables that might affect lead data
+    const relatedChannel = supabase
+      .channel('related_changes')
+      .on('postgres_changes', 
+        { 
+          event: '*', 
+          schema: 'public', 
+          table: 'communications',
+        },
+        async () => {
+          console.log('Communication change detected, refreshing leads');
+          const { data: updatedLeads, error } = await supabase
+            .rpc('get_leads')
+            .order('updated_at', { ascending: false });
+
+          if (error) {
+            console.error('Error fetching updated leads:', error);
+            return;
+          }
+
+          setLeads(updatedLeads as Lead[]);
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'reminders',
+        },
+        async () => {
+          console.log('Reminder change detected, refreshing leads');
+          const { data: updatedLeads, error } = await supabase
+            .rpc('get_leads')
+            .order('updated_at', { ascending: false });
+
+          if (error) {
+            console.error('Error fetching updated leads:', error);
+            return;
+          }
+
+          setLeads(updatedLeads as Lead[]);
+        }
+      )
+      .on('postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'lead_notes',
+        },
+        async () => {
+          console.log('Note change detected, refreshing leads');
+          const { data: updatedLeads, error } = await supabase
+            .rpc('get_leads')
+            .order('updated_at', { ascending: false });
+
+          if (error) {
+            console.error('Error fetching updated leads:', error);
+            return;
+          }
+
+          setLeads(updatedLeads as Lead[]);
+        }
+      )
+      .subscribe((status) => {
+        console.log('Related data subscription status:', status);
+      });
+
     return () => {
+      console.log('Cleaning up real-time subscriptions');
       supabase.removeChannel(channel);
+      supabase.removeChannel(relatedChannel);
     };
-  }, []);
+  }, [supabase]);
 
   if (isLoading) {
     return (

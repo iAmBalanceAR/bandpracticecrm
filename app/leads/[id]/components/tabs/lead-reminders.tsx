@@ -100,10 +100,10 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
 
     try {
       const formData = new FormData(e.currentTarget);
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!session) {
-        throw new Error('No session found');
+      if (userError || !user) {
+        throw new Error('No authenticated user found');
       }
 
       if (!dueDate) {
@@ -129,7 +129,6 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
         message: 'Reminder added successfully',
         type: 'success'
       });
-      router.refresh();
       (e.target as HTMLFormElement).reset();
       setDueDate(undefined);
     } catch (error) {
@@ -153,10 +152,10 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
       type: 'delete',
       onConfirm: async () => {
         try {
-          const { data: { session } } = await supabase.auth.getSession();
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
           
-          if (!session) {
-            throw new Error('No session found');
+          if (userError || !user) {
+            throw new Error('No authenticated user found');
           }
 
           const { error } = await supabase
@@ -172,7 +171,6 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
             message: 'Reminder deleted successfully',
             type: 'success'
           });
-          router.refresh();
         } catch (error) {
           console.error('Error deleting reminder:', error);
           setFeedbackModal({
@@ -188,10 +186,10 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
 
   const toggleReminderStatus = async (reminder: LeadReminder) => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
       
-      if (!session) {
-        throw new Error('No session found');
+      if (userError || !user) {
+        throw new Error('No authenticated user found');
       }
 
       const { error } = await supabase
@@ -210,7 +208,6 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
         message: 'Reminder status updated',
         type: 'success'
       });
-      router.refresh();
     } catch (error) {
       console.error('Error updating reminder:', error);
       setFeedbackModal({

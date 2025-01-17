@@ -53,7 +53,7 @@ export default function LeadCard({ lead }: LeadCardProps) {
           </div>
         </CardHeader>
         <CardContent className="p-4 pt-2">
-          <div className="flex items-center justify-between text-sm text-muted-foreground">
+          <div className="flex items-center text-sm text-muted-foreground">
             <div className="flex items-center gap-4">
               <div className="flex items-center">
                 <User2 className="h-4 w-4 mr-1" />
@@ -64,20 +64,6 @@ export default function LeadCard({ lead }: LeadCardProps) {
                 Last contact: {formatDistanceToNow(new Date(lead.last_contact_date), { addSuffix: true })}
               </div>
             </div>
-            {lead.tags.length > 0 && (
-              <div className="flex gap-1">
-                {lead.tags.slice(0, 3).map((tag) => (
-                  <Badge key={tag} variant="outline" className="text-xs">
-                    {tag}
-                  </Badge>
-                ))}
-                {lead.tags.length > 3 && (
-                  <Badge variant="outline" className="text-xs">
-                    +{lead.tags.length - 3}
-                  </Badge>
-                )}
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>

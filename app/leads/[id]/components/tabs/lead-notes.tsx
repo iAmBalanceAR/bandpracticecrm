@@ -65,6 +65,10 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
             setNotes(prev => [payload.new as LeadNote, ...prev]);
           } else if (payload.eventType === 'DELETE' && payload.old.id) {
             setNotes(prev => prev.filter(note => note.id !== payload.old.id));
+          } else if (payload.eventType === 'UPDATE' && payload.new.id) {
+            setNotes(prev => prev.map(note => 
+              note.id === payload.new.id ? (payload.new as LeadNote) : note
+            ));
           }
         }
       )
@@ -113,7 +117,6 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
         message: 'Note added successfully',
         type: 'success'
       });
-      router.refresh();
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error('Error adding note:', error);
@@ -159,7 +162,6 @@ export default function LeadNotes({ lead }: LeadNotesProps) {
             message: 'Note deleted successfully',
             type: 'success'
           });
-          router.refresh();
         } catch (error) {
           console.error('Error deleting note:', error);
           setFeedbackModal({

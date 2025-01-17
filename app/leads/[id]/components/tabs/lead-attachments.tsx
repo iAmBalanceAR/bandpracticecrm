@@ -81,17 +81,15 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
     setIsUploading(true);
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (!session) {
-        throw new Error('No session found');
+      if (userError || !user) {
+        throw new Error('No authenticated user found');
       }
 
       const fileName = file.name;
       const fileType = file.type;
-      const filePath = `${session.user.id}/leads/${lead.id}/${fileName}`;
+      const filePath = `${user.id}/leads/${lead.id}/${fileName}`;
 
       // Upload file to storage
       const { error: uploadError, data: uploadData } = await supabase.storage
@@ -121,7 +119,6 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
       if (dbError) throw dbError;
 
       toast.success('Attachment added successfully');
-      router.refresh();
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -143,15 +140,13 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
     if (!confirmed) return;
 
     try {
-      const {
-        data: { session },
-      } = await supabase.auth.getSession();
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-      if (!session) {
-        throw new Error('No session found');
+      if (userError || !user) {
+        throw new Error('No authenticated user found');
       }
 
-      const filePath = `${session.user.id}/leads/${lead.id}/${attachment.file_name}`;
+      const filePath = `${user.id}/leads/${lead.id}/${attachment.file_name}`;
       await supabase.storage
         .from('attachments')
         .remove([filePath]);
@@ -165,7 +160,6 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
       if (error) throw error;
 
       toast.success('File deleted successfully');
-      router.refresh();
     } catch (error) {
       console.error('Error deleting file:', error);
       toast.error('Failed to delete file');

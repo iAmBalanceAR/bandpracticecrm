@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
@@ -11,6 +11,7 @@ import CustomSectionHeader from '@/components/common/CustomSectionHeader';
 import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Phone, Loader2 } from 'lucide-react';
+import { Lead } from '@/app/types/lead';
 
 interface LeadPageProps {
   params: {
@@ -22,50 +23,66 @@ export default function LeadPage({ params }: LeadPageProps) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const [lead, setLead] = useState<any>(null);
+  const [lead, setLead] = useState<Lead | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
+  // Fetch lead data
+  const fetchLead = useCallback(async () => {
+    if (!isAuthenticated) return;
+    
+    try {
+      setIsLoading(true);
+      const { data, error } = await supabase
+        .rpc('get_lead_with_details', { p_lead_id: params.id });
+      
+      if (error) {
+        console.error('Error fetching lead:', error);
+        setError('Failed to load lead details');
+        return;
+      }
+      
+      if (data) {
+        console.log('Fetched lead data:', data);
+        setLead(data);
+      }
+    } catch (err) {
+      console.error('Error:', err);
+      setError('An unexpected error occurred');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [isAuthenticated, params.id, supabase]);
+
+  // Authentication check
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
       router.push('/auth/signin');
     }
   }, [isAuthenticated, authLoading, router]);
 
+  // Initial data fetch only
   useEffect(() => {
-    async function fetchLead() {
-      if (!isAuthenticated) return;
-
-      try {
-        const { data, error } = await supabase
-          .rpc('get_lead_with_details', { p_lead_id: params.id });
-
-        if (error) {
-          console.error('Error fetching lead:', error);
-          notFound();
-        }
-
-        if (!data) {
-          console.error('Lead not found');
-          notFound();
-        }
-
-        setLead(data);
-      } catch (error) {
-        console.error('Error:', error);
-        notFound();
-      } finally {
-        setIsLoading(false);
-      }
+    if (isAuthenticated) {
+      fetchLead();
     }
-
-    fetchLead();
-  }, [isAuthenticated, params.id, supabase]);
+  }, [isAuthenticated, fetchLead]);
 
   if (authLoading || isLoading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="bg-[#192555] border-blue-800">
+        <div className="p-6 text-center text-white">
+          <p className="mb-4">{error}</p>
+        </div>
+      </Card>
     );
   }
 
@@ -117,9 +134,9 @@ export default function LeadPage({ params }: LeadPageProps) {
             </div>
           </div>
 
-          <LeadHeader lead={lead} />
+          <LeadHeader lead={lead} onUpdate={fetchLead} />
           <div className="mt-8">
-            <LeadTabs lead={lead} />
+            <LeadTabs lead={lead} onUpdate={fetchLead} />
           </div>
         </CardContent>
       </Card>

@@ -28,10 +28,10 @@ export interface Lead {
   created_at: string;
   updated_at: string;
   last_contact_date: string;
-  lead_notes?: LeadNote[];
-  reminders?: LeadReminder[];
-  communications?: LeadCommunication[];
-  attachments?: LeadAttachment[];
+  lead_notes: LeadNote[];
+  reminders: LeadReminder[];
+  communications: LeadCommunication[];
+  attachments: Attachment[];
 }
 
 export interface LeadNote {
@@ -64,19 +64,6 @@ export interface LeadCommunication {
   sentiment: string | null;
   user_id: string;
   created_at: string;
-}
-
-export interface LeadAttachment {
-  id: string;
-  lead_id: string;
-  communication_id: string | null;
-  file_name: string;
-  file_type: string;
-  file_size: number;
-  file_url: string;
-  type: string;
-  uploaded_by: string;
-  uploaded_at: string;
 }
 
 export interface Attachment {

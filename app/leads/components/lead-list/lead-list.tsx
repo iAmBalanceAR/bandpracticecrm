@@ -22,8 +22,12 @@ export default function LeadList() {
     setIsLoading(true);
     try {
       // Log user session
-      const { data: { session } } = await supabase.auth.getSession();
-      console.log('Current user email:', session?.user?.email);
+      const { data: { user }, error: userError } = await supabase.auth.getUser();
+      console.log('Current user email:', user?.email);
+
+      if (userError || !user) {
+        throw new Error('No authenticated user found');
+      }
 
       let query = supabase
         .from('leads')

@@ -47,14 +47,8 @@ export default function SupabaseProvider({
       }
 
       if (currentUser) {
-        const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
-        if (sessionError) {
-          console.error('Error getting session:', sessionError)
-          setUser(null)
-          setSession(null)
-          return
-        }
         setUser(currentUser)
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
         setSession(currentSession)
       } else {
         setUser(null)
@@ -69,9 +63,21 @@ export default function SupabaseProvider({
 
   useEffect(() => {
     if (initialSession) {
-      setUser(initialSession.user)
-      setSession(initialSession)
-      setIsLoading(false)
+      const verifyInitialSession = async () => {
+        const { data: { user: verifiedUser } } = await supabase.auth.getUser()
+        if (verifiedUser) {
+          setUser(verifiedUser)
+          setSession(initialSession)
+        } else {
+          setUser(null)
+          setSession(null)
+          if (!pathname.includes('/auth/')) {
+            router.push('/auth/signin')
+          }
+        }
+        setIsLoading(false)
+      }
+      verifyInitialSession()
       return
     }
 
@@ -89,17 +95,8 @@ export default function SupabaseProvider({
         }
 
         if (currentUser) {
-          const { data: { session: currentSession }, error: sessionError } = await supabase.auth.getSession()
-          if (sessionError) {
-            console.error('Error getting session:', sessionError)
-            setUser(null)
-            setSession(null)
-            if (!pathname.includes('/auth/')) {
-              router.push('/auth/signin')
-            }
-            return
-          }
           setUser(currentUser)
+          const { data: { session: currentSession } } = await supabase.auth.getSession()
           setSession(currentSession)
         } else {
           setUser(null)

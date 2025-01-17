@@ -129,7 +129,6 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
         message: 'Communication added successfully',
         type: 'success'
       });
-      router.refresh();
       (e.target as HTMLFormElement).reset();
     } catch (error) {
       console.error('Error adding communication:', error);
@@ -175,7 +174,6 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
             message: 'Communication deleted successfully',
             type: 'success'
           });
-          router.refresh();
         } catch (error) {
           console.error('Error deleting communication:', error);
           setFeedbackModal({
