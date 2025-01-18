@@ -19,7 +19,7 @@ export default function Page() {
 
   if (authLoading) {
     return (
-      <div className="flex items-center justify-center min-h-[200px]">
+      <div className="flex items-center justify-center min-h-[500px] bg-[#111C44]">
         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
       </div>
     );
@@ -27,7 +27,7 @@ export default function Page() {
 
   if (!isAuthenticated) {
     return (
-      <Card className="bg-[#192555] border-blue-800">
+      <Card className="bg-[#192555] min-h-[500px] border-blue-800">
         <div className="p-6 text-center text-white">
           <p className="mb-4">Please sign in to view the calendar.</p>
         </div>

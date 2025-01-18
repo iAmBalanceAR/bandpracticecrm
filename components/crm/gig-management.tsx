@@ -640,7 +640,7 @@ export default function GigManagement() {
               <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
             </div>
           ) : !isAuthenticated ? (
-            <div className="text-center py-12 clear-both">
+            <div className="text-center py-12 min-h-[500px] clear-both">
               <p className="text-gray-400 mb-4">Please sign in to manage gigs</p>
             </div>
           ) : gigs.length === 0 ? (

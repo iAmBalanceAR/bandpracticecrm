@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Lead, LeadReminder } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -20,13 +20,7 @@ import { useAuth } from '@/components/providers/auth-provider';
 import { useRouter } from 'next/navigation';
 import { cn } from '@/lib/utils';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
-import { MoreVertical, CalendarIcon } from 'lucide-react';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+import { Trash2, CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 
@@ -34,6 +28,7 @@ interface LeadRemindersProps {
   lead: Lead & {
     reminders: LeadReminder[];
   };
+  onUpdate?: () => void;
 }
 
 type FeedbackModalState = {
@@ -44,8 +39,7 @@ type FeedbackModalState = {
   onConfirm?: () => Promise<void>;
 };
 
-export default function LeadReminders({ lead }: LeadRemindersProps) {
-  const [reminders, setReminders] = useState<LeadReminder[]>(lead.reminders || []);
+export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [dueDate, setDueDate] = useState<Date>();
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
@@ -57,42 +51,6 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
-
-  // Subscribe to realtime changes
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const channel = supabase
-      .channel('lead_reminders_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'reminders',
-          filter: `lead_id=eq.${lead.id}`
-        }, 
-        async (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setReminders(prev => [payload.new as LeadReminder, ...prev]);
-          } else if (payload.eventType === 'DELETE' && payload.old.id) {
-            setReminders(prev => prev.filter(reminder => reminder.id !== payload.old.id));
-          } else if (payload.eventType === 'UPDATE' && payload.new.id) {
-            setReminders(prev => prev.map(reminder => 
-              reminder.id === payload.new.id ? (payload.new as LeadReminder) : reminder
-            ));
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') {
-          console.error('Failed to subscribe to reminders changes:', status);
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAuthenticated, lead.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -131,6 +89,7 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
       });
       (e.target as HTMLFormElement).reset();
       setDueDate(undefined);
+      onUpdate?.();
     } catch (error) {
       console.error('Error adding reminder:', error);
       setFeedbackModal({
@@ -171,6 +130,7 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
             message: 'Reminder deleted successfully',
             type: 'success'
           });
+          onUpdate?.();
         } catch (error) {
           console.error('Error deleting reminder:', error);
           setFeedbackModal({
@@ -208,6 +168,7 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
         message: 'Reminder status updated',
         type: 'success'
       });
+      onUpdate?.();
     } catch (error) {
       console.error('Error updating reminder:', error);
       setFeedbackModal({
@@ -227,36 +188,39 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-          <div className="flex gap-2">
-            <div className="flex flex-auto gap-2">
-                 <Label htmlFor="title">Title</Label>
+            <div className="flex gap-2">
+              <div className="flex flex-auto gap-2">
+                <Label htmlFor="title">Title</Label>
               </div>
               <div className='flex flex-1'>
-                 <Label>Date</Label>
+                <Label>Date</Label>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
-            <div className=" grid-col-1  gap-2">
+              <div className="grid-col-1 gap-2">
                 <Input
                   id="title"
                   name="title"
                   placeholder="Enter reminder title"
                   required
-                  className="w-full bg-[#1B2559] "
+                  className="w-full bg-[#1B2559]"
                 />
               </div>
-              <div className="grid-col-1r">
-                <Popover className="w-full">
+              <div className="grid-col-1">
+                <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
-                      className="w-full bg-[#1B2559]"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !dueDate && "text-muted-foreground"
+                      )}
                     >
                       <CalendarIcon className="mr-2 h-4 w-4" />
-                      {dueDate ? format(dueDate, "PPP") : "Pick a date"}
+                      {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto  p-0 bg-[#0f1729] border-[#4A5568]">
+                  <PopoverContent className="w-auto p-0 bg-[#111C44]">
                     <Calendar
                       mode="single"
                       selected={dueDate}
@@ -276,21 +240,8 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
               name="description"
               placeholder="Add reminder details..."
               required
+              className="min-h-[100px] bg-[#1B2559]"
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="priority">Priority</Label>
-            <Select name="priority" defaultValue="medium">
-              <SelectTrigger>
-                <SelectValue placeholder="Select priority" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="low">Low</SelectItem>
-                <SelectItem value="medium">Medium</SelectItem>
-                <SelectItem value="high">High</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex justify-end">
@@ -301,12 +252,12 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
         </form>
 
         <div className="space-y-4">
-          {reminders.length === 0 ? (
+          {lead.reminders.length === 0 ? (
             <p className="text-center text-muted-foreground py-4">
               No reminders yet. Add your first reminder above.
             </p>
           ) : (
-            reminders
+            lead.reminders
               .sort((a, b) => {
                 const dateA = new Date(a.due_date).getTime();
                 const dateB = new Date(b.due_date).getTime();
@@ -315,54 +266,43 @@ export default function LeadReminders({ lead }: LeadRemindersProps) {
               .map((reminder) => (
                 <div
                   key={reminder.id}
-                  className={cn(
-                    "flex gap-4 p-4 border rounded-lg",
-                    reminder.completed && "opacity-50"
-                  )}
+                  className="flex gap-4 p-4 border rounded-lg"
                 >
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
-                      <div className="font-medium capitalize">
-                        {reminder.title}
+                      <div className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={reminder.completed}
+                          onChange={() => toggleReminderStatus(reminder)}
+                          className="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                        />
+                        <div className={cn(
+                          "font-medium",
+                          reminder.completed && "line-through text-muted-foreground"
+                        )}>
+                          {reminder.title}
+                        </div>
                       </div>
                       <div className="flex items-center gap-2">
                         <div className="text-sm text-muted-foreground">
-                          {format(new Date(reminder.due_date), "MMM d, yyyy")}
+                          Due {formatDistanceToNow(new Date(reminder.due_date), {
+                            addSuffix: true,
+                          })}
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[200px] bg-[#111C44]">
-                            <DropdownMenuItem
-                              onClick={() => toggleReminderStatus(reminder)}
-                              className={cn(
-                                "cursor-pointer",
-                                reminder.completed ? 'text-green-600' : 'text-blue-600'
-                              )}
-                            >
-                              {reminder.completed ? 'Mark as Pending' : 'Mark as Complete'}
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(reminder.id)}
-                              className="text-red-600 cursor-pointer"
-                            >
-                              Delete Reminder
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => reminder.id && handleDelete(reminder.id)}
+                          className="text-muted-foreground hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
-                    <p className="text-muted-foreground">
+                    <p className="text-muted-foreground whitespace-pre-wrap">
                       {reminder.description}
                     </p>
-                    {reminder.completed && (
-                      <p className="text-sm text-muted-foreground mt-2">
-                        Created by {reminder.created_by_email}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))

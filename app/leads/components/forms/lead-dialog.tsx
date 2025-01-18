@@ -245,9 +245,8 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
         console.log('Lead updated successfully:', data);
         toast.success('Lead updated successfully');
         
-        // Close dialog and refresh the page
+        // Just close the dialog, no refresh needed
         setOpen(false);
-        window.location.reload();
       } else {
         // Create new lead logic
         const newLead = {
@@ -286,16 +285,10 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
         }
         
         console.log('Lead created successfully:', data);
-        
-        // Show success message before closing
         toast.success('Lead created successfully');
         
-        // Wait for toast to be visible
-        await new Promise(resolve => setTimeout(resolve, 500));
-        
-        // Then close and refresh
+        // Just close the dialog, no refresh needed
         setOpen(false);
-        router.refresh();
       }
     } catch (error) {
       console.error('Error:', error);

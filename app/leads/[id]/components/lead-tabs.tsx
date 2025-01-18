@@ -143,7 +143,7 @@ export default function LeadTabs({ lead, onUpdate }: LeadTabsProps) {
                       Capacity
                     </span>
                     <span>{lead.venue.capacity.toLocaleString()}</span>
-                  </div>
+              </div>
                 )}
               </>
             ) : (

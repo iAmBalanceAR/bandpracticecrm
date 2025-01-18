@@ -16,7 +16,7 @@ const CustomSectionHeader: React.FC<CustomSectionHeaderProps> = ({ title, childr
         </span>
       </h1>
       <div className="border-[#008ffb] border-b-2 -mt-7 mb-8 w-[100%] h-4"></div>
-        <div className={` bg-[${underlineColor}] text-white min-h-[500px]  shadow-sm shadow-green-400 rounded-md  border-blue-800 border ${addclassName}`}>
+        <div className={` bg-[#111C44] text-white min-h-[500px]  shadow-sm shadow-green-400 rounded-md  border-blue-800 border ${addclassName}`}>
       <div className="p-0 m-0">
             {children}
         </div> 

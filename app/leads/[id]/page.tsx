@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import Link from 'next/link';
 import { ArrowLeft, Mail, Phone, Loader2 } from 'lucide-react';
 import { Lead } from '@/app/types/lead';
+import { motion, AnimatePresence } from 'framer-motion';
 
 interface LeadPageProps {
   params: {
@@ -28,11 +29,11 @@ export default function LeadPage({ params }: LeadPageProps) {
   const [error, setError] = useState<string | null>(null);
 
   // Fetch lead data
-  const fetchLead = useCallback(async () => {
+  const fetchLead = useCallback(async (showLoading = true) => {
     if (!isAuthenticated) return;
     
     try {
-      setIsLoading(true);
+      if (showLoading) setIsLoading(true);
       const { data, error } = await supabase
         .rpc('get_lead_with_details', { p_lead_id: params.id });
       
@@ -43,14 +44,19 @@ export default function LeadPage({ params }: LeadPageProps) {
       }
       
       if (data) {
-        console.log('Fetched lead data:', data);
-        setLead(data);
+        setLead(prev => {
+          // Only update if data has changed
+          if (JSON.stringify(prev) !== JSON.stringify(data)) {
+            return data;
+          }
+          return prev;
+        });
       }
     } catch (err) {
       console.error('Error:', err);
       setError('An unexpected error occurred');
     } finally {
-      setIsLoading(false);
+      if (showLoading) setIsLoading(false);
     }
   }, [isAuthenticated, params.id, supabase]);
 
@@ -61,11 +67,22 @@ export default function LeadPage({ params }: LeadPageProps) {
     }
   }, [isAuthenticated, authLoading, router]);
 
-  // Initial data fetch only
+  // Initial data fetch
   useEffect(() => {
     if (isAuthenticated) {
-      fetchLead();
+      fetchLead(true);
     }
+  }, [isAuthenticated, fetchLead]);
+
+  // Set up polling for updates
+  useEffect(() => {
+    if (!isAuthenticated) return;
+
+    const intervalId = setInterval(() => {
+      fetchLead(false); // Don't show loading state for polling updates
+    }, 5000);
+
+    return () => clearInterval(intervalId);
   }, [isAuthenticated, fetchLead]);
 
   if (authLoading || isLoading) {
@@ -110,34 +127,43 @@ export default function LeadPage({ params }: LeadPageProps) {
             Back to Leads
           </Link>
 
-          <div className="bg-[#1B2559] border border-blue-800 rounded-lg p-6 mb-6">
-            <h1 className="text-3xl font-bold text-white text-shadow-sm font-mono text-shadow-x-2 text-shadow-y-2 text-shadow-black mb-4">
-              {lead.title}
-            </h1>
-            <div className="flex items-center gap-6 text-md text-gray-400">
-              {lead.contact_info.email && (
-                <div className="flex items-center gap-2">
-                  <Mail className="h-4 w-4" />
-                  <a href={`mailto:${lead.contact_info.email}`} className="hover:text-white">
-                    {lead.contact_info.email}
-                  </a>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={lead.updated_at}
+              initial={{ opacity: 0.8 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="bg-[#1B2559] border border-blue-800 rounded-lg p-6 mb-6">
+                <h1 className="text-3xl font-bold text-white text-shadow-sm font-mono text-shadow-x-2 text-shadow-y-2 text-shadow-black mb-4">
+                  {lead.title}
+                </h1>
+                <div className="flex items-center gap-6 text-md text-gray-400">
+                  {lead.contact_info.email && (
+                    <div className="flex items-center gap-2">
+                      <Mail className="h-4 w-4" />
+                      <a href={`mailto:${lead.contact_info.email}`} className="hover:text-white">
+                        {lead.contact_info.email}
+                      </a>
+                    </div>
+                  )}
+                  {lead.contact_info.phone && (
+                    <div className="flex items-center gap-2">
+                      <Phone className="h-4 w-4" />
+                      <a href={`tel:${lead.contact_info.phone}`} className="hover:text-white">
+                        {lead.contact_info.phone}
+                      </a>
+                    </div>
+                  )}
                 </div>
-              )}
-              {lead.contact_info.phone && (
-                <div className="flex items-center gap-2">
-                  <Phone className="h-4 w-4" />
-                  <a href={`tel:${lead.contact_info.phone}`} className="hover:text-white">
-                    {lead.contact_info.phone}
-                  </a>
-                </div>
-              )}
-            </div>
-          </div>
+              </div>
 
-          <LeadHeader lead={lead} onUpdate={fetchLead} />
-          <div className="mt-8">
-            <LeadTabs lead={lead} onUpdate={fetchLead} />
-          </div>
+              <LeadHeader lead={lead} onUpdate={() => fetchLead(true)} />
+              <div className="mt-8">
+                <LeadTabs lead={lead} onUpdate={() => fetchLead(true)} />
+              </div>
+            </motion.div>
+          </AnimatePresence>
         </CardContent>
       </Card>
     </CustomSectionHeader>

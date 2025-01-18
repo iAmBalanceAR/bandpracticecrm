@@ -10,6 +10,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const statusColors = {
   new: 'bg-blue-500',
@@ -60,7 +61,6 @@ export default function LeadsDataView() {
   const router = useRouter();
 
   const fetchLeads = async () => {
-    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .rpc('get_leads')
@@ -76,130 +76,20 @@ export default function LeadsDataView() {
     } catch (error) {
       console.error('Error fetching leads:', error);
       toast.error('Failed to fetch leads');
-    } finally {
-      setIsLoading(false);
     }
   };
 
+  // Initial load with loading state
   useEffect(() => {
-    fetchLeads();
+    setIsLoading(true);
+    fetchLeads().finally(() => setIsLoading(false));
   }, []);
 
-  // Subscribe to realtime changes
+  // Set up polling for updates without loading state
   useEffect(() => {
-    console.log('Setting up real-time subscriptions for leads');
-    const channel = supabase
-      .channel('leads_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'leads',
-        }, 
-        async (payload: RealtimeLeadPayload) => {
-          console.log('Received lead change event:', payload.eventType);
-          // For inserts and updates, fetch the complete lead data
-          if (payload.eventType === 'INSERT' || payload.eventType === 'UPDATE') {
-            console.log('Fetching updated leads data');
-            const { data: updatedLeads, error } = await supabase
-              .rpc('get_leads')
-              .order('updated_at', { ascending: false });
-
-            if (error) {
-              console.error('Error fetching updated leads:', error);
-              return;
-            }
-
-            console.log('Setting updated leads:', updatedLeads?.length);
-            setLeads(updatedLeads as Lead[]);
-          } 
-          // For deletes, just remove from the local state
-          else if (payload.eventType === 'DELETE' && (payload.old as LeadPayload)?.id) {
-            console.log('Removing deleted lead from state');
-            setLeads(prev => prev.filter(lead => lead.id !== (payload.old as LeadPayload)?.id));
-          }
-        }
-      )
-      .subscribe((status) => {
-        console.log('Leads subscription status:', status);
-        if (status !== 'SUBSCRIBED') {
-          console.error('Failed to subscribe to leads changes:', status);
-        }
-      });
-
-    // Also subscribe to related tables that might affect lead data
-    const relatedChannel = supabase
-      .channel('related_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'communications',
-        },
-        async () => {
-          console.log('Communication change detected, refreshing leads');
-          const { data: updatedLeads, error } = await supabase
-            .rpc('get_leads')
-            .order('updated_at', { ascending: false });
-
-          if (error) {
-            console.error('Error fetching updated leads:', error);
-            return;
-          }
-
-          setLeads(updatedLeads as Lead[]);
-        }
-      )
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'reminders',
-        },
-        async () => {
-          console.log('Reminder change detected, refreshing leads');
-          const { data: updatedLeads, error } = await supabase
-            .rpc('get_leads')
-            .order('updated_at', { ascending: false });
-
-          if (error) {
-            console.error('Error fetching updated leads:', error);
-            return;
-          }
-
-          setLeads(updatedLeads as Lead[]);
-        }
-      )
-      .on('postgres_changes',
-        {
-          event: '*',
-          schema: 'public',
-          table: 'lead_notes',
-        },
-        async () => {
-          console.log('Note change detected, refreshing leads');
-          const { data: updatedLeads, error } = await supabase
-            .rpc('get_leads')
-            .order('updated_at', { ascending: false });
-
-          if (error) {
-            console.error('Error fetching updated leads:', error);
-            return;
-          }
-
-          setLeads(updatedLeads as Lead[]);
-        }
-      )
-      .subscribe((status) => {
-        console.log('Related data subscription status:', status);
-      });
-
-    return () => {
-      console.log('Cleaning up real-time subscriptions');
-      supabase.removeChannel(channel);
-      supabase.removeChannel(relatedChannel);
-    };
-  }, [supabase]);
+    const intervalId = setInterval(fetchLeads, 5000);
+    return () => clearInterval(intervalId);
+  }, []);
 
   if (isLoading) {
     return (
@@ -226,61 +116,81 @@ export default function LeadsDataView() {
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {leads.map((lead) => (
-        <Link key={lead.id} href={`/leads/${lead.id}`}>
-          <Card className="bg-[#192555] border-blue-800 hover:border-blue-600 transition-colors cursor-pointer min-h-[150px]">
-            <div className="p-4">
-              <div className="flex justify-between items-start mb-3">
-                <h3 className="text-lg font-semibold text-white truncate">
-                  {lead.title}
-                </h3>
-                <div className="flex gap-2">
-                  <Badge 
-                    variant="secondary"
-                    className={priorityColors[lead.priority]}
-                  >
-                    {lead.priority}
-                  </Badge>
-                  <Badge 
-                    variant="secondary"
-                    className={statusColors[lead.status]}
-                  >
-                    {lead.status.replace('_', ' ')}
-                  </Badge>
-                </div>
-              </div>
-              
-              {lead.company && (
-                <p className="text-gray-400 mb-2">{lead.company}</p>
-              )}
-              
-              <div className="flex flex-col gap-1 text-sm text-gray-300">
-                {lead.contact_info.name && (
-                  <p>Contact: {lead.contact_info.name}</p>
-                )}
-                <p className="text-gray-400">
-                  Last Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
-                </p>
-              </div>
+      <AnimatePresence mode="popLayout">
+        {leads.map((lead) => (
+          <motion.div
+            key={lead.id}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <Link href={`/leads/${lead.id}`}>
+              <motion.div
+                initial={{ opacity: 1, x: 0, y: 0 }}
+                whileHover={{ scale: 1.01 }}
+                animate={{ opacity: 1, x: -3, y: 0 }}
+                transition={{ type: 'tween', duration: 0.02 }}
+              >
+                <Card className="bg-[#1B2559] border-blue-800 hover:bg-[#0F1729] transition-colors cursor-pointer min-h-[150px]">
+                  <div className="p-4 pt-0">
+                    <div className="flex float-right items-start mb-0 mt-1">
+                    
+                      <div className=" ">
+                        <Badge 
+                          variant="secondary"
+                          className={priorityColors[lead.priority]}
+                        >
+                          {lead.priority}
+                        </Badge>
+                        &nbsp;
+                        <Badge 
+                          variant="secondary"
+                          className={statusColors[lead.status]}
+                        >
+                          {lead.status.replace('_', ' ')}
+                        </Badge>
+                      </div>
 
-              {lead.tags && lead.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {lead.tags.slice(0, 3).map((tag) => (
-                    <Badge key={tag} variant="outline" className="text-xs">
-                      {tag}
-                    </Badge>
-                  ))}
-                  {lead.tags.length > 3 && (
-                    <Badge variant="outline" className="text-xs">
-                      +{lead.tags.length - 3}
-                    </Badge>
-                  )}
-                </div>
-              )}
-            </div>
-          </Card>
-        </Link>
-      ))}
+                    </div>
+                   <h3 className="clear-both pt-0 mt-0 text-lg font-semibold text-white truncate">
+                        {lead.title}
+                      </h3>
+                    
+                    {lead.company && (
+                      <p className="text-gray-400 mb-2">{lead.company}</p>
+                    )}
+                    
+                    <div className="flex flex-col gap-1 text-sm text-gray-300">
+                      {lead.contact_info.name && (
+                        <p>Contact: {lead.contact_info.name}</p>
+                      )}
+                      <p className="text-gray-400">
+                        Last Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
+                      </p>
+                    </div>
+
+                    {lead.tags && lead.tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {/* {lead.tags.slice(0, 3).map((tag) => (
+                          <Badge key={tag} variant="outline" className="text-xs">
+                            {tag}
+                          </Badge>
+                        ))} */}
+                        {/* {lead.tags.length > 3 && (()
+                          // <Badge variant="outline" className="text-xs">
+                          //   +{lead.tags.length - 3}
+                          // </Badge>
+                        )} */}
+                      </div>
+                    )}
+                  </div>
+                </Card>
+              </motion.div>
+            </Link>
+          </motion.div>
+        ))}
+      </AnimatePresence>
     </div>
   );
 } 

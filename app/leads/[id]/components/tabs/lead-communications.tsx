@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Lead, LeadCommunication } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,21 +15,16 @@ import {
 import { Label } from '@/components/ui/label';
 import { formatDistanceToNow } from 'date-fns';
 import { useRouter } from 'next/navigation';
-import { Mail, Phone, MessageSquare, Calendar, MoreVertical, Loader2 } from 'lucide-react';
+import { Mail, Phone, MessageSquare, Calendar, Trash2, Loader2 } from 'lucide-react';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { useAuth } from '@/components/providers/auth-provider';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 
 interface LeadCommunicationsProps {
   lead: Lead & {
     communications: Partial<LeadCommunication>[];
   };
+  onUpdate?: () => void;
 }
 
 const communicationIcons = {
@@ -47,7 +42,7 @@ type FeedbackModalState = {
   onConfirm?: () => Promise<void>;
 };
 
-export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
+export default function LeadCommunications({ lead, onUpdate }: LeadCommunicationsProps) {
   const [communications, setCommunications] = useState<Partial<LeadCommunication>[]>(lead.communications || []);
   const [isLoading, setIsLoading] = useState(false);
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
@@ -59,38 +54,6 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
-
-  // Subscribe to realtime changes
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const channel = supabase
-      .channel('lead_communications_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'communications',
-          filter: `lead_id=eq.${lead.id}`
-        }, 
-        async (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setCommunications(prev => [payload.new as LeadCommunication, ...prev]);
-          } else if (payload.eventType === 'DELETE' && payload.old.id) {
-            setCommunications(prev => prev.filter(comm => comm.id !== payload.old.id));
-          }
-        }
-      )
-      .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') {
-          console.error('Failed to subscribe to communications changes:', status);
-        }
-      });
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAuthenticated, lead.id, supabase]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -130,6 +93,7 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
         type: 'success'
       });
       (e.target as HTMLFormElement).reset();
+      onUpdate?.();
     } catch (error) {
       console.error('Error adding communication:', error);
       setFeedbackModal({
@@ -174,6 +138,7 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
             message: 'Communication deleted successfully',
             type: 'success'
           });
+          onUpdate?.();
         } catch (error) {
           console.error('Error deleting communication:', error);
           setFeedbackModal({
@@ -259,12 +224,12 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
         </form>
 
         <div className="space-y-4">
-          {communications.length === 0 ? (
+          {lead.communications.length === 0 ? (
             <p className="text-center text-muted-foreground py-4">
               No communications yet. Add your first communication above.
             </p>
           ) : (
-            communications
+            lead.communications
               .sort((a, b) => {
                 const dateA = a.date ? new Date(a.date).getTime() : 0;
                 const dateB = b.date ? new Date(b.date).getTime() : 0;
@@ -289,23 +254,14 @@ export default function LeadCommunications({ lead }: LeadCommunicationsProps) {
                             addSuffix: true,
                           })}
                         </div>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-[200px] bg-[#111C44]">
-                            {communication.id && (
-                              <DropdownMenuItem
-                                onClick={() => handleDelete(communication.id as string)}
-                                className="text-red-600 cursor-pointer"
-                              >
-                                Delete Communication
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => communication.id && handleDelete(communication.id)}
+                          className="text-muted-foreground hover:text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
                       </div>
                     </div>
                     <p className="text-muted-foreground whitespace-pre-wrap">

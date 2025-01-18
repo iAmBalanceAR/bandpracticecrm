@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { Lead, Attachment } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -15,7 +15,6 @@ import {
 import { formatDistanceToNow } from 'date-fns';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { useAuth } from '@/components/providers/auth-provider';
-import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import {
   UploadCloud,
@@ -27,6 +26,7 @@ import {
   Trash2,
   Loader2,
 } from 'lucide-react';
+import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 function formatBytes(bytes: number, decimals = 2) {
   if (bytes === 0) return '0 Bytes';
@@ -44,7 +44,16 @@ interface LeadAttachmentsProps {
   lead: Lead & {
     attachments: Attachment[];
   };
+  onUpdate?: () => void;
 }
+
+type FeedbackModalState = {
+  isOpen: boolean;
+  title: string;
+  message: string;
+  type: 'success' | 'error' | 'warning' | 'delete';
+  onConfirm?: () => Promise<void>;
+};
 
 const fileTypeIcons: Record<string, React.ReactNode> = {
   'image': <Image className="h-4 w-4" />,
@@ -54,21 +63,31 @@ const fileTypeIcons: Record<string, React.ReactNode> = {
   'default': <File className="h-4 w-4" />,
 };
 
-export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
+export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps) {
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
-  const [attachments, setAttachments] = useState<Attachment[]>(lead.attachments || []);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadType, setUploadType] = useState<Attachment['type']>('document');
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+  const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'success'
+  });
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
     if (!isAuthenticated) {
-      toast.error('Please sign in to upload files');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to upload files',
+        type: 'error'
+      });
       return;
     }
 
@@ -118,13 +137,24 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
 
       if (dbError) throw dbError;
 
-      toast.success('Attachment added successfully');
+      onUpdate?.();
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'Attachment added successfully',
+        type: 'success'
+      });
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
     } catch (error) {
       console.error('Error adding attachment:', error);
-      toast.error('Failed to add attachment');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to add attachment',
+        type: 'error'
+      });
     } finally {
       setIsUploading(false);
     }
@@ -132,71 +162,60 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
 
   const handleDelete = async (attachment: Attachment) => {
     if (!isAuthenticated) {
-      toast.error('Please sign in to delete files');
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Please sign in to delete files',
+        type: 'error'
+      });
       return;
     }
 
-    const confirmed = window.confirm('Are you sure you want to delete this file?');
-    if (!confirmed) return;
+    setFeedbackModal({
+      isOpen: true,
+      title: 'Delete Attachment',
+      message: 'Are you sure you want to delete this file?',
+      type: 'delete',
+      onConfirm: async () => {
+        try {
+          const { data: { user }, error: userError } = await supabase.auth.getUser();
 
-    try {
-      const { data: { user }, error: userError } = await supabase.auth.getUser();
-
-      if (userError || !user) {
-        throw new Error('No authenticated user found');
-      }
-
-      const filePath = `${user.id}/leads/${lead.id}/${attachment.file_name}`;
-      await supabase.storage
-        .from('attachments')
-        .remove([filePath]);
-
-      // Delete from database using RPC
-      const { error } = await supabase
-        .rpc('delete_attachment', {
-          p_attachment_id: attachment.id
-        });
-
-      if (error) throw error;
-
-      toast.success('File deleted successfully');
-    } catch (error) {
-      console.error('Error deleting file:', error);
-      toast.error('Failed to delete file');
-    }
-  };
-
-  // Subscribe to realtime changes
-  useEffect(() => {
-    if (!isAuthenticated) return;
-
-    const channel = supabase
-      .channel('lead_attachments_changes')
-      .on('postgres_changes', 
-        { 
-          event: '*', 
-          schema: 'public', 
-          table: 'attachments',
-          filter: `lead_id=eq.${lead.id}`
-        }, 
-        async (payload) => {
-          if (payload.eventType === 'INSERT') {
-            setAttachments(prev => [payload.new as Attachment, ...prev]);
-          } else if (payload.eventType === 'DELETE' && payload.old.id) {
-            setAttachments(prev => prev.filter(attachment => attachment.id !== payload.old.id));
+          if (userError || !user) {
+            throw new Error('No authenticated user found');
           }
-        }
-      )
-      .subscribe((status) => {
-        if (status !== 'SUBSCRIBED') {
-          console.error('Failed to subscribe to attachments changes:', status);
-        }
-      });
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [isAuthenticated, lead.id, supabase]);
+          const filePath = `${user.id}/leads/${lead.id}/${attachment.file_name}`;
+          await supabase.storage
+            .from('attachments')
+            .remove([filePath]);
+
+          // Delete from database using RPC
+          const { error } = await supabase
+            .rpc('delete_attachment', {
+              p_attachment_id: attachment.id
+            });
+
+          if (error) throw error;
+
+          onUpdate?.();
+          setFeedbackModal({
+            isOpen: true,
+            title: 'Success',
+            message: 'File deleted successfully',
+            type: 'success'
+          });
+        } catch (error) {
+          console.error('Error deleting file:', error);
+          setFeedbackModal({
+            isOpen: true,
+            title: 'Error',
+            message: 'Failed to delete file',
+            type: 'error'
+          });
+        }
+      }
+    });
+  };
 
   if (authLoading) {
     return (
@@ -249,32 +268,46 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                 accept="image/*,.pdf,.doc,.docx,.xls,.xlsx"
               />
               <Button
+                type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
+                className="flex items-center gap-2"
               >
-                <UploadCloud className="mr-2 h-4 w-4" />
+                <UploadCloud className="h-4 w-4" />
                 {isUploading ? 'Uploading...' : 'Upload File'}
               </Button>
             </div>
           </div>
 
           <div className="space-y-4">
-            {attachments.length === 0 ? (
+            {!lead.attachments?.length ? (
               <p className="text-center text-muted-foreground py-4">
                 No attachments yet. Upload your first file above.
               </p>
             ) : (
-              attachments
-                .sort((a, b) => new Date(b.uploaded_at).getTime() - new Date(a.uploaded_at).getTime())
+              lead.attachments
+                .sort((a, b) => {
+                  const dateA = new Date(a.uploaded_at).getTime();
+                  const dateB = new Date(b.uploaded_at).getTime();
+                  return dateB - dateA;
+                })
                 .map((attachment) => (
                   <div
                     key={attachment.id}
                     className="flex items-center justify-between p-4 border rounded-lg"
                   >
                     <div className="flex items-center gap-4">
-                      {fileTypeIcons[attachment.type] || fileTypeIcons.default}
+                      <div className="text-muted-foreground">
+                        {fileTypeIcons[attachment.type] || fileTypeIcons.default}
+                      </div>
                       <div>
-                        <h4 className="font-medium">{attachment.file_name}</h4>
+                        <Button
+                          variant="link"
+                          className="p-0 h-auto font-medium hover:text-blue-500"
+                          onClick={() => window.open(attachment.file_url, '_blank')}
+                        >
+                          {attachment.file_name}
+                        </Button>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span>{formatBytes(attachment.file_size)}</span>
                           <span>•</span>
@@ -290,24 +323,16 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
                       <Button
                         variant="ghost"
                         size="icon"
-                        asChild
+                        onClick={() => window.open(attachment.file_url, '_blank')}
+                        className="text-muted-foreground hover:text-blue-500"
                       >
-                        <a
-                          href={attachment.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          download
-                        >
-                          <Download className="h-4 w-4" />
-                        </a>
+                        <Download className="h-4 w-4" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => handleDelete({
-                          ...attachment,
-                          type: attachment.type as "image" | "document" | "contract" | "rider" | "other"
-                        })}
+                        onClick={() => handleDelete(attachment)}
+                        className="text-muted-foreground hover:text-red-500"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>
@@ -318,6 +343,15 @@ export default function LeadAttachments({ lead }: LeadAttachmentsProps) {
           </div>
         </div>
       </CardContent>
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+        onConfirm={feedbackModal.onConfirm}
+      />
     </>
   );
 } 
