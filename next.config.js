@@ -5,13 +5,32 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   images: {
-    domains: ['localhost', 'bandpracticecrm.com', 'www.bandpracticecrm.com'],
     remotePatterns: [
       {
         protocol: 'https',
         hostname: '*.supabase.co',
         port: '',
         pathname: '/storage/v1/object/public/**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'res.cloudinary.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'bandpracticecrm.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'https',
+        hostname: 'www.bandpracticecrm.com',
+        pathname: '**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        pathname: '**',
       },
     ],
   },
@@ -49,15 +68,4 @@ const nextConfig = {
   },
 }
 
-module.exports = nextConfig 
-module.exports = {
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'res.cloudinary.com',
-        pathname: '**',
-      },
-    ],
-  },
-};
+module.exports = nextConfig

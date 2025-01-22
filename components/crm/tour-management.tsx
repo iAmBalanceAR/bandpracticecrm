@@ -656,8 +656,8 @@ export default function TourManagement() {
       <CardTitle className="flex justify-between items-center text-3xl font-bold">
       </CardTitle>
     </CardHeader>
-    <CardContent>
-            <div className="h-[400px] rounded-lg overflow-hidden -z-[99999]">
+    <CardContent className="p-0">
+            <div className="h-[400px] border-[#ff9920] border-2 rounded-lg overflow-hidden -z-[99999]">
               <MapWithNoSSR 
                 tourStops={tourStops}
                 route={route}
@@ -667,7 +667,7 @@ export default function TourManagement() {
           </CardContent>
         </Card>        
       <Card className="bg-[#111C44] border-none">
-        <CardContent>
+        <CardContent className="p-0">
             <div className="space-y-6">
               <div>
                 <h3 className="text-2xl mb-6">

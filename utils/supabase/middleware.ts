@@ -50,14 +50,14 @@ export async function updateSession(request: NextRequest) {
   )
 
   try {
-    await supabase.auth.getSession()
+    await supabase.auth.getUser()
     return response
   } catch (error) {
     // If we hit rate limit, wait briefly and retry once
     if (error instanceof Error && error.message.includes('rate limit')) {
       await new Promise(resolve => setTimeout(resolve, 1000))
       try {
-        await supabase.auth.getSession()
+        await supabase.auth.getUser()
         return response
       } catch (retryError) {
         console.error('Rate limit retry failed:', retryError)

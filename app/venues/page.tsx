@@ -44,7 +44,6 @@ export default function VenuesPage() {
             <div className="">
               <div className="flex flex-auto tracking-tight text-3xl">
                 <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                  Venues
                 </span>
               </div>
             </div>

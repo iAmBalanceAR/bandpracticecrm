@@ -31,10 +31,10 @@ export default function Page() {
         </CardHeader>
         <CardContent>
             <h3 className="text-2xl mb-0">
-                  <span className="mx-6 text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+                  <span className="mx-0 text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
                     Tour Route Map
                   </span>
-                  <div className="border-[#ff9920] border-b-2 -mt-2 mb-0  h-2 ml-6  mr-6"></div>
+                  <div className="border-[#ff9920] border-b-2 -mt-2 mb-0  h-2 ml-0 mr-0"></div>
                 </h3>
           <TourManagement />
         </CardContent>

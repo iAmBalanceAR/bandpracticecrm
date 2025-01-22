@@ -13,7 +13,7 @@ export default function ClientProviders({
   session: any
 }) {
   return (
-    <SupabaseProvider session={session}>
+    <SupabaseProvider initialSession={session}>
       <AuthProvider>
         <TourProvider>
           <MobileProvider>

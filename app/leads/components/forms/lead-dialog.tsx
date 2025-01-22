@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { Lead, LeadStatus, LeadPriority, LeadType } from '@/app/types/lead';
 import * as Dialog from '@radix-ui/react-dialog';
@@ -26,6 +26,14 @@ interface LeadDialogProps {
   children: React.ReactNode;
   lead?: Lead;  // Optional lead for edit mode
   mode?: 'create' | 'edit';
+  venue?: {
+    id: string;
+    title: string;
+    city?: string;
+    state?: string;
+    address?: string;
+    zip?: string;
+  };
 }
 
 interface LeadData {
@@ -57,11 +65,76 @@ const statusOptions: LeadStatus[] = ['new', 'contacted', 'in_progress', 'negotia
 const priorityOptions: LeadPriority[] = ['low', 'medium', 'high'];
 const typeOptions: LeadType[] = ['venue', 'artist', 'promoter', 'other'];
 
-export default function LeadDialog({ children, lead, mode = 'create' }: LeadDialogProps) {
+// State abbreviation helper
+const getStateAbbreviation = (fullState: string): string => {
+  const stateMap: { [key: string]: string } = {
+    'alabama': 'AL',
+    'alaska': 'AK',
+    'arizona': 'AZ',
+    'arkansas': 'AR',
+    'california': 'CA',
+    'colorado': 'CO',
+    'connecticut': 'CT',
+    'delaware': 'DE',
+    'florida': 'FL',
+    'georgia': 'GA',
+    'hawaii': 'HI',
+    'idaho': 'ID',
+    'illinois': 'IL',
+    'indiana': 'IN',
+    'iowa': 'IA',
+    'kansas': 'KS',
+    'kentucky': 'KY',
+    'louisiana': 'LA',
+    'maine': 'ME',
+    'maryland': 'MD',
+    'massachusetts': 'MA',
+    'michigan': 'MI',
+    'minnesota': 'MN',
+    'mississippi': 'MS',
+    'missouri': 'MO',
+    'montana': 'MT',
+    'nebraska': 'NE',
+    'nevada': 'NV',
+    'new hampshire': 'NH',
+    'new jersey': 'NJ',
+    'new mexico': 'NM',
+    'new york': 'NY',
+    'north carolina': 'NC',
+    'north dakota': 'ND',
+    'ohio': 'OH',
+    'oklahoma': 'OK',
+    'oregon': 'OR',
+    'pennsylvania': 'PA',
+    'rhode island': 'RI',
+    'south carolina': 'SC',
+    'south dakota': 'SD',
+    'tennessee': 'TN',
+    'texas': 'TX',
+    'utah': 'UT',
+    'vermont': 'VT',
+    'virginia': 'VA',
+    'washington': 'WA',
+    'west virginia': 'WV',
+    'wisconsin': 'WI',
+    'wyoming': 'WY',
+    'district of columbia': 'DC',
+    'american samoa': 'AS',
+    'guam': 'GU',
+    'northern mariana islands': 'MP',
+    'puerto rico': 'PR',
+    'us virgin islands': 'VI',
+  };
+
+  const normalizedState = fullState?.toLowerCase().trim();
+  return stateMap[normalizedState] || fullState;
+};
+
+export default function LeadDialog({ children, lead, mode = 'create', venue }: LeadDialogProps) {
   const [open, setOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [currentLead, setCurrentLead] = useState<Lead | null>(null);
-  const [searchValue, setSearchValue] = useState(lead?.venue_id ? '' : '');
+  const [searchValue, setSearchValue] = useState(venue?.title || lead?.venue_id ? '' : '');
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -74,10 +147,43 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
     type: 'success'
   });
   const [venues, setVenues] = useState<any[]>([]);
-  const [selectedVenue, setSelectedVenue] = useState<any>(null);
+  const [selectedVenue, setSelectedVenue] = useState(venue || null);
   const [tagsInput, setTagsInput] = useState(lead?.tags?.join(', ') || '');
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { supabase, user } = useSupabase();
+  const [isEditingVenue, setIsEditingVenue] = useState(false);
+
+  // Initialize venue data if provided
+  useEffect(() => {
+    if (venue) {
+      setSelectedVenue(venue);
+      setSearchValue(venue.title);
+    }
+  }, [venue]);
+
+  // Handle pre-populated venue data from URL
+  useEffect(() => {
+    const venueId = searchParams.get('venue_id');
+    const venueTitle = searchParams.get('venue_title');
+    const venueCity = searchParams.get('venue_city');
+    const venueState = searchParams.get('venue_state');
+    const venueAddress = searchParams.get('venue_address');
+    const venueZip = searchParams.get('venue_zip');
+
+    if (venueId && venueTitle) {
+      setSelectedVenue({
+        id: venueId,
+        title: venueTitle,
+        city: venueCity || undefined,
+        state: venueState || undefined,
+        address: venueAddress || undefined,
+        zip: venueZip || undefined
+      });
+      setSearchValue(venueTitle);
+      setOpen(true);
+    }
+  }, [searchParams]);
 
   // Fetch fresh lead data when dialog opens
   useEffect(() => {
@@ -243,34 +349,43 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
         }
 
         console.log('Lead updated successfully:', data);
-        toast.success('Lead updated successfully');
         
-        // Just close the dialog, no refresh needed
+        // Show success feedback
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Success',
+          message: 'Lead updated successfully',
+          type: 'success'
+        });
+        
+        // Close dialog
         setOpen(false);
       } else {
-        // Create new lead logic
-        const newLead = {
+        // Create new lead
+        const newLeadData = {
           title: formData.get('title') as string,
           type: formData.get('type') as LeadType,
           status: formData.get('status') as LeadStatus,
           priority: formData.get('priority') as LeadPriority,
-          company: formData.get('company')?.toString() || null,
-          description: formData.get('description')?.toString() || null,
-          venue_id: selectedVenue?.id || null,
+          company: formData.get('company')?.toString() || '',
+          description: formData.get('description')?.toString() || '',
+          venue_id: selectedVenue?.id || '',
           contact_info: {
-            name: (formData.get('contact_name') || '') as string,
-            email: (formData.get('contact_email') || '') as string,
-            phone: (formData.get('contact_phone') || '') as string,
+            name: formData.get('contact_name')?.toString() || '',
+            email: formData.get('contact_email')?.toString() || '',
+            phone: formData.get('contact_phone')?.toString() || ''
           },
           tags,
+          created_by_email: user?.email || '',
+          last_contact_date: new Date().toISOString(),
           next_follow_up: null,
-          expected_value: null,
-          last_contact_date: new Date().toISOString()
+          expected_value: null
         };
 
-        console.log('Creating new lead with data:', newLead);
-        const { data, error } = await supabase
-          .rpc('create_lead', { lead_data: newLead });
+        const { data: newLead, error } = await supabase
+          .rpc('create_lead', { 
+            lead_data: newLeadData 
+          });
 
         if (error) {
           console.error('Create error:', error);
@@ -278,21 +393,29 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
           return;
         }
 
-        if (!data) {
+        if (!newLead) {
           console.error('No data returned from create');
           toast.error('Failed to create lead');
           return;
         }
+
+        console.log('Lead created successfully:', newLead);
         
-        console.log('Lead created successfully:', data);
-        toast.success('Lead created successfully');
+        // Show success feedback and navigate
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Success',
+          message: 'Lead created successfully. You\'ll now be taken to your leads view.',
+          type: 'success'
+        });
         
-        // Just close the dialog, no refresh needed
+        // Close dialog and navigate to main leads page
         setOpen(false);
+        router.push('/leads');
       }
     } catch (error) {
-      console.error('Error:', error);
-      toast.error('An error occurred');
+      console.error('Error submitting lead:', error);
+      toast.error('Failed to submit lead');
     } finally {
       setIsLoading(false);
     }
@@ -305,8 +428,8 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
           {children}
         </Dialog.Trigger>
         <Dialog.Portal>
-          <Dialog.Overlay className="fixed inset-0 bg-black/80" />
-          <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[95vh] w-[95vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] overflow-y-auto rounded-lg bg-[#192555] border border-blue-800 p-6 text-white shadow-lg">
+          <Dialog.Overlay className="fixed inset-0 bg-black/80 z-[100]" />
+          <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[95vh] w-[95vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] overflow-y-auto rounded-lg bg-[#192555] border border-blue-800 p-6 text-white shadow-lg z-[101]">
             <Dialog.Title className="text-xl font-bold mb-4">
               {mode === 'create' ? 'Create New Lead' : 'Edit Lead'}
             </Dialog.Title>
@@ -354,7 +477,7 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
                         <SelectTrigger className="bg-[#1B2559] border ">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white">
+                        <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white z-[102]">
                           {typeOptions.map((type) => (
                             <SelectItem key={type} value={type}>
                               {type.charAt(0).toUpperCase() + type.slice(1)}
@@ -370,7 +493,7 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
                         <SelectTrigger className="bg-[#1B2559] ">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0f1729]  text-white">
+                        <SelectContent className="bg-[#0f1729] text-white z-[102]">
                           {statusOptions.map((status) => (
                             <SelectItem key={status} value={status}>
                               {status.replace('_', ' ')}
@@ -386,7 +509,7 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
                         <SelectTrigger className="bg-[#1B2559] ">
                           <SelectValue />
                         </SelectTrigger>
-                        <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white">
+                        <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white z-[102]">
                           {priorityOptions.map((priority) => (
                             <SelectItem key={priority} value={priority}>
                               {priority.charAt(0).toUpperCase() + priority.slice(1)}
@@ -434,82 +557,120 @@ export default function LeadDialog({ children, lead, mode = 'create' }: LeadDial
 
                     <div className="space-y-2">
                       <Label>Venue</Label>
-                      <div className="relative">
-                        <Input
-                          placeholder="Search venues..."
-                          value={searchValue}
-                          onChange={(e) => handleVenueSearch(e.target.value)}
-                          className="bg-[#1B2559] border "
-                        />
-                        {venues.length > 0 && (
-                          <div className="absolute w-full z-50 top-full mt-1 bg-[#1B2559] rounded-md shadow-lg max-h-[200px] overflow-y-auto border ">
-                            {venues.map((venue) => (
-                              <div
-                                key={venue.id}
-                                onClick={() => handleVenueSelect(venue)}
-                                className="cursor-pointer hover:bg-[#2a3c7d] p-2 flex justify-between items-center"
-                              >
-                                <span className="font-medium">{venue.title}</span>
-                                <span className="text-sm text-gray-400 ml-2">• {venue.city}, {venue.state}</span>
-                              </div>
-                            ))}
+                      {!selectedVenue || isEditingVenue ? (
+                          <div className="relative">
+                            <Input
+                              placeholder="Search venues..."
+                              value={searchValue}
+                              onChange={(e) => {
+                                handleVenueSearch(e.target.value);
+                                setSearchValue(e.target.value);
+                              }}
+                              className="bg-[#1B2559] border"
+                            />
+                            {searchValue.length > 0 && (
+                              <>
+                                {venues.length > 0 && (
+                                  <div className="absolute w-full z-50 top-full mt-1 bg-[#1B2559] rounded-md shadow-lg max-h-[200px] overflow-y-auto border">
+                                    {venues.map((venue) => (
+                                      <div
+                                        key={venue.id}
+                                        onClick={() => {
+                                          handleVenueSelect(venue);
+                                          setIsEditingVenue(false);
+                                        }}
+                                        className="cursor-pointer hover:bg-[#2a3c7d] p-2 flex justify-between items-center"
+                                      >
+                                        <span className="font-medium">{venue.title}</span>
+                                        <span className="text-sm text-gray-400 ml-2">• {venue.city}, {getStateAbbreviation(venue.state || '')}</span>
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {searchValue.length > 2 && venues.length === 0 && (
+                                  <div className="absolute w-full z-50 top-full mt-1 bg-[#1B2559] rounded-md shadow-lg p-2 border">
+                                    No venues found
+                                  </div>
+                                )}
+                              </>
+                            )}
                           </div>
-                        )}
-                        {searchValue.length > 2 && venues.length === 0 && !selectedVenue && (
-                          <div className="absolute w-full z-50 top-full mt-1 bg-[#1B2559] rounded-md shadow-lg p-2 border ">
-                            No venues found
+                      ) : (
+                        <div className="mt-2 flex justify-between items-center p-2 bg-[#1B2559] rounded-md">
+                          <div className="space-y-1">
+                            <div className="font-medium">{selectedVenue.title}</div>
+                            <div className="text-sm text-gray-400">
+                              {selectedVenue.address}
+                            </div>
+                            <div className="text-sm text-gray-400">
+                              {selectedVenue.city}, {getStateAbbreviation(selectedVenue.state || '')} {selectedVenue.zip}
+                            </div>
                           </div>
-                        )}
-                      </div>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setIsEditingVenue(true);
+                              setSearchValue('');
+                              setVenues([]);
+                            }}
+                          >
+                            Change
+                          </Button>
+                        </div>
+                      )}
                     </div>
 
-                    <div className="]">
-                      <div className="space-y-2">
-                        <Label htmlFor="venue_address">Venue Address</Label>
-                        <Input
-                          id="venue_address"
-                          name="venue_address"
-                          value={selectedVenue?.address || ''}
-                          readOnly
-                          className="bg-[#192555] border "
-                        />
-                      </div>
+                    {(isEditingVenue || !selectedVenue) && (
+                      <>
+                          <div className="space-y-2">
+                            <Label htmlFor="venue_address">Venue Address</Label>
+                            <Input
+                              id="venue_address"
+                              name="venue_address"
+                              value={selectedVenue?.address || ''}
+                              readOnly
+                              className="bg-[#192555] border"
+                            />
+                          </div>
 
-                      <div className="grid grid-cols-3 gap-4">
-                        <div className="space-y-2">
-                          <Label htmlFor="venue_city">City</Label>
-                          <Input
-                            id="venue_city"
-                            name="venue_city"
-                            value={selectedVenue?.city || ''}
-                            readOnly
-                            className="bg-[#192555] border "
-                          />
-                        </div>
+                          <div className="grid grid-cols-3 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="venue_city">City</Label>
+                              <Input
+                                id="venue_city"
+                                name="venue_city"
+                                value={selectedVenue?.city || ''}
+                                readOnly
+                                className="bg-[#192555] border"
+                              />
+                            </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="venue_state">State</Label>
-                          <Input
-                            id="venue_state"
-                            name="venue_state"
-                            value={selectedVenue?.state || ''}
-                            readOnly
-                            className="bg-[#192555] border "
-                          />
-                        </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="venue_state">State</Label>
+                              <Input
+                                id="venue_state"
+                                name="venue_state"
+                                value={selectedVenue?.state || ''}
+                                readOnly
+                                className="bg-[#192555] border"
+                              />
+                            </div>
 
-                        <div className="space-y-2">
-                          <Label htmlFor="venue_zip">ZIP</Label>
-                          <Input
-                            id="venue_zip"
-                            name="venue_zip"
-                            value={selectedVenue?.zip || ''}
-                            readOnly
-                            className="bg-[#192555] border "
-                          />
-                        </div>
-                      </div>
-                    </div>
+                            <div className="space-y-2">
+                              <Label htmlFor="venue_zip">ZIP</Label>
+                              <Input
+                                id="venue_zip"
+                                name="venue_zip"
+                                value={selectedVenue?.zip || ''}
+                                readOnly
+                                className="bg-[#192555] border"
+                              />
+                            </div>
+                          </div>
+                      </>
+                    )}
                   </div>
                 </div>
 

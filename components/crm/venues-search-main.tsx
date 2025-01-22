@@ -100,9 +100,32 @@ export default function VenuesSearchMain() {
         return;
       }
 
+      // Check if there are any meaningful search criteria
+      const updatedFilters = { ...localFilters, ...newFilters, page: 1 };
+      const hasSearchCriteria = !!(
+        updatedFilters.query ||
+        updatedFilters.city ||
+        updatedFilters.state ||
+        updatedFilters.venue_type ||
+        updatedFilters.capacity ||
+        updatedFilters.verified ||
+        updatedFilters.featured ||
+        updatedFilters.allows_underage ||
+        updatedFilters.has_bar ||
+        updatedFilters.has_stage ||
+        updatedFilters.has_sound_system ||
+        updatedFilters.has_lighting_system ||
+        updatedFilters.has_parking
+      );
+
+      if (!hasSearchCriteria && !hasSearched) {
+        setVenues([]);
+        setTotalCount(0);
+        return;
+      }
+
       setLoading(true);
       setHasSearched(true);
-      const updatedFilters = { ...localFilters, ...newFilters, page: 1 };
       setLocalFilters(updatedFilters);
       
       try {
@@ -123,6 +146,30 @@ export default function VenuesSearchMain() {
         }
         if (updatedFilters.venue_type) {
           query = query.eq('venue_type', updatedFilters.venue_type);
+        }
+        if (updatedFilters.verified) {
+          query = query.eq('verified', true);
+        }
+        if (updatedFilters.featured) {
+          query = query.eq('featured', true);
+        }
+        if (updatedFilters.allows_underage) {
+          query = query.eq('allows_underage', true);
+        }
+        if (updatedFilters.has_bar) {
+          query = query.eq('has_bar', true);
+        }
+        if (updatedFilters.has_stage) {
+          query = query.eq('has_stage', true);
+        }
+        if (updatedFilters.has_sound_system) {
+          query = query.eq('has_sound_system', true);
+        }
+        if (updatedFilters.has_lighting_system) {
+          query = query.eq('has_lighting_system', true);
+        }
+        if (updatedFilters.has_parking) {
+          query = query.eq('has_parking', true);
         }
         const capacity = Number(updatedFilters.capacity);
         if (!isNaN(capacity) && capacity > 0) {
@@ -218,8 +265,15 @@ export default function VenuesSearchMain() {
   
     // Only fetch initial results if there are search params and user is authenticated
     useEffect(() => {
-      if (searchParams.toString() && isAuthenticated) {
-        handleSearch(localFilters);
+      if (isAuthenticated) {
+        // Check if there are any search parameters
+        const hasSearchParams = Array.from(searchParams.entries()).some(([key, value]) => 
+          value && !['tab', 'source'].includes(key)
+        );
+
+        if (hasSearchParams) {
+          handleSearch(localFilters);
+        }
       }
     }, [isAuthenticated]);
 

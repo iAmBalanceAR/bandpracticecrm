@@ -10,9 +10,13 @@ import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 import { Badge } from '@/components/ui/badge';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { cn } from '@/lib/utils';
+import LeadDialog from '@/app/leads/components/forms/lead-dialog';
 
-const Map = dynamic(() => import('@/components/ui/map'), {
+// Import Map component with proper type
+const MapComponent = dynamic(() => import('@/components/ui/map'), {
   loading: () => <div className="h-48 bg-muted animate-pulse rounded-md" />,
   ssr: false
 });
@@ -33,6 +37,16 @@ interface SavedVenue {
   user_id: string;
 }
 
+interface VenueLeadAssociation {
+  id: string;
+  venue_id: string;
+}
+
+// Add type for venue lead map
+type VenueLeadMap = {
+  [key: string]: string;
+};
+
 export default function VenueGrid({ 
   venues = [], 
   loading = false, 
@@ -44,23 +58,29 @@ export default function VenueGrid({
   source = 'search'
 }: VenueGridProps) {
   const { toast } = useToast();
+  const router = useRouter();
+  const { supabase } = useSupabase();
   const [loadingMore, setLoadingMore] = useState(false);
   const [savedVenues, setSavedVenues] = useState<Set<string>>(new Set());
+  const [venueLeads, setVenueLeads] = useState<VenueLeadMap>({});
   const [feedbackModal, setFeedbackModal] = useState<{
     isOpen: boolean;
     title: string;
     message: string;
     type: 'success' | 'error';
+    onClose: () => void;
   }>({
     isOpen: false,
     title: '',
     message: '',
-    type: 'success'
+    type: 'success',
+    onClose: () => setFeedbackModal(prev => ({ ...prev, isOpen: false }))
   });
   const searchParams = useSearchParams();
 
   useEffect(() => {
     fetchSavedVenues();
+    fetchVenueLeads();
   }, []);
 
   const fetchSavedVenues = async () => {
@@ -77,8 +97,35 @@ export default function VenueGrid({
         isOpen: true,
         title: 'Error',
         message: 'Failed to load saved venues',
-        type: 'error'
+        type: 'error',
+        onClose: () => setFeedbackModal(prev => ({ ...prev, isOpen: false }))
       });
+    }
+  };
+
+  const fetchVenueLeads = async () => {
+    try {
+      // Use the get_leads stored procedure which handles auth and permissions
+      const { data: leadAssociations, error } = await supabase
+        .rpc('get_leads');
+
+      if (error) {
+        console.error('Error fetching leads:', error);
+        return;
+      }
+
+      // Process the leads we have access to, filtering only those with venue_id
+      const leadMap: VenueLeadMap = {};
+      if (leadAssociations) {
+        leadAssociations
+          .filter((lead: any) => lead.venue_id)
+          .forEach((lead: VenueLeadAssociation) => {
+            leadMap[lead.venue_id] = lead.id;
+          });
+      }
+      setVenueLeads(leadMap);
+    } catch (error) {
+      console.error('Error fetching venue lead associations:', error);
     }
   };
 
@@ -114,7 +161,8 @@ export default function VenueGrid({
         message: isSaved 
           ? 'Venue has been removed from your saved list'
           : 'Venue has been added to your saved list',
-        type: 'success'
+        type: 'success',
+        onClose: () => setFeedbackModal(prev => ({ ...prev, isOpen: false }))
       });
     } catch (error) {
       console.error('Error updating saved venue:', error);
@@ -122,9 +170,33 @@ export default function VenueGrid({
         isOpen: true,
         title: 'Error',
         message: error instanceof Error ? error.message : 'Failed to update saved venue',
-        type: 'error'
+        type: 'error',
+        onClose: () => setFeedbackModal(prev => ({ ...prev, isOpen: false }))
       });
     }
+  };
+
+  const handleCreateLead = (venue: Venue) => {
+    const venueData = {
+      id: venue.id,
+      title: venue.title,
+      city: venue.city,
+      state: venue.state,
+      address: venue.address,
+      zip: venue.zip
+    };
+
+    return (
+      <LeadDialog venue={venueData}>
+        <Button
+          variant="outline"
+          size="sm"
+          className="border-[#60A5FA] border hover:bg-blue-800 bg-blue-600 text-white"
+        >
+          Create Lead
+        </Button>
+      </LeadDialog>
+    );
   };
 
   const handleLoadMore = async () => {
@@ -211,7 +283,7 @@ export default function VenueGrid({
         {sortVenues(venues).map((venue) => (
           <Card key={venue.id} className="bg-[#030817] border-blue-400 border-2 rounded-md overflow-hidden group relative">
             {isVenueComplete(venue) && (
-              <div className="absolute top-2 right-2 z-10">
+              <div className="absolute top-2 right-2 z-[2]">
                 <Badge variant="default" className="bg-blue-500">
                   <Star className="h-3 w-3 mr-1" />
                   Complete
@@ -220,12 +292,9 @@ export default function VenueGrid({
             )}
             <Link href={getVenueDetailUrl(venue.id)} className="block">
               <CardHeader className="p-0 relative">
-                {venue.latitude && 
-                 venue.longitude && 
-                 !isNaN(Number(venue.latitude)) && 
-                 !isNaN(Number(venue.longitude)) && (
-                  <div className="h-48 w-full relative">
-                    <Map
+                {hasMapData(venue) && (
+                  <div className="h-48 w-full relative z-[1]">
+                    <MapComponent
                       center={[Number(venue.latitude), Number(venue.longitude)]}
                       zoom={14}
                       className="h-full w-full"
@@ -240,61 +309,84 @@ export default function VenueGrid({
               <CardContent className="p-4">
                 <div className="flex justify-between items-start mb-2">
                   <h3 className="text-lg font-semibold group-hover:text-blue-400">{venue.title}</h3>
-                  <div className="relative z-10" onClick={(e) => e.preventDefault()}>
+                  <div className="relative z-[2]" onClick={(e) => e.preventDefault()}>
                     <Button
                       variant="ghost"
                       size="icon"
-                      className="ml-2 hover:bg-[#1B2559]"
+                      className="hover:bg-[#1B2559]"
                       onClick={(e) => {
                         e.preventDefault();
                         handleSaveVenue(venue.id);
                       }}
                     >
                       <Heart 
-                        className={savedVenues.has(venue.id) ? 'fill-red-500 text-red-500' : 'text-white'} 
+                        className={cn(
+                          "h-5 w-5",
+                          savedVenues.has(venue.id) ? "fill-red-500 text-red-500" : "text-gray-400"
+                        )}
                       />
                     </Button>
                   </div>
                 </div>
-                <div className="flex items-center text-sm text-gray-400 mb-2">
-                  <MapPin className="h-4 w-4 mr-1" />
-                  {venue.city}, {venue.state}
-                </div>
-                <div className="flex items-center text-sm text-gray-400">
-                  <Users className="h-4 w-4 mr-1" />
-                  {venue.capacity && String(venue.capacity) !== 'null' ? `Capacity: ${Number(venue.capacity).toLocaleString()}` : null}
+                <div className="space-y-2">
+                  {venue.city && venue.state && (
+                    <div className="flex items-center text-gray-400">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span>{venue.city}, {venue.state}</span>
+                    </div>
+                  )}
+                  {venue.capacity && (
+                    <div className="flex items-center text-gray-400">
+                      <Users className="h-4 w-4 mr-2" />
+                      <span>Capacity: {venue.capacity}</span>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Link>
+            <CardFooter className="p-4 pt-0 flex justify-end relative z-[2]">
+              {venue.id in venueLeads ? (
+                <Link href={`/leads/${venueLeads[venue.id]}`}>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="border-[#60A5FA] border bg-green-800 hover:bg-green-900 text-white"
+                  >
+                    Active Lead
+                  </Button>
+                </Link>
+              ) : source !== 'search' ? (
+                handleCreateLead(venue)
+              ) : null}
+            </CardFooter>
           </Card>
         ))}
       </div>
-
       {hasMore && (
         <div className="flex justify-center mt-8">
           <Button
+            variant="outline"
             onClick={handleLoadMore}
             disabled={loadingMore}
-            className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
+            className="min-w-[200px]"
           >
             {loadingMore ? (
               <>
-                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                Loading more venues...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Loading...
               </>
             ) : (
-              'Load More Venues'
+              'Load More'
             )}
           </Button>
         </div>
       )}
-
       <FeedbackModal
         isOpen={feedbackModal.isOpen}
-        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
         title={feedbackModal.title}
         message={feedbackModal.message}
         type={feedbackModal.type}
+        onClose={feedbackModal.onClose}
       />
     </div>
   );

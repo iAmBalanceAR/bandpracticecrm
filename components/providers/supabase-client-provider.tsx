@@ -1,35 +1,35 @@
 'use client'
 
-import createClient from '@/utils/supabase/client'
+import { createBrowserClient } from '@supabase/ssr'
+import { type SupabaseClient, type User, type Session } from '@supabase/supabase-js'
 import { useRouter, usePathname } from 'next/navigation'
 import { createContext, useContext, useEffect, useState } from 'react'
-import { createBrowserClient } from '@supabase/ssr'
 import type { Database } from '@/types/supabase'
 
-type SupabaseClient = ReturnType<typeof createBrowserClient<Database>>
 type UserResponse = Awaited<ReturnType<SupabaseClient['auth']['getUser']>>
-type SessionResponse = Awaited<ReturnType<SupabaseClient['auth']['getSession']>>
-type User = NonNullable<UserResponse['data']['user']>
-type Session = NonNullable<SessionResponse['data']['session']>
 
 type SupabaseContext = {
-  supabase: SupabaseClient
+  supabase: SupabaseClient<Database>
   user: User | null
-  isLoading: boolean
   session: Session | null
+  isLoading: boolean
   refreshUser: () => Promise<void>
 }
 
 const Context = createContext<SupabaseContext | undefined>(undefined)
 
-export default function SupabaseProvider({
-  children,
-  session: initialSession,
-}: {
+interface Props {
   children: React.ReactNode
-  session: NonNullable<SessionResponse['data']['session']> | null
-}) {
-  const [supabase] = useState(() => createClient())
+  initialSession: Session | null
+}
+
+export default function SupabaseProvider({ children, initialSession }: Props) {
+  const [supabase] = useState(() => 
+    createBrowserClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+  )
   const [user, setUser] = useState<User | null>(initialSession?.user ?? null)
   const [session, setSession] = useState<Session | null>(initialSession)
   const [isLoading, setIsLoading] = useState(!initialSession)
@@ -38,24 +38,23 @@ export default function SupabaseProvider({
 
   const refreshUser = async () => {
     try {
-      const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
-      if (userError) {
-        console.error('Error refreshing user:', userError)
+      const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+      if (error) {
+        console.error('Error refreshing session:', error)
         setUser(null)
         setSession(null)
         return
       }
 
-      if (currentUser) {
-        setUser(currentUser)
-        const { data: { session: currentSession } } = await supabase.auth.getSession()
+      if (currentSession) {
+        setUser(currentSession.user)
         setSession(currentSession)
       } else {
         setUser(null)
         setSession(null)
       }
     } catch (error) {
-      console.error('Error in user refresh:', error)
+      console.error('Error in session refresh:', error)
       setUser(null)
       setSession(null)
     }
@@ -64,10 +63,10 @@ export default function SupabaseProvider({
   useEffect(() => {
     if (initialSession) {
       const verifyInitialSession = async () => {
-        const { data: { user: verifiedUser } } = await supabase.auth.getUser()
-        if (verifiedUser) {
-          setUser(verifiedUser)
-          setSession(initialSession)
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        if (currentSession) {
+          setUser(currentSession.user)
+          setSession(currentSession)
         } else {
           setUser(null)
           setSession(null)
@@ -83,20 +82,9 @@ export default function SupabaseProvider({
 
     const initializeAuth = async () => {
       try {
-        const { data: { user: currentUser }, error: userError } = await supabase.auth.getUser()
-        if (userError) {
-          console.error('Error fetching user:', userError)
-          setUser(null)
-          setSession(null)
-          if (!pathname.includes('/auth/')) {
-            router.push('/auth/signin')
-          }
-          return
-        }
-
-        if (currentUser) {
-          setUser(currentUser)
-          const { data: { session: currentSession } } = await supabase.auth.getSession()
+        const { data: { session: currentSession } } = await supabase.auth.getSession()
+        if (currentSession) {
+          setUser(currentSession.user)
           setSession(currentSession)
         } else {
           setUser(null)
@@ -118,10 +106,10 @@ export default function SupabaseProvider({
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      if (event === 'SIGNED_IN') {
-        setUser(newSession?.user ?? null)
-        setSession(newSession)
+    } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setUser(session.user)
+        setSession(session)
         if (pathname === '/auth/signin' || pathname === '/auth/signup') {
           router.push('/')
         }
@@ -131,8 +119,7 @@ export default function SupabaseProvider({
         if (!pathname.includes('/auth/')) {
           router.push('/auth/signin')
         }
-      } else if (event === 'TOKEN_REFRESHED' && newSession) {
-        setSession(newSession)
+      } else if (event === 'TOKEN_REFRESHED') {
         await refreshUser()
       } else if (event === 'USER_UPDATED') {
         await refreshUser()
