@@ -16,7 +16,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold mb-3 text-[#008ffb]">CRM</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/pricing" className="hover:text-[#008ffb] transition-colors">Pricing</a></li>
-              <li><a href="/docs" className="hover:text-[#008ffb] transition-colors">Documentation</a></li>
+              <li><a href="https://docs.bandpracticecrm.com" className="hover:text-[#008ffb] transition-colors">Documentation</a></li>
               <li><a href="/faq" className="hover:text-[#008ffb] transition-colors">FAQ</a></li>
             </ul>
           </div>

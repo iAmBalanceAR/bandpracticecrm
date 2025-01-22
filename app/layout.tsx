@@ -7,6 +7,8 @@ import type { Database } from '@/types/supabase'
 import { ClientErrorBoundary } from '@/components/error/client-error-boundary'
 import 'leaflet/dist/leaflet.css';
 import { ThemeProvider } from '@/lib/providers/theme-provider';
+import { Analytics } from "@vercel/analytics/react"
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -64,6 +66,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className=" bg-background font-sans antialiased">
+        <Analytics />
         <ClientErrorBoundary>
           <SupabaseClientProvider initialSession={session}>
             <MobileProvider>
@@ -73,6 +76,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 enableSystem
               >
                 {children}
+                <SpeedInsights />
               </ThemeProvider>
             </MobileProvider>
           </SupabaseClientProvider>
