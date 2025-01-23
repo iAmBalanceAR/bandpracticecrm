@@ -231,7 +231,7 @@ importers:
         specifier: ^1.7.1
         version: 1.7.1(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
       stripe:
-        specifier: ^14.19.0
+        specifier: ^14.25.0
         version: 14.25.0
       tailwind-merge:
         specifier: ^2.5.5

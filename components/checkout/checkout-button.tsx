@@ -16,7 +16,14 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
     try {
       setLoading(true)
 
-      const response = await fetch(`/api/checkout?priceId=${priceId}`)
+      const response = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ priceId }),
+      })
+      
       const data = await response.json()
 
       if (!response.ok) {
@@ -24,7 +31,11 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
       }
 
       // Redirect to Stripe Checkout
-      router.push(data.url)
+      if (data.url) {
+        router.push(data.url)
+      } else {
+        throw new Error('No checkout URL returned')
+      }
     } catch (error) {
       console.error('Error:', error)
       setLoading(false)
@@ -37,9 +48,9 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
       disabled={loading}
       className="w-full bg-green-700 text-whie hover:bg-green-600 border-blue-500 border"
     >
-    <span className="text-shadow-sm text-shadow-blur-1 text-shadow-black">
+      <span className="text-shadow-sm text-shadow-blur-1 text-shadow-black">
         {loading ? 'Loading...' : 'Subscribe'}
-    </span>    
-  </Button>
+      </span>    
+    </Button>
   )
 } 

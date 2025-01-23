@@ -9,6 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from '@vercel/speed-insights/next';
+import { Toaster } from '@/components/ui/toaster'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -75,12 +76,15 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 storageKey="ui-theme"
                 enableSystem
               >
-                {children}
+                <div className="flex min-h-screen">
+                  <main className="flex-1">{children}</main>
+                </div>
                 <SpeedInsights />
               </ThemeProvider>
             </MobileProvider>
           </SupabaseClientProvider>
         </ClientErrorBoundary>
+        <Toaster />
       </body>
     </html>
   )

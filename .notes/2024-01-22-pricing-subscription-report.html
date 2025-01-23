@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Report: Pricing & Subscription Implementation - Jan 22, 2024</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            line-height: 1.6;
+            color: #e4e4e7;
+            background-color: #0f172a;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            color: #60a5fa;
+            border-bottom: 1px solid #334155;
+            padding-bottom: 0.5rem;
+        }
+        code {
+            background-color: #1e293b;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.9em;
+        }
+        pre {
+            background-color: #1e293b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            border: 1px solid #334155;
+        }
+        .note {
+            background-color: #172554;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        .warning {
+            background-color: #422006;
+            border-left: 4px solid #f97316;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0.25rem;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        th, td {
+            border: 1px solid #334155;
+            padding: 0.5rem;
+            text-align: left;
+        }
+        th {
+            background-color: #1e293b;
+        }
+    </style>
+</head>
+<body>
+    <h1>Technical Report: Pricing & Subscription Implementation</h1>
+    <p><strong>Date:</strong> January 22, 2024</p>
+
+    <h2>Overview</h2>
+    <p>Implementation of dynamic pricing cards with Stripe integration, featuring automatic synchronization of product features and marketing features between Stripe and Supabase.</p>
+
+    <h2>Database Schema Updates</h2>
+    <pre><code>-- Add feature columns to products table
+ALTER TABLE products
+ADD COLUMN IF NOT EXISTS features TEXT[],
+ADD COLUMN IF NOT EXISTS marketing_features TEXT[];</code></pre>
+
+    <h2>Stripe Integration</h2>
+    <h3>Webhook Handler</h3>
+    <p>Location: <code>app/api/webhooks/stripe/route.ts</code></p>
+    <pre><code>import { createClient } from '@/utils/supabase/server'
+import Stripe from 'stripe'
+
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+  apiVersion: '2023-10-16'
+})
+
+export async function POST(req: Request) {
+  // ... webhook handling code ...
+}</code></pre>
+
+    <h3>Manual Sync Endpoint</h3>
+    <p>Location: <code>app/api/sync-products/route.ts</code></p>
+    <pre><code>// Feature parsing logic
+const featureList = product.metadata?.['feature-list'] || ''
+const marketingFeatures = featureList
+  ? featureList.split(',')
+      .map(f => f.trim())
+      .filter(f => f)
+      .map(f => f.replace(/"/g, '\\"'))
+  : []</code></pre>
+
+    <div class="note">
+        <strong>Important:</strong> The feature list in Stripe should be added as a metadata field called <code>feature-list</code> with comma-separated values.
+    </div>
+
+    <h2>Stripe Product Configuration</h2>
+    <ol>
+        <li>Access Stripe Dashboard</li>
+        <li>Navigate to Products</li>
+        <li>Add metadata field <code>feature-list</code> with comma-separated features</li>
+        <li>Example value: <code>Advanced Tour Management,Track and Manage Unlimited Tours,Research Over 45,000 Venues,Advanced Lead Management,Data Tracking and Analytics,Stage Plot Generator,Advanced Tour Routing,Document Generation</code></li>
+    </ol>
+
+    <h2>Pricing Component</h2>
+    <p>Location: <code>components/pricing/pricing-client.tsx</code></p>
+    <p>Key features:</p>
+    <ul>
+        <li>Dynamic rendering of product features from Supabase</li>
+        <li>Responsive grid layout</li>
+        <li>Motion animations for card entry</li>
+        <li>Conditional rendering based on user authentication</li>
+    </ul>
+
+    <h3>Feature Display Structure</h3>
+    <pre><code>{product.marketing_features && product.marketing_features.length > 0 && (
+  <div className="mb-6">
+    <h4 className="text-lg font-semibold text-white mb-3">Features</h4>
+    <ul className="space-y-4">
+      {product.marketing_features.map((feature: string, i: number) => (
+        <li key={i} className="flex items-start text-gray-300">
+          <Check className="h-5 w-5 mr-3 text-[#00e396] mt-1 flex-shrink-0" />
+          <span className="text-sm">{feature}</span>
+        </li>
+      ))}
+    </ul>
+  </div>
+)}</code></pre>
+
+    <h2>Testing & Synchronization</h2>
+    <h3>Manual Sync</h3>
+    <p>To trigger a manual sync between Stripe and Supabase:</p>
+    <pre><code>curl http://localhost:3000/api/sync-products</code></pre>
+
+    <h3>Webhook Testing</h3>
+    <p>Using Stripe CLI:</p>
+    <pre><code>stripe listen --forward-to localhost:3000/api/webhooks/stripe
+stripe trigger product.updated</code></pre>
+
+    <div class="warning">
+        <strong>Note:</strong> Ensure proper environment variables are set:
+        <ul>
+            <li><code>STRIPE_SECRET_KEY</code></li>
+            <li><code>STRIPE_WEBHOOK_SECRET</code></li>
+        </ul>
+    </div>
+
+    <h2>Middleware Configuration</h2>
+    <p>Location: <code>middleware.ts</code></p>
+    <p>Public paths configuration for pricing access:</p>
+    <pre><code>const publicPaths = [
+  '/pricing',
+  '/auth/signin',
+  '/auth/signup',
+  // ... other public paths
+]</code></pre>
+
+    <h2>Future Considerations</h2>
+    <ul>
+        <li>Add error recovery for missing profiles</li>
+        <li>Implement subscription status indicators</li>
+        <li>Add billing history section</li>
+        <li>Enhance subscription management options</li>
+    </ul>
+
+</body>
+</html> 

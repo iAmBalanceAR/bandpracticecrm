@@ -31,5 +31,9 @@ export default async function Pricing() {
     console.error('Error fetching products:', productsError)
   }
 
-  return <PricingClient products={products || []} user={user} />
+  return (
+    <div>
+      <PricingClient products={products || []} user={user} />
+    </div>
+  )
 } 

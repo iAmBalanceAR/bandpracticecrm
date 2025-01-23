@@ -35,11 +35,53 @@ export default async function BillingPage() {
     redirect('/auth/signin')
   }
 
+  // Get profile and related subscription data
   const { data: profile } = await supabase
     .from('profiles')
-    .select('stripe_customer_id, subscription_status')
+    .select(`
+      stripe_customer_id,
+      subscription_status,
+      subscription_price_id,
+      subscriptions (
+        current_period_start,
+        current_period_end,
+        cancel_at_period_end
+      ),
+      prices (
+        id,
+        unit_amount,
+        currency,
+        interval,
+        products (
+          name
+        )
+      )
+    `)
     .eq('id', user.id)
     .single()
+
+  // Format subscription details
+  const subscription = profile?.subscriptions?.[0]
+  const price = profile?.prices?.[0]
+  const product = price?.products?.[0]
+
+  const formatDate = (dateString?: string) => {
+    if (!dateString) return ''
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const formatPrice = (amount?: number, currency?: string) => {
+    if (!amount || !currency) return ''
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: currency.toUpperCase(),
+      minimumFractionDigits: 0
+    }).format(amount / 100)
+  }
 
   return (
     <div className="pl-4 pt-3 bg-[#0f1729] text-white min-h-screen">
@@ -55,20 +97,48 @@ export default async function BillingPage() {
           <div className="p-6">
             <div className="space-y-6">
               <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
-                <div>
-                  <h3 className="text-lg font-medium text-white">Subscription Status</h3>
+                <div className="space-y-2">
+                  <h3 className="text-lg font-medium text-white">Current Plan</h3>
                   <p className="text-gray-400 text-sm">
-                    {profile?.subscription_status || 'No active subscription'}
+                    {product?.name || 'No active plan'}
                   </p>
+                  {profile?.subscription_status && (
+                    <>
+                      <p className="text-gray-400 text-sm">
+                        Status: <span className="text-green-400 capitalize">{profile.subscription_status}</span>
+                      </p>
+                      {price && (
+                        <p className="text-gray-400 text-sm">
+                          {formatPrice(price.unit_amount, price.currency)}/{price.interval}
+                        </p>
+                      )}
+                    </>
+                  )}
                 </div>
               </div>
+
+              {subscription && (
+                <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                  <div className="space-y-2">
+                    <h3 className="text-lg font-medium text-white">Billing Period</h3>
+                    <p className="text-gray-400 text-sm">
+                      Current period: {formatDate(subscription.current_period_start)} - {formatDate(subscription.current_period_end)}
+                    </p>
+                    {subscription.cancel_at_period_end && (
+                      <p className="text-yellow-400 text-sm">
+                        Your subscription will end on {formatDate(subscription.current_period_end)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )}
 
               <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
                 <div>
                   <h3 className="text-lg font-medium text-white">Subscription Management</h3>
                   <p className="text-gray-400 text-sm">
                     {profile?.stripe_customer_id 
-                      ? 'Manage your current subscription'
+                      ? 'Manage your subscription, payment methods, and billing history'
                       : 'View available subscription plans'}
                   </p>
                 </div>
