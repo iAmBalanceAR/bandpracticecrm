@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard } from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -232,6 +232,14 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
         {/* Only show sign out in footer if user is logged in */}
         {user && (
           <div className="mt-auto">
+            <Button 
+              variant="ghost" 
+              className={`w-full justify-${sidebarOpen ? 'start' : 'center'} text-gray-400 text-lg hover:bg-[#1B2559] hover:text-white ${!sidebarOpen ? 'p-0' : 'px-2'}`}
+              onClick={() => router.push('http:////docs.bandpracticecrm.com')}
+            >
+              <BookOpen className={`${sidebarOpen ? '!h-7 !w-7 mr-2' : '!h-10 !w-10'} text-green-40 0`} />
+              {sidebarOpen && <span>Docs</span>}
+            </Button>            
             <Button 
               variant="ghost" 
               className={`w-full justify-${sidebarOpen ? 'start' : 'center'} text-gray-400 text-lg hover:bg-[#1B2559] hover:text-red-400 ${!sidebarOpen ? 'p-0' : 'px-2'}`}
