@@ -1,5 +1,5 @@
 import { createClient } from '@/utils/supabase/server'
-import type { Database } from '@/types/supabase'
+//import type { Database } from '@/types/supabase'
 import { PricingClient } from '@/components/pricing/pricing-client'
 
 export default async function Pricing() {
