@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Reminders Alert Implementation - Technical Report</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      line-height: 1.6;
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #0f172a;
+      color: #e2e8f0;
+    }
+    h1, h2, h3 {
+      color: #60a5fa;
+      margin-top: 2rem;
+    }
+    code {
+      background: #1e293b;
+      padding: 0.2rem 0.4rem;
+      border-radius: 0.25rem;
+      font-family: monospace;
+    }
+    pre {
+      background: #1e293b;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      overflow-x: auto;
+      border: 1px solid #3b82f6;
+    }
+    .warning {
+      background: #451a03;
+      border-left: 4px solid #ea580c;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+    .success {
+      background: #022c22;
+      border-left: 4px solid #059669;
+      padding: 1rem;
+      margin: 1rem 0;
+      border-radius: 0.5rem;
+    }
+  </style>
+</head>
+<body>
+  <h1>Reminders Alert Implementation - Technical Report</h1>
+  <p>Date: January 25, 2024</p>
+
+  <h2>Overview</h2>
+  <p>
+    This report documents the implementation of a reminders alert system in the side navigation menu. 
+    The feature displays overdue reminders to users and allows for immediate deletion with visual feedback.
+  </p>
+
+  <h2>Implementation Details</h2>
+
+  <h3>1. Component Structure</h3>
+  <p>The system consists of two main components:</p>
+  <ul>
+    <li><code>RemindersAlert</code>: A display component that shows overdue reminders with delete functionality</li>
+    <li><code>SideMenu</code>: The parent component that manages reminder state and polling</li>
+  </ul>
+
+  <h3>2. Data Flow</h3>
+  <pre>
+SideMenu
+├── Manages reminders state
+├── Handles polling (60-second intervals)
+└── Passes to RemindersAlert
+    ├── Filters overdue reminders
+    ├── Handles visual transitions
+    └── Triggers deletion callbacks
+  </pre>
+
+  <h3>3. Key Features</h3>
+  <ul>
+    <li>Automatic polling every 60 seconds (matches reminder granularity)</li>
+    <li>Immediate visual feedback on deletion</li>
+    <li>Smooth transitions with CSS animations</li>
+    <li>Efficient state management (local deletion + server sync)</li>
+    <li>Responsive design (collapses with sidebar)</li>
+  </ul>
+
+  <h3>4. Data Types</h3>
+  <pre>
+interface Reminder {
+  id: string
+  title: string
+  description: string
+  due_date: string
+  completed: boolean
+  lead_id: string
+  created_by: string
+  created_by_email: string
+  created_at: string
+  lead: {
+    title: string
+    company: string | null
+  }
+}</pre>
+
+  <h3>5. State Management</h3>
+  <p>The implementation uses a two-tier state management approach:</p>
+  <ul>
+    <li>Parent (<code>SideMenu</code>) manages the source of truth for reminders</li>
+    <li>Child (<code>RemindersAlert</code>) manages visual state for transitions</li>
+  </ul>
+
+  <div class="success">
+    <h4>Performance Optimizations</h4>
+    <ul>
+      <li>Reduced polling frequency to 60 seconds to match reminder granularity</li>
+      <li>Local state updates for immediate user feedback</li>
+      <li>Efficient filtering of overdue reminders</li>
+    </ul>
+  </div>
+
+  <h3>6. Visual Design</h3>
+  <ul>
+    <li>Red accent colors to draw attention to overdue items</li>
+    <li>Smooth slide-out animation on deletion</li>
+    <li>Responsive layout that adapts to sidebar state</li>
+    <li>Clear hierarchy with lead/company context</li>
+  </ul>
+
+  <h2>Edge Cases Handled</h2>
+  <ul>
+    <li>Empty reminders array</li>
+    <li>Failed deletions with error recovery</li>
+    <li>Race conditions during polling/deletion</li>
+    <li>Sidebar collapse/expand transitions</li>
+  </ul>
+
+  <div class="warning">
+    <h4>Important Notes</h4>
+    <ul>
+      <li>Reminders are checked every 60 seconds to match the minute-based reminder system</li>
+      <li>Deleted reminders are removed immediately from UI before server confirmation</li>
+      <li>Visual transitions are managed separately from data state</li>
+    </ul>
+  </div>
+
+  <h2>Future Considerations</h2>
+  <ol>
+    <li>Add sound notifications for new overdue reminders</li>
+    <li>Implement reminder snooze functionality</li>
+    <li>Add priority levels for reminders</li>
+    <li>Group reminders by lead/project</li>
+    <li>Add quick-edit functionality for due dates</li>
+  </ol>
+
+  <h2>Testing Procedures</h2>
+  <ol>
+    <li>Create a reminder and wait for it to become overdue</li>
+    <li>Verify the alert appears in the sidebar</li>
+    <li>Test deletion with both success and error cases</li>
+    <li>Verify polling updates with new overdue reminders</li>
+    <li>Check responsive behavior with sidebar collapse/expand</li>
+  </ol>
+
+</body>
+</html> 

@@ -1,13 +1,13 @@
 'use client'
 
 import React from 'react'
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import createClient from '@/utils/supabase/client'
 import { Button } from '@/components/ui/button'
 import { Label } from '@/components/ui/label'
 import { Input } from '@/components/ui/input'
 import { Alert, AlertDescription } from '@/components/ui/alert'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { AuthError } from '@supabase/supabase-js'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { FeedbackModal } from '@/components/ui/feedback-modal'
@@ -27,6 +27,7 @@ export function SignUpForm() {
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [isEmailFromStripe, setIsEmailFromStripe] = useState(false)
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
     isOpen: false,
     title: '',
@@ -36,6 +37,29 @@ export function SignUpForm() {
   const recaptchaRef = useRef<ReCAPTCHA>(null)
   const supabase = createClient()
   const router = useRouter()
+  const searchParams = useSearchParams()
+
+  useEffect(() => {
+    // Get email and name from URL parameters
+    const emailParam = searchParams.get('email')
+    const nameParam = searchParams.get('name')
+
+    if (emailParam) {
+      setEmail(emailParam)
+      setIsEmailFromStripe(true)
+    }
+
+    if (nameParam) {
+      // Split full name into first and last name
+      const names = nameParam.trim().split(' ')
+      if (names.length > 0) {
+        setFirstName(names[0])
+        if (names.length > 1) {
+          setLastName(names.slice(1).join(' '))
+        }
+      }
+    }
+  }, [searchParams])
 
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -231,9 +255,15 @@ export function SignUpForm() {
                       autoComplete="email"
                       required
                       value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      className="bg-[#111c44] w-full rounded-md p-1.5 text-white focus:border-white border-gray-400 border placeholder:text-gray-300 sm:textmd m sm:leading-6 py-6"
+                      onChange={(e) => !isEmailFromStripe && setEmail(e.target.value)}
+                      disabled={isEmailFromStripe}
+                      className={`bg-[#111c44] w-full rounded-md p-1.5 text-white focus:border-white border-gray-400 border placeholder:text-gray-300 sm:textmd m sm:leading-6 py-6 ${isEmailFromStripe ? 'opacity-50 cursor-not-allowed' : ''}`}
                     />
+                    {isEmailFromStripe && (
+                      <p className="mt-1 text-xs text-gray-400">
+                        Email address from your subscription
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>

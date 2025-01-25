@@ -42,6 +42,7 @@ type FeedbackModalState = {
 export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [dueDate, setDueDate] = useState<Date>();
+  const [dueTime, setDueTime] = useState<string>("12:00");
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
     isOpen: false,
     title: '',
@@ -68,13 +69,17 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
         throw new Error('Due date is required');
       }
 
+      const [hours, minutes] = dueTime.split(':').map(Number);
+      const dueDateWithTime = new Date(dueDate);
+      dueDateWithTime.setHours(hours, minutes);
+
       const { data, error } = await supabase
         .rpc('create_reminder', {
           reminder_data: {
             lead_id: lead.id,
             title: formData.get('title'),
             description: formData.get('description'),
-            due_date: dueDate.toISOString(),
+            due_date: dueDateWithTime.toISOString(),
             completed: false
           }
         });
@@ -89,6 +94,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
       });
       (e.target as HTMLFormElement).reset();
       setDueDate(undefined);
+      setDueTime("12:00");
       onUpdate?.();
     } catch (error) {
       console.error('Error adding reminder:', error);
@@ -193,7 +199,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                 <Label htmlFor="title">Title</Label>
               </div>
               <div className='flex flex-1'>
-                <Label>Date</Label>
+                <Label>Due Date & Time</Label>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -206,13 +212,13 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                   className="w-full bg-[#1B2559]"
                 />
               </div>
-              <div className="grid-col-1">
+              <div className="grid-col-1 flex gap-2">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
                       className={cn(
-                        "w-full justify-start text-left font-normal",
+                        "flex-1 justify-start text-left font-normal",
                         !dueDate && "text-muted-foreground"
                       )}
                     >
@@ -229,6 +235,13 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                     />
                   </PopoverContent>
                 </Popover>
+                <Input
+                  type="time"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                  className="w-32 bg-[#1B2559]"
+                  required
+                />
               </div>
             </div>
           </div>

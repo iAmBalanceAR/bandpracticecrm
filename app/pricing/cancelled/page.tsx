@@ -35,8 +35,8 @@ export default function CancelledPage() {
             </Link>
           </Button>
           <Button asChild variant="outline" className="w-full">
-            <Link href="/dashboard">
-              Back to Dashboard
+            <Link href="/auth/signin">
+              Back to Login
             </Link>
           </Button>
         </div>

@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { useSupabase } from '../providers/supabase-client-provider'
 import { useRouter } from 'next/navigation'
 import { ProfileAvatar } from '@/components/account/profile-avatar'
+import { RemindersAlert } from './reminders-alert'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,6 +16,7 @@ import {
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
 import { useTheme } from '@/lib/providers/theme-provider'
+import type { Reminder } from './reminders-alert'
 
 interface SideMenuProps {
   sidebarOpen: boolean
@@ -29,6 +31,7 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   const { theme, setTheme } = useTheme()
   const [profile, setProfile] = React.useState<any>(null)
   const [loading, setLoading] = React.useState(true)
+  const [reminders, setReminders] = React.useState<Reminder[]>([])
 
   React.useEffect(() => {
     async function getProfile() {
@@ -48,9 +51,39 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
     getProfile()
   }, [user, supabase])
 
+  React.useEffect(() => {
+    async function getReminders() {
+      if (!user) return
+      
+      const { data, error } = await supabase
+        .from('reminders')
+        .select()
+        .eq('created_by', user.id)
+      
+      if (!error && data) {
+        setReminders(data)
+      }
+    }
+    getReminders()
+
+    // Poll for updates every minute since reminders are minute-based
+    const interval = setInterval(() => {
+      getReminders()
+    }, 60000) // Changed from 10000 to 60000 (1 minute)
+
+    return () => {
+      clearInterval(interval)
+    }
+  }, [user, supabase])
+
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/auth/signin')
+  }
+
+  const handleDelete = async (id: string) => {
+    // Remove from local state immediately
+    setReminders((prev: Reminder[]) => prev.filter((r: Reminder) => r.id !== id))
   }
 
   // Check if user has active subscription
@@ -227,6 +260,9 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
               </Link>
             ))}
           </nav>
+
+          {/* Add Reminders Alert */}
+          {hasSubscription && <RemindersAlert sidebarOpen={sidebarOpen} reminders={reminders} onUpdate={handleDelete} />}
         </div>
 
         {/* Only show sign out in footer if user is logged in */}
