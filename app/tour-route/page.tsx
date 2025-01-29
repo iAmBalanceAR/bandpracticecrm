@@ -36,7 +36,7 @@ export default function Page() {
                   </span>
                   <div className="border-[#ff9920] border-b-2 -mt-2 mb-0  h-2 ml-0 mr-0"></div>
                 </h3>
-          <TourManagement />
+          <TourManagement filterPastGigs={true} />
         </CardContent>
       </Card>
     </CustomSectionHeader>

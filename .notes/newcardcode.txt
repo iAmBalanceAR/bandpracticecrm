@@ -1,0 +1,105 @@
+"use client"
+
+import { Card, CardContent } from "@/components/ui/card"
+import { Badge } from "@/components/ui/badge"
+import { CalendarDays, Building2, User2 } from "lucide-react"
+
+interface CardData {
+  title: string
+  company?: string
+  contact?: string
+  lastUpdated: string
+  tags: string[]
+}
+
+export default function RefinedCardsDarkHover() {
+  const cards: CardData[] = [
+    {
+      title: "Little Rock Dive Bar Extreme",
+      company: "Balance Lighting Systems LLC.",
+      contact: "Contact: Jason Haynie",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "contacted"],
+    },
+    {
+      title: "test",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "new"],
+    },
+    {
+      title: "dasfdsafasd",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "new"],
+    },
+    {
+      title: "test",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "new"],
+    },
+    {
+      title: "test",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "new"],
+    },
+    {
+      title: "test",
+      lastUpdated: "Jan 22, 2025",
+      tags: ["medium", "new"],
+    },
+  ]
+
+  return (
+    <div className="min-h-screen bg-[#111C44] p-6">
+      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        {cards.map((card, index) => (
+          <Card
+            key={index}
+            className="overflow-hidden transition-all duration-300 ease-in-out 
+                       bg-[#030817] border-[#283489] 
+                       hover:shadow-[0_20px_30px_-10px_rgba(0,0,0,0.3)] 
+                       hover:transform hover:scale-105 hover:border-blue-400"
+          >
+            <div className="bg-[#1a237e] p-4">
+              <h3 className="text-xl font-semibold text-white mb-3 line-clamp-2">{card.title}</h3>
+              <div className="flex flex-wrap gap-2">
+                {card.tags.map((tag) => (
+                  <Badge
+                    key={tag}
+                    variant="secondary"
+                    className={`
+                      ${tag === "new" ? "bg-blue-500 hover:bg-blue-600" : "bg-amber-500 hover:bg-amber-600"}
+                      text-white font-medium px-3 py-1
+                    `}
+                  >
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            </div>
+            <CardContent className="p-4">
+              <div className="space-y-3">
+                {card.company && (
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <Building2 className="h-4 w-4" />
+                    <span className="text-sm">{card.company}</span>
+                  </div>
+                )}
+                {card.contact && (
+                  <div className="flex items-center gap-2 text-gray-300">
+                    <User2 className="h-4 w-4" />
+                    <span className="text-sm">{card.contact}</span>
+                  </div>
+                )}
+                <div className="flex items-center gap-2 text-gray-300">
+                  <CalendarDays className="h-4 w-4" />
+                  <span className="text-sm">Last Updated: {card.lastUpdated}</span>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    </div>
+  )
+}
+

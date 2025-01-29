@@ -15,7 +15,12 @@ import {
   CartesianGrid,
   Tooltip,
   Legend,
-  ResponsiveContainer
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  ComposedChart,
+  AreaChart,
+  Area
 } from 'recharts'
 import { Loader2 } from "lucide-react"
 
@@ -99,7 +104,14 @@ export default function DataTrackingPage() {
     }
   }, [currentTour, isAuthenticated])
 
-  // Calculate summary statistics
+  // First, add this helper function near the top of the file
+  const getWeekNumber = (date: Date) => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  }
+
+  // Update the summaryStats calculation to group by weeks
   const summaryStats = React.useMemo(() => {
     if (!gigs.length) return null
 
@@ -109,25 +121,31 @@ export default function DataTrackingPage() {
     const paidDeposits = gigs.reduce((sum, gig) => sum + (gig.deposit_paid ? (gig.deposit_amount || 0) : 0), 0)
     const totalOpenBalance = gigs.reduce((sum, gig) => sum + gig.open_balance, 0)
 
-    // Calculate monthly breakdown
-    const monthlyData = gigs.reduce((acc: Record<string, any>, gig) => {
-      const month = format(new Date(gig.gig_date), 'MMM yyyy')
-      if (!acc[month]) {
-        acc[month] = {
+    // Calculate weekly breakdown
+    const weeklyData = gigs.reduce((acc: Record<string, any>, gig) => {
+      const gigDate = new Date(gig.gig_date)
+      const weekKey = `Week ${getWeekNumber(gigDate)} - ${format(gigDate, 'MMM yyyy')}`
+      
+      if (!acc[weekKey]) {
+        acc[weekKey] = {
           contractTotal: 0,
           deposits: 0,
           paidDeposits: 0,
           openBalance: 0,
           gigCount: 0,
-          name: month // Add name field for Recharts
+          name: weekKey,
+          weekNumber: getWeekNumber(gigDate),
+          year: gigDate.getFullYear(),
+          month: gigDate.getMonth()
         }
       }
-      acc[month].contractTotal += gig.contract_total
-      acc[month].deposits += gig.deposit_amount || 0
-      acc[month].paidDeposits += gig.deposit_paid ? (gig.deposit_amount || 0) : 0
-      acc[month].openBalance += gig.open_balance
-      acc[month].gigCount++
-      acc[month].remaining = acc[month].contractTotal - acc[month].paidDeposits // Add remaining field for Recharts
+      
+      acc[weekKey].contractTotal += gig.contract_total
+      acc[weekKey].deposits += gig.deposit_amount || 0
+      acc[weekKey].paidDeposits += gig.deposit_paid ? (gig.deposit_amount || 0) : 0
+      acc[weekKey].openBalance += gig.open_balance
+      acc[weekKey].gigCount++
+      acc[weekKey].remaining = acc[weekKey].contractTotal - acc[weekKey].paidDeposits
       return acc
     }, {})
 
@@ -136,7 +154,7 @@ export default function DataTrackingPage() {
       totalDeposits,
       paidDeposits,
       totalOpenBalance,
-      monthlyData,
+      weeklyData,
       gigCount: gigs.length,
       averageContractValue: totalContractValue / gigs.length,
       depositCollectionRate: (paidDeposits / totalDeposits) * 100 || 0,
@@ -144,11 +162,15 @@ export default function DataTrackingPage() {
     }
   }, [gigs])
 
-  // Convert monthly data for chart
+  // Update the chart data conversion
   const chartData = React.useMemo(() => {
     if (!summaryStats) return []
-    return Object.values(summaryStats.monthlyData)
-      .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime())
+    return Object.values(summaryStats.weeklyData)
+      .sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year
+        if (a.month !== b.month) return a.month - b.month
+        return a.weekNumber - b.weekNumber
+      })
   }, [summaryStats])
 
   // Custom tooltip for the chart
@@ -157,12 +179,17 @@ export default function DataTrackingPage() {
       return (
         <div className="bg-[#1B2559] border border-gray-600 p-3 rounded-lg shadow-lg">
           <p className="text-white font-medium mb-1">{label}</p>
-          <p className="text-sm text-gray-400 mb-2">{payload[0].payload.gigCount} gigs</p>
+          <p className="text-sm text-gray-400 mb-2">
+            {payload[0].payload.gigCount} gig{payload[0].payload.gigCount !== 1 ? 's' : ''}
+          </p>
           {payload.map((entry: any, index: number) => (
-            <p key={index} className="text-sm" style={{ color: entry.color }}>
+            <p key={index} className="text-sm" style={{ color: entry.fill }}>
               {entry.name}: ${entry.value.toLocaleString()}
             </p>
           ))}
+          <p className="text-sm text-purple-400 mt-1">
+            Total: ${(payload[0].value + payload[1].value).toLocaleString()}
+          </p>
         </div>
       )
     }
@@ -263,59 +290,41 @@ export default function DataTrackingPage() {
                     <h3 className="text-lg font-semibold text-white mb-2">Monthly Revenue Breakdown</h3>
                     <div className="h-[360px] w-full border border-[#6B7280] rounded-lg overflow-hidden">
                       <ResponsiveContainer width="100%" height="100%">
-                        <LineChart 
-                          data={chartData} 
-                          margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                        <BarChart 
+                          data={chartData}
+                          margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                           style={{ backgroundColor: '#020817' }}
                         >
-                          <CartesianGrid 
-                            strokeDasharray="3 3" 
-                            stroke="#6B7280" 
-                            vertical={true}
-                            horizontal={true}
-                          />
+                          <CartesianGrid strokeDasharray="3 3" stroke="#6B7280" />
                           <XAxis 
                             dataKey="name" 
                             stroke="#9CA3AF"
-                            tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                            height={20}
+                            angle={-45}
+                            textAnchor="end"
+                            height={80}
+                            interval={0}
+                            tick={{ fill: '#9CA3AF', fontSize: 11 }}
                           />
                           <YAxis 
                             stroke="#9CA3AF"
                             tick={{ fill: '#9CA3AF', fontSize: 12 }}
                             tickFormatter={(value) => `$${value.toLocaleString()}`}
-                            width={80}
                           />
                           <Tooltip content={<CustomTooltip />} />
-                          <Legend verticalAlign="top" height={36}/>
-                          <Line 
-                            type="monotone"
-                            dataKey="contractTotal" 
-                            name="Total Value" 
-                            stroke="#9333EA"
-                            strokeWidth={2}
-                            dot={{ fill: '#9333EA', r: 3 }}
-                            activeDot={{ r: 5 }}
-                          />
-                          <Line 
-                            type="monotone"
+                          <Legend />
+                          <Bar 
                             dataKey="paidDeposits" 
                             name="Collected" 
-                            stroke="#10B981"
-                            strokeWidth={2}
-                            dot={{ fill: '#10B981', r: 3 }}
-                            activeDot={{ r: 5 }}
+                            stackId="a" 
+                            fill="#10B981"
                           />
-                          <Line 
-                            type="monotone"
+                          <Bar 
                             dataKey="remaining" 
                             name="Remaining" 
-                            stroke="#EF4444"
-                            strokeWidth={2}
-                            dot={{ fill: '#EF4444', r: 3 }}
-                            activeDot={{ r: 5 }}
+                            stackId="a" 
+                            fill="#EF4444"
                           />
-                        </LineChart>
+                        </BarChart>
                       </ResponsiveContainer>
                     </div>
                   </Card>
@@ -338,15 +347,15 @@ export default function DataTrackingPage() {
                       </div>
 
                       {/* Table Rows */}
-                      {summaryStats && Object.entries(summaryStats.monthlyData)
+                      {summaryStats && Object.entries(summaryStats.weeklyData)
                         .sort((a, b) => new Date(a[0]).getTime() - new Date(b[0]).getTime())
-                        .map(([month, data]: [string, any]) => (
+                        .map(([week, data]: [string, any]) => (
                           <div 
-                            key={month} 
+                            key={week} 
                             className="flex items-center justify-between px-2 py-1 border-b border-gray-600 last:border-0 hover:bg-[#111C44] transition-colors cursor-pointer"
                           >
                             <div className="flex-1">
-                              <h4 className="text-white font-medium text-sm">{month}</h4>
+                              <h4 className="text-white font-medium text-sm">{week}</h4>
                               <p className="text-xs text-gray-400">{data.gigCount} gigs</p>
                             </div>
                             <div className="flex-1 text-right">

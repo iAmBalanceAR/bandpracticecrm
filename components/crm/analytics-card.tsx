@@ -3,7 +3,18 @@
 import * as React from "react"
 import CustomCard from '@/components/common/CustomCard'
 import { ChartContainer } from "@/components/ui/chart"
-import { Line, LineChart, ResponsiveContainer, Tooltip, XAxis, YAxis, CartesianGrid } from "recharts"
+import { 
+  Line, 
+  LineChart, 
+  ResponsiveContainer, 
+  Tooltip, 
+  XAxis, 
+  YAxis, 
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Legend
+} from "recharts"
 import { useTour } from '@/components/providers/tour-provider'
 import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { format } from 'date-fns'
@@ -110,36 +121,55 @@ export default function AnalyticsCard() {
     loadGigs()
   }, [currentTour, isAuthenticated])
 
-  // Calculate financial summary statistics
+  // First, add the getWeekNumber helper function
+  const getWeekNumber = (date: Date) => {
+    const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
+    const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
+    return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
+  }
+
+  // Update the summaryStats calculation
   const summaryStats = React.useMemo(() => {
     if (!gigs.length) return null
 
-    const monthlyData = gigs.reduce((acc: Record<string, any>, gig) => {
-      const month = format(new Date(gig.gig_date), 'MMM yyyy')
-      if (!acc[month]) {
-        acc[month] = {
+    // Calculate weekly breakdown
+    const weeklyData = gigs.reduce((acc: Record<string, any>, gig) => {
+      const gigDate = new Date(gig.gig_date)
+      const weekKey = `Week ${getWeekNumber(gigDate)} - ${format(gigDate, 'MMM yyyy')}`
+      
+      if (!acc[weekKey]) {
+        acc[weekKey] = {
           contractTotal: 0,
+          deposits: 0,
           paidDeposits: 0,
-          remaining: 0,
+          openBalance: 0,
           gigCount: 0,
-          name: month
+          name: weekKey,
+          weekNumber: getWeekNumber(gigDate),
+          year: gigDate.getFullYear(),
+          month: gigDate.getMonth()
         }
       }
-      acc[month].contractTotal += gig.contract_total
-      acc[month].paidDeposits += gig.deposit_paid ? (gig.deposit_amount || 0) : 0
-      acc[month].gigCount++
-      acc[month].remaining = acc[month].contractTotal - acc[month].paidDeposits
+      
+      acc[weekKey].contractTotal += gig.contract_total
+      acc[weekKey].paidDeposits += gig.deposit_paid ? (gig.deposit_amount || 0) : 0
+      acc[weekKey].gigCount++
+      acc[weekKey].remaining = acc[weekKey].contractTotal - acc[weekKey].paidDeposits
       return acc
     }, {})
 
-    return { monthlyData }
+    return { weeklyData }
   }, [gigs])
 
-  // Convert monthly data for chart
+  // Update the chart data conversion
   const chartData = React.useMemo(() => {
     if (!summaryStats) return []
-    return Object.values(summaryStats.monthlyData)
-      .sort((a, b) => new Date(a.name).getTime() - new Date(b.name).getTime())
+    return Object.values(summaryStats.weeklyData)
+      .sort((a, b) => {
+        if (a.year !== b.year) return a.year - b.year
+        if (a.month !== b.month) return a.month - b.month
+        return a.weekNumber - b.weekNumber
+      })
   }, [summaryStats])
 
   return (
@@ -170,68 +200,62 @@ export default function AnalyticsCard() {
               <h3 className="text-sm font-semibold text-gray-400 mb-2">Financial Overview</h3>
               <div className="h-[360px] w-full border-2 border-solid border-[#6B7280] rounded-lg overflow-hidden bg-[#020817]">
                 <ResponsiveContainer width="100%" height="100%">
-                  <LineChart 
-                    data={chartData} 
-                    margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                  <BarChart 
+                    data={chartData}
+                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
                     style={{ backgroundColor: '#020817' }}
                   >
                     <CartesianGrid strokeDasharray="3 3" stroke="#6B7280" />
                     <XAxis 
                       dataKey="name" 
                       stroke="#9CA3AF"
-                      tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                      height={20}
+                      angle={-45}
+                      textAnchor="end"
+                      height={80}
+                      interval={0}
+                      tick={{ fill: '#9CA3AF', fontSize: 11 }}
                     />
                     <YAxis 
                       stroke="#9CA3AF"
                       tick={{ fill: '#9CA3AF', fontSize: 12 }}
                       tickFormatter={(value) => `$${value.toLocaleString()}`}
-                      width={80}
                     />
                     <Tooltip content={({ active, payload, label }) => {
-                      if (active && payload && payload.length) {
+                      if (active && payload && payload.length >= 2) {
+                        const total = Number(payload[0]?.value || 0) + Number(payload[1]?.value || 0)
                         return (
                           <div className="bg-[#1B2559] border border-gray-600 p-3 rounded-lg shadow-lg">
                             <p className="text-white font-medium mb-1">{label}</p>
-                            <p className="text-sm text-gray-400 mb-2">{payload[0].payload.gigCount} gigs</p>
+                            <p className="text-sm text-gray-400 mb-2">
+                              {payload[0]?.payload?.gigCount || 0} gig{(payload[0]?.payload?.gigCount || 0) !== 1 ? 's' : ''}
+                            </p>
                             {payload.map((entry: any, index: number) => (
-                              <p key={index} className="text-sm" style={{ color: entry.color }}>
-                                {entry.name}: ${entry.value.toLocaleString()}
+                              <p key={index} className="text-sm" style={{ color: entry?.fill }}>
+                                {entry?.name}: ${(entry?.value || 0).toLocaleString()}
                               </p>
                             ))}
+                            <p className="text-sm text-purple-400 mt-1">
+                              Total: ${total.toLocaleString()}
+                            </p>
                           </div>
                         )
                       }
                       return null
                     }} />
-                    <Line 
-                      type="monotone"
-                      dataKey="contractTotal" 
-                      name="Total Value" 
-                      stroke="#9333EA"
-                      strokeWidth={2}
-                      dot={{ fill: '#9333EA', r: 3 }}
-                      activeDot={{ r: 5 }}
-                    />
-                    <Line 
-                      type="monotone"
+                    <Legend />
+                    <Bar 
                       dataKey="paidDeposits" 
                       name="Collected" 
-                      stroke="#10B981"
-                      strokeWidth={2}
-                      dot={{ fill: '#10B981', r: 3 }}
-                      activeDot={{ r: 5 }}
+                      stackId="a" 
+                      fill="#10B981"
                     />
-                    <Line 
-                      type="monotone"
+                    <Bar 
                       dataKey="remaining" 
                       name="Remaining" 
-                      stroke="#EF4444"
-                      strokeWidth={2}
-                      dot={{ fill: '#EF4444', r: 3 }}
-                      activeDot={{ r: 5 }}
+                      stackId="a" 
+                      fill="#EF4444"
                     />
-                  </LineChart>
+                  </BarChart>
                 </ResponsiveContainer>
               </div>
             </div>

@@ -92,17 +92,18 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   // Define menu items based on subscription status
   const menuItems = hasSubscription ? [
     { href: '/', icon: LayoutDashboard, text: 'Dashboard', color: '#00e396' },
-    { href: '/tours', icon: Route, text: 'Tour Details', color: '#d83b34' },
-    { href: '/tour-route', icon: MapPin, text: 'Tour Route Management', color: '#008ffb' },
-    { href: '/calender', icon: Calendar, text: 'Gig Calendar', color: '#ff9920' },
-    { href: '/leads', icon: ClipboardList, text: 'Lead Management', color: '#d83b34' },
-    { href: '/venues', icon: Users, text: 'Venue Database Search', color: '#00e396' },
-    { href: '/data-tracking', icon: BarChart3, text: 'Data Tracking', color: '#008ffb' },
-    { href: '/stage-plot', icon: Guitar, text: 'Stage Plot Generator', color: '#ff9920' },
-    { href: '/setlist', icon: ListVideo, text: 'Setlist Generator', color: '#008ffb' }
+    { href: '/tours', icon: Route, text: 'Tours', color: '#d83b34' },
+    { href: '/calender', icon: Calendar, text: 'Tour Calendar', color: '#ff9920' },
+    { href: '/tour-route', icon: MapPin, text: 'Tour Route', color: '#008ffb' },
+    { href: '/data-tracking', icon: BarChart3, text: 'Tour Analytics', color: '#008ffb' },
+    { href: '/stage-plot', icon: Guitar, text: 'Stage Plot Tool', color: '#ff9920' },
+    { href: '/setlist', icon: ListVideo, text: 'Setlist Tool', color: '#008ffb' },
+    { href: '/leads', icon: ClipboardList, text: 'Leads', color: '#d83b34' },
+    { href: '/venues', icon: Users, text: 'Venue Search', color: '#00e396' }
   ] : [
     { href: '/pricing', icon: CreditCard, text: 'Subscription Plans', color: '#00e396' },
-    { href: '/account/billing', icon: LayoutDashboard, text: 'Billing', color: '#d83b34' }
+    { href: '/account/billing', icon: LayoutDashboard, text: 'Billing', color: '#d83b34' },
+    { href: 'https://docs.bandpracticecrm.com', icon: BookOpen, text: 'Docs', color: '#008ffb' }
   ]
 
   if (loading) {

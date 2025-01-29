@@ -96,6 +96,15 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete, sa
     opacity: isDragging ? 0.5 : 1,
   }
 
+  // Format the date
+  const formattedDate = stop.gig_date 
+    ? new Date(stop.gig_date).toLocaleDateString('en-US', {
+        weekday: 'short',
+        month: 'short',
+        day: 'numeric'
+      })
+    : null
+
   return (
     <li
       ref={setNodeRef}
@@ -123,7 +132,14 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete, sa
           <div className="flex items-center gap-2">
             <span className="font-semibold">{stop.name}</span>
             {stop.savedToGigs && (
-              <Calendar className="w-4 h-4 text-[#008ffb]" />
+              <div className="flex items-center gap-2">
+                <Calendar className="w-4 h-4 text-[#008ffb]" />
+                {formattedDate && (
+                  <span className="text-sm text-[#008ffb] font-medium">
+                    {formattedDate}
+                  </span>
+                )}
+              </div>
             )}
           </div>
         </div>
@@ -167,6 +183,19 @@ function SortableStopItem({ stop, index, distance, onAddToCalendar, onDelete, sa
   )
 }
 
+const calculateDateBetween = (date1: Date, date2: Date): string => {
+  const timestamp1 = date1.getTime()
+  const timestamp2 = date2.getTime()
+  const middleTimestamp = timestamp1 + ((timestamp2 - timestamp1) / 2)
+  return new Date(middleTimestamp).toISOString().split('T')[0]
+}
+
+const areDatesTooClose = (date1: Date, date2: Date): boolean => {
+  const oneDayInMs = 24 * 60 * 60 * 1000
+  const diffInDays = Math.abs(date2.getTime() - date1.getTime()) / oneDayInMs
+  return diffInDays <= 1 // Returns true if dates are 1 day or less apart
+}
+
 export default function TourManagement() {
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
@@ -186,8 +215,10 @@ export default function TourManagement() {
     isOpen: boolean;
     title: string;
     message: string;
-    type: 'success' | 'error' | 'delete';
+    type: 'success' | 'error' | 'delete' | 'warning';
     onConfirm?: () => void;
+    confirmLabel?: string;
+    confirmStyle?: 'success' | 'danger';
   }>({
     isOpen: false,
     title: '',
@@ -217,9 +248,21 @@ export default function TourManagement() {
     
     setLoading(true);
     try {
-      // First, get all gigs and sort them by date
+      // First, get all gigs
       const gigs = await gigHelpers.getGigs()
-      const sortedGigs = gigs.sort((a, b) => 
+      
+      // Filter out past gigs
+      const currentDate = new Date()
+      currentDate.setHours(0, 0, 0, 0)
+      
+      const filteredGigs = gigs.filter(gig => {
+        if (!gig.gig_date) return false
+        const gigDate = new Date(gig.gig_date + 'T00:00:00')
+        return gigDate.getTime() >= currentDate.getTime()
+      })
+
+      // Sort filtered gigs by date
+      const sortedGigs = filteredGigs.sort((a, b) => 
         new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime()
       )
 
@@ -335,6 +378,15 @@ export default function TourManagement() {
 
   const handleVenueSearch = async (value: string) => {
     try {
+      // Update the search value immediately
+      setSearchValue(value)
+
+      // Only query if we have at least 2 characters
+      if (value.length < 2) {
+        setVenues([])
+        return
+      }
+
       const { data, error } = await supabase
         .from('venues')
         .select('*')
@@ -345,6 +397,7 @@ export default function TourManagement() {
       setVenues(data || []);
     } catch (error) {
       console.error('Error searching venues:', error);
+      setVenues([]);
     }
   };
 
@@ -400,44 +453,33 @@ export default function TourManagement() {
       address: formData.address && formData.address !== 'null' ? formData.address : '',
       zip: formData.zip && formData.zip !== 'null' ? formData.zip : '',
       savedToGigs: false,
-      gig_date: new Date().toISOString().split('T')[0] // Default to today's date
+      gig_date: undefined 
     }
 
-    // Check for duplicates
-    const isDuplicate = tourStops.some(stop => 
-      stop.city.toLowerCase() === city.toLowerCase() &&
-      stop.state.toLowerCase() === state.toLowerCase() &&
-      (formData.address ? stop.address.toLowerCase() === formData.address.toLowerCase() : true)
-    )
-
-    if (isDuplicate) {
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Duplicate Venue Detected',
-        message: 'This venue is already in your tour stops. Some artists play multiple shows at the same venue during a tour. Would you like to add it anyway?',
-        type: 'delete',
-        onConfirm: () => {
-          addStopToTour(newStop)
-        }
-      })
-      return
-    }
+    // Show info modal about dates
+    setFeedbackModal({
+      isOpen: true,
+      title: 'Tour Stop Added',
+      message: 'Tour stop has been added to your route. Dates will be assigned when you add the stop to your calendar, where you can then adjust them as needed.',
+      type: 'success'
+    })
 
     addStopToTour(newStop)
   }
 
   const addStopToTour = (stop: TourStop) => {
     setTourStops(prevStops => {
-      // Get all saved and unsaved stops
-      const savedStops = prevStops.filter(s => s.savedToGigs)
-      const unsavedStops = prevStops.filter(s => !s.savedToGigs)
+      // Get all stops
+      const allStops = [...prevStops, stop]
       
-      // Add the new stop to unsaved stops
-      unsavedStops.push(stop)
+      // Sort all stops by date
+      const sortedStops = allStops.sort((a, b) => {
+        const dateA = new Date(a.gig_date || '').getTime()
+        const dateB = new Date(b.gig_date || '').getTime()
+        return dateA - dateB
+      })
       
-      // Combine them back together
-      const newStops = [...savedStops, ...unsavedStops]
-      return newStops
+      return sortedStops
     })
     
     setSearchValue('')
@@ -452,11 +494,59 @@ export default function TourManagement() {
   }
 
   const handleAddToCalendar = async (stop: TourStop) => {
-    if (!stop) return;
-    setSavingStop(stop.id);
+    if (!stop) return
+    setSavingStop(stop.id)
 
     try {
-      // Create a new gig using gigHelpers with all required fields
+      // Calculate suggested date based on position
+      const suggestedDate = calculateSuggestedDate(stop, tourStops)
+
+      // Check if the suggested date would create a tight schedule
+      const stopIndex = tourStops.findIndex(s => s.id === stop.id)
+      const savedStops = tourStops
+        .filter(s => s.savedToGigs && s.gig_date)
+        .sort((a, b) => new Date(a.gig_date!).getTime() - new Date(b.gig_date!).getTime())
+
+      const prevSavedStop = savedStops.findLast(s => tourStops.findIndex(as => as.id === s.id) < stopIndex)
+      const nextSavedStop = savedStops.find(s => tourStops.findIndex(as => as.id === s.id) > stopIndex)
+
+      if ((prevSavedStop && areDatesTooClose(new Date(prevSavedStop.gig_date!), new Date(suggestedDate))) ||
+          (nextSavedStop && areDatesTooClose(new Date(suggestedDate), new Date(nextSavedStop.gig_date!)))) {
+        
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Warning: Tight Schedule',
+          message: 'This stop would be added between events that are only 1 day apart. Would you like to proceed?',
+          type: 'warning',
+          confirmLabel: 'Continue',
+          confirmStyle: 'success',
+          onConfirm: () => {
+            // Proceed with adding to calendar
+            addToCalendarWithDate(stop, suggestedDate)
+          }
+        })
+        setSavingStop(null)
+        return
+      }
+
+      // If dates aren't too close, proceed normally
+      await addToCalendarWithDate(stop, suggestedDate)
+
+    } catch (error) {
+      console.error('Error saving gig:', error)
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Error',
+        message: 'Failed to add stop to calendar',
+        type: 'error'
+      })
+      setSavingStop(null)
+    }
+  }
+
+  // Helper function to handle the actual calendar addition
+  const addToCalendarWithDate = async (stop: TourStop, date: string) => {
+    try {
       const gigData = {
         title: stop.name,
         venue: stop.name,
@@ -464,7 +554,7 @@ export default function TourManagement() {
         venue_city: stop.city,
         venue_state: stop.state,
         venue_zip: stop.zip,
-        gig_date: new Date().toISOString().split('T')[0],
+        gig_date: date,
         load_in_time: '18:00:00',
         sound_check_time: '19:00:00',
         set_time: '20:00:00',
@@ -486,11 +576,10 @@ export default function TourManagement() {
 
       const newGig = await gigHelpers.createGig(gigData);
 
-      // Get the authenticated user
+      // Rest of the existing calendar addition logic...
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No authenticated user');
 
-      // Get the default tour
       const { data: defaultTour } = await supabase
         .from('tours')
         .select('id')
@@ -499,7 +588,6 @@ export default function TourManagement() {
         .single();
 
       if (defaultTour) {
-        // Connect the gig to the default tour
         const { error: connectError } = await supabase
           .from('tourconnect')
           .insert([{
@@ -516,7 +604,7 @@ export default function TourManagement() {
       // Update the stop in tourStops
       const updatedStops = tourStops.map(s => 
         s.id === stop.id 
-          ? { ...s, savedToGigs: true, gig_date: new Date().toISOString() }
+          ? { ...s, savedToGigs: true, gig_date: date }
           : s
       );
 
@@ -525,21 +613,42 @@ export default function TourManagement() {
 
       setFeedbackModal({
         isOpen: true,
-        title: 'Success',
-        message: 'Stop has been added to your calendar',
+        title: 'Stop Added to Calendar',
+        message: 'The stop has been added to your calendar with a suggested date based on its position. You can adjust the date in the calendar view if needed.',
         type: 'success'
-      });
-    } catch (error) {
-      console.error('Error saving gig:', error);
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Error',
-        message: 'Failed to add stop to calendar',
-        type: 'error'
-      });
+      })
     } finally {
-      setSavingStop(null);
+      setSavingStop(null)
     }
+  }
+
+  // Helper function to calculate suggested date based on position
+  const calculateSuggestedDate = (stop: TourStop, allStops: TourStop[]): string => {
+    const savedStops = allStops
+      .filter(s => s.savedToGigs && s.gig_date)
+      .sort((a, b) => new Date(a.gig_date!).getTime() - new Date(b.gig_date!).getTime())
+
+    if (savedStops.length === 0) {
+      return new Date().toISOString().split('T')[0]
+    }
+
+    const stopIndex = allStops.findIndex(s => s.id === stop.id)
+    const prevSavedStop = savedStops.findLast(s => allStops.findIndex(as => as.id === s.id) < stopIndex)
+    const nextSavedStop = savedStops.find(s => allStops.findIndex(as => as.id === s.id) > stopIndex)
+
+    if (prevSavedStop && nextSavedStop) {
+      return calculateDateBetween(new Date(prevSavedStop.gig_date!), new Date(nextSavedStop.gig_date!))
+    } else if (prevSavedStop) {
+      const suggestedDate = new Date(prevSavedStop.gig_date!)
+      suggestedDate.setDate(suggestedDate.getDate() + 1)
+      return suggestedDate.toISOString().split('T')[0]
+    } else if (nextSavedStop) {
+      const suggestedDate = new Date(nextSavedStop.gig_date!)
+      suggestedDate.setDate(suggestedDate.getDate() - 1)
+      return suggestedDate.toISOString().split('T')[0]
+    }
+
+    return new Date().toISOString().split('T')[0]
   }
 
   const getCoordinates = async (location: string): Promise<[number, number]> => {
@@ -569,47 +678,33 @@ export default function TourManagement() {
       const oldIndex = stops.findIndex((stop) => stop.id === active.id)
       const newIndex = stops.findIndex((stop) => stop.id === over.id)
       
-      // Only allow reordering if the dragged stop is not saved to gigs
-      if (stops[oldIndex].savedToGigs) return stops
+      // Allow free movement of unsaved stops
+      const movingStop = stops[oldIndex]
+      if (!movingStop.savedToGigs) {
+        return arrayMove(stops, oldIndex, newIndex)
+      }
 
-      // Get all saved stops with their indices
+      // Only enforce order for saved stops
       const savedStops = stops
         .map((stop, index) => ({ stop, index }))
         .filter(item => item.stop.savedToGigs)
 
-      // If we're moving between saved stops, check if it would create an out-of-order situation
+      // If moving a saved stop, ensure it stays in chronological order
       if (savedStops.length > 1) {
-        for (let i = 0; i < savedStops.length - 1; i++) {
-          const currentSaved = savedStops[i]
-          const nextSaved = savedStops[i + 1]
-          
-          // If we're trying to place an unsaved stop between two saved stops
-          if (newIndex > currentSaved.index && newIndex <= nextSaved.index) {
-            // If the dragged stop doesn't have a date, prevent the move
-            if (!stops[oldIndex].gig_date) {
-              setFeedbackModal({
-                isOpen: true,
-                title: 'Invalid Move',
-                message: 'Cannot move a stop without a scheduled date between dated stops.',
-                type: 'error'
-              })
-              return stops
-            }
-
-            // Check if the dates would be out of order
-            const draggedDate = new Date(stops[oldIndex].gig_date as string)
-            const currentDate = new Date(currentSaved.stop.gig_date!)
-            const nextDate = new Date(nextSaved.stop.gig_date!)
-            
-            if (draggedDate < currentDate || draggedDate > nextDate) {
-              setFeedbackModal({
-                isOpen: true,
-                title: 'Invalid Move',
-                message: 'Cannot place this stop here as it would create an out-of-order date sequence.',
-                type: 'error'
-              })
-              return stops // Prevent the move if it would create an out-of-order situation
-            }
+        const movingStopIndex = savedStops.findIndex(s => s.stop.id === movingStop.id)
+        if (movingStopIndex > -1) {
+          // Prevent moving saved stops out of chronological order
+          if (
+            (movingStopIndex > 0 && newIndex < savedStops[movingStopIndex - 1].index) ||
+            (movingStopIndex < savedStops.length - 1 && newIndex > savedStops[movingStopIndex + 1].index)
+          ) {
+            setFeedbackModal({
+              isOpen: true,
+              title: 'Cannot Reorder',
+              message: 'Saved stops must remain in chronological order. Please adjust the date in the calendar to reorder.',
+              type: 'error'
+            })
+            return stops
           }
         }
       }
@@ -820,6 +915,8 @@ export default function TourManagement() {
         title={feedbackModal.title}
         message={feedbackModal.message}
         type={feedbackModal.type}
+        confirmLabel={feedbackModal.confirmLabel}
+        confirmStyle={feedbackModal.confirmStyle}
         onConfirm={() => {
           if (feedbackModal.onConfirm) {
             feedbackModal.onConfirm()
