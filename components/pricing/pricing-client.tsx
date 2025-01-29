@@ -21,7 +21,7 @@ export function PricingClient({ products, user }: PricingClientProps) {
           Subscription Plans
         </span>
       </h1>
-      <div className="border-[#008ffb] border-b-2 -mt-7 w-[100%] h-4"></div>
+      <div className="border-[#008ffb] border-b-2 -mt-7 w-[100%] h-4 mb-4"></div>
       
       <div className=" pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
         <p className="align-center text-center mb-8"><span className="text-lg text-white text-shadow-sm text-shadow-blur-4 text-shadow-black">
@@ -100,8 +100,8 @@ export function PricingClient({ products, user }: PricingClientProps) {
                       asChild
                       className="w-full bg-green-700 hover:bg-green-600 text-white text-lg"
                     >
-                      <Link href="/auth/signin">
-                        Sign in to subscribe
+                      <Link href="/auth/signup">
+                        Sign up to subscribe
                       </Link>
                     </Button>
                   )}

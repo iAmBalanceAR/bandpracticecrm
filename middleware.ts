@@ -23,7 +23,9 @@ const publicPaths = [
   '/api/auth',
   '/api/sync-subscription',
   '/api/create-profile',
-  '/pricing',  // Add pricing to public paths
+  '/pricing',  // Main pricing page
+  '/pricing/success',  // Add success page
+  '/pricing/cancelled',  // Add cancelled page
   '/about',
   '/contact',
   '/privacy',
@@ -36,7 +38,7 @@ const publicPaths = [
   '/images',
   '/robots.txt',
   '/sitemap.xml',
-  '/'  // Add root path
+  '/'
 ]
 
 export async function middleware(request: NextRequest) {

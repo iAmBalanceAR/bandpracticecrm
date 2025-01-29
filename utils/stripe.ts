@@ -42,6 +42,11 @@ export async function createCheckoutSession(
   priceId: string,
   returnUrl: string
 ) {
+  // Ensure return URL is properly formatted
+  const baseUrl = returnUrl.startsWith('http') 
+    ? returnUrl 
+    : `https://${returnUrl.replace(/^\/+/, '')}`
+
   const checkout = await stripe.checkout.sessions.create({
     customer: customerId,
     mode: 'subscription',
@@ -52,8 +57,8 @@ export async function createCheckoutSession(
         quantity: 1,
       },
     ],
-    success_url: `${returnUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
-    cancel_url: `${returnUrl}/cancelled`,
+    success_url: `${baseUrl}/success?session_id={CHECKOUT_SESSION_ID}`,
+    cancel_url: `${baseUrl}/cancelled`,
   })
 
   return checkout

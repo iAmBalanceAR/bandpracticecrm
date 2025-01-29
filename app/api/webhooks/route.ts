@@ -26,6 +26,9 @@ const relevantEvents = new Set([
   'customer.subscription.created',
   'customer.subscription.updated',
   'customer.subscription.deleted',
+  'payment_intent.succeeded',
+  'payment_intent.payment_failed',
+  'payment_intent.processing',
 ])
 
 type ValidSubscriptionStatus = 'active' | 'trialing' | 'past_due' | 'canceled' | 'unpaid'
@@ -156,16 +159,37 @@ export async function POST(req: Request) {
   const body = await req.text()
   const signature = req.headers.get('stripe-signature')
 
-  let event: Stripe.Event
+  let event: Stripe.Event | undefined
 
   try {
     if (!signature) throw new Error('No signature')
     
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature,
-      process.env.STRIPE_WEBHOOK_SECRET!
-    )
+    // Try multiple webhook secrets
+    const webhookSecrets = [
+      process.env.STRIPE_WEBHOOK_SECRET,
+      process.env.STRIPE_WEBHOOK_SECRET_SUBSCRIPTION
+    ].filter(Boolean) // Remove any undefined secrets
+
+    let error: any
+    
+    // Try each secret until one works
+    for (const secret of webhookSecrets) {
+      try {
+        event = stripe.webhooks.constructEvent(body, signature, secret!)
+        // If we get here, the signature was valid
+        break
+      } catch (err) {
+        error = err
+        // Continue to try next secret
+        continue
+      }
+    }
+
+    // If we get here and event is not defined, no secrets worked
+    if (!event) {
+      throw error || new Error('Invalid signature')
+    }
+
   } catch (err: any) {
     console.error('Error verifying webhook signature:', err.message)
     return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 })
@@ -216,6 +240,58 @@ export async function POST(req: Request) {
                 subscription_id: subscription.id,
               })
               .eq('id', userId)
+          }
+          break
+        case 'payment_intent.succeeded':
+          const paymentIntent = event.data.object as Stripe.PaymentIntent
+          console.log(`💰 PaymentIntent succeeded: ${paymentIntent.id}`)
+          
+          // If this is a subscription payment
+          if (paymentIntent.metadata.subscription_id) {
+            const subscription = await stripe.subscriptions.retrieve(
+              paymentIntent.metadata.subscription_id
+            )
+            
+            // Update subscription status in database
+            await supabase
+              .from('subscriptions')
+              .update({
+                status: subscription.status,
+                latest_payment_success: true,
+                latest_payment_error: null
+              })
+              .eq('id', subscription.id)
+          }
+          break
+        case 'payment_intent.payment_failed':
+          const failedIntent = event.data.object as Stripe.PaymentIntent
+          console.log(`❌ Payment failed: ${failedIntent.id}`)
+          const error = failedIntent.last_payment_error?.message
+          
+          if (failedIntent.metadata.subscription_id) {
+            // Update subscription status in database
+            await supabase
+              .from('subscriptions')
+              .update({
+                latest_payment_success: false,
+                latest_payment_error: error || 'Payment failed'
+              })
+              .eq('id', failedIntent.metadata.subscription_id)
+          }
+          break
+        case 'payment_intent.processing':
+          const processingIntent = event.data.object as Stripe.PaymentIntent
+          console.log(`⏳ Payment processing: ${processingIntent.id}`)
+          
+          if (processingIntent.metadata.subscription_id) {
+            // Update subscription status to indicate processing
+            await supabase
+              .from('subscriptions')
+              .update({
+                status: 'processing',
+                latest_payment_error: null
+              })
+              .eq('id', processingIntent.metadata.subscription_id)
           }
           break
         default:

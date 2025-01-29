@@ -121,6 +121,22 @@ export default function AccountPage() {
                   </Button>
                 </Link>
               </div>
+
+              <div className="flex justify-between items-center p-4 bg-[#111c44] rounded-lg border border-blue-800">
+                <div>
+                  <h3 className="text-lg font-medium text-white">Usage Statistics</h3>
+                  <p className="text-gray-400 text-sm">View your activity and feature usage statistics</p>
+                </div>
+                <Link href="/account/user-stats">
+                  <Button 
+                    variant="outline"
+                    className="bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                  >
+                    View Stats
+                  </Button>
+                </Link>
+              </div>
+
             </div>
           </div>
         </Card>

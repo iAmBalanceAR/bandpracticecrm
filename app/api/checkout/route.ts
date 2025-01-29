@@ -49,6 +49,12 @@ export async function POST(request: Request) {
     console.log('Customer ID:', customerId)
 
     console.log('Creating checkout session with price:', priceId)
+    // Ensure site URL is properly formatted
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
+    const baseUrl = siteUrl.startsWith('http') 
+      ? siteUrl 
+      : `https://${siteUrl.replace(/^\/+/, '')}`
+
     // Create a checkout session
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
@@ -59,8 +65,8 @@ export async function POST(request: Request) {
         },
       ],
       mode: 'subscription',
-      success_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${process.env.NEXT_PUBLIC_SITE_URL}/pricing/cancelled`,
+      success_url: `${baseUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${baseUrl}/pricing/cancelled`,
       subscription_data: {
         metadata: {
           supabase_user_id: user.id,

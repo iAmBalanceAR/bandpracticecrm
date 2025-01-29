@@ -43,6 +43,7 @@ export async function updateSession(request: NextRequest) {
       request.nextUrl.pathname.startsWith('/api/') ||
       request.nextUrl.pathname.startsWith('/static') ||
       request.nextUrl.pathname.startsWith('/auth/') ||
+      request.nextUrl.pathname.startsWith('/pricing') ||
       request.nextUrl.pathname === '/favicon.ico') {
     return NextResponse.next()
   }

@@ -5,15 +5,6 @@ import { PricingClient } from '@/components/pricing/pricing-client'
 export default async function Pricing() {
   const supabase = createClient()
   
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
-
-  if (userError) {
-    console.error('Error fetching user:', userError)
-  }
-
   // Fetch active products with their prices
   const { data: products, error: productsError } = await supabase
     .from('products')
@@ -31,9 +22,10 @@ export default async function Pricing() {
     console.error('Error fetching products:', productsError)
   }
 
+  // Don't try to get user/session for pricing page
   return (
     <div>
-      <PricingClient products={products || []} user={user} />
+      <PricingClient products={products || []} user={null} />
     </div>
   )
 } 

@@ -32,6 +32,7 @@ export default function SuccessPage() {
         
         const email = data.customer_email
         const name = data.customer_details?.name
+        const stripeCustomerId = data.customer
 
         // Check if email exists using our safe endpoint
         const checkResponse = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
@@ -52,7 +53,8 @@ export default function SuccessPage() {
         } else {
           const params = new URLSearchParams({
             email: email || '',
-            name: name || ''
+            name: name || '',
+            stripe_customer_id: stripeCustomerId as string
           })
           router.push(`/auth/signup?${params.toString()}`)
         }

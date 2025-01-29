@@ -518,8 +518,6 @@ export default function TourManagement() {
           title: 'Warning: Tight Schedule',
           message: 'This stop would be added between events that are only 1 day apart. Would you like to proceed?',
           type: 'warning',
-          confirmLabel: 'Continue',
-          confirmStyle: 'success',
           onConfirm: () => {
             // Proceed with adding to calendar
             addToCalendarWithDate(stop, suggestedDate)
@@ -915,8 +913,6 @@ export default function TourManagement() {
         title={feedbackModal.title}
         message={feedbackModal.message}
         type={feedbackModal.type}
-        confirmLabel={feedbackModal.confirmLabel}
-        confirmStyle={feedbackModal.confirmStyle}
         onConfirm={() => {
           if (feedbackModal.onConfirm) {
             feedbackModal.onConfirm()

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen, ListVideo} from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen, ListVideo, LogIn} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -35,7 +35,10 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
 
   React.useEffect(() => {
     async function getProfile() {
-      if (!user) return
+      if (!user) {
+        setLoading(false)
+        return
+      }
       
       const { data, error } = await supabase
         .from('profiles')
@@ -101,12 +104,12 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
     { href: '/leads', icon: ClipboardList, text: 'Leads', color: '#d83b34' },
     { href: '/venues', icon: Users, text: 'Venue Search', color: '#00e396' }
   ] : [
-    { href: '/pricing', icon: CreditCard, text: 'Subscription Plans', color: '#00e396' },
-    { href: '/account/billing', icon: LayoutDashboard, text: 'Billing', color: '#d83b34' },
-    { href: 'https://docs.bandpracticecrm.com', icon: BookOpen, text: 'Docs', color: '#008ffb' }
+    { href: '/pricing', icon: CreditCard, text: 'Pricing Information', color: '#00e396' },
+    { href: 'https://docs.bandpracticecrm.com', icon: BookOpen, text: 'Band Practice Docs', color: '#d83b34' },
+    { href: '/auth/signin', icon: LogIn, text: 'Sign In', color: '#ff9920', target: '_blank' }
   ]
 
-  if (loading) {
+  if (loading && user) {
     return <div className="flex items-center justify-center p-4">Loading...</div>
   }
 
@@ -191,6 +194,12 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
                         onClick={() => router.push('/account')}
                       >
                         Profile
+                      </DropdownMenuItem>
+                      <DropdownMenuItem 
+                        className="cursor-pointer hover:bg-[#242f6a] text-white rounded-md"
+                        onClick={() => router.push('/account/user-stats')}
+                      >
+                        Usage Stats
                       </DropdownMenuItem>
                       <DropdownMenuItem 
                         className="cursor-pointer hover:bg-[#242f6a] text-white rounded-md"

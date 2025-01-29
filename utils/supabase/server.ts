@@ -11,7 +11,11 @@ export function createClient() {
     {
       cookies: {
         get(name: string) {
-          return cookieStore.get(name)?.value
+          try {
+            return cookieStore.get(name)?.value
+          } catch (error) {
+            return undefined
+          }
         },
         set(name: string, value: string, options: CookieOptions) {
           try {
@@ -28,6 +32,10 @@ export function createClient() {
           }
         },
       },
+      auth: {
+        detectSessionInUrl: true,
+        persistSession: true // Enable session persistence
+      }
     }
   )
 }

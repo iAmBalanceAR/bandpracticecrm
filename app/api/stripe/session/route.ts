@@ -16,7 +16,8 @@ export async function GET(request: Request) {
 
     return NextResponse.json({
       customer_email: session.customer_details?.email,
-      customer_details: session.customer_details
+      customer_details: session.customer_details,
+      customer: session.customer
     })
   } catch (error) {
     console.error('Error retrieving session:', error)

@@ -23,6 +23,14 @@ interface Props {
   initialSession: Session | null
 }
 
+const PUBLIC_ROUTES = [
+  '/pricing',
+  '/auth/signin',
+  '/auth/signup',
+  '/auth/reset-password',
+  '/auth/forgot-password'
+]
+
 export default function SupabaseProvider({ children, initialSession }: Props) {
   const [supabase] = useState(() => 
     createBrowserClient(
@@ -60,6 +68,10 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
     }
   }
 
+  const isPublicRoute = (path: string) => {
+    return PUBLIC_ROUTES.some(route => path.startsWith(route))
+  }
+
   useEffect(() => {
     if (initialSession) {
       const verifyInitialSession = async () => {
@@ -70,7 +82,7 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
         } else {
           setUser(null)
           setSession(null)
-          if (!pathname.includes('/auth/')) {
+          if (!isPublicRoute(pathname)) {
             router.push('/auth/signin')
           }
         }
@@ -89,7 +101,7 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
         } else {
           setUser(null)
           setSession(null)
-          if (!pathname.includes('/auth/')) {
+          if (!isPublicRoute(pathname)) {
             router.push('/auth/signin')
           }
         }
@@ -116,7 +128,7 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
       } else if (event === 'SIGNED_OUT') {
         setUser(null)
         setSession(null)
-        if (!pathname.includes('/auth/')) {
+        if (!isPublicRoute(pathname)) {
           router.push('/auth/signin')
         }
       } else if (event === 'TOKEN_REFRESHED') {

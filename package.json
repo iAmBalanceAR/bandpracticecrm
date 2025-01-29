@@ -12,7 +12,8 @@
 		"start": "next start",
 		"lint": "next lint",
 		"stripe:sync": "node scripts/stripe-sync.mjs",
-		"postinstall": "node node_modules/esbuild/install.js"
+		"postinstall": "node node_modules/esbuild/install.js",
+		"test:stripe": "cross-env DEBUG=true tsx scripts/test-stripe-flow.ts"
 	},
 	"dependencies": {
 		"@designbycode/tailwindcss-text-shadow": "^2.2.1",

@@ -43,6 +43,7 @@ export function SignUpForm() {
     // Get email and name from URL parameters
     const emailParam = searchParams.get('email')
     const nameParam = searchParams.get('name')
+    const stripeCustomerIdParam = searchParams.get('stripe_customer_id')
 
     if (emailParam) {
       setEmail(emailParam)
@@ -133,6 +134,7 @@ export function SignUpForm() {
           data: {
             first_name: firstName,
             last_name: lastName,
+            stripe_customer_id: searchParams.get('stripe_customer_id') || null
           },
           emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
         }
