@@ -63,8 +63,18 @@ export default function CookiePolicy() {
             </section>
 
             <section className="mb-8">
-              <h3 className="text-xl font-semibold mb-3 text-white">7. Contact Us</h3>
-              <p className="text-gray-300">If you have any questions about our Cookie Policy, please contact us at info@bandpracticecrm.com</p>
+              <h3 className="text-xl font-semibold mb-3 text-white">7. Version History</h3>
+              <p className="text-gray-300 mb-2">Recent changes to this Cookie Policy:</p>
+              <ul className="list-disc pl-6 text-gray-300">
+                <li>January 2024: Added detailed third-party cookie information</li>
+                <li>December 2023: Updated cookie management options</li>
+                <li>November 2023: Initial release</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">8. Contact Us</h3>
+              <p className="text-gray-300">If you have any questions about our Cookie Policy, please contact us at <a href="mailto:info@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">info@bandpracticecrm.com</a></p>
             </section>
           </div>
         </CardContent>

@@ -318,253 +318,249 @@ export default function TourList() {
 
   return (
     <div>
-        <div className=" flex-auto  relative float-right  -top-8">
-        <Button 
-          onClick={handleAddNew}
-          className="mb-4 bg-green-700 text-white hover:bg-green-600 float-right"
-        >
-          <Plus className="mr-2 h-4 w-4" /> Add New Tour
-        </Button>
-    </div>
-      <div className="overflow-x-auto clear-both">
-        {loading ? (
-          <div className="flex justify-center items-center h-64">
-            <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
-          </div>
-        ) : tours.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-400 mb-4">No tours found</p>
+      {!isFormVisible ? (
+        <>
+          <div className="flex-auto relative float-right -top-8">
             <Button 
               onClick={handleAddNew}
-              className="bg-[#008ffb] hover:bg-[#0070cc]"
+              className="mb-4 bg-green-700 text-white hover:bg-green-600 float-right"
             >
-              Create your first tour
+              <Plus className="mr-2 h-4 w-4" /> Add New Tour
             </Button>
           </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <div className="border-gray-500 border-2 rounded-lg">
-              <Table className="w-full">
-                <TableHeader>
-                  <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Start Date</TableHead>
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">End Date</TableHead>
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Status</TableHead>
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Default</TableHead>
-                    <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 pr-9 text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {tours.map((tour) => (
-                    <TableRow key={tour.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
-                      <TableCell className="font-medium text-gray-400 pt-4 pb-4">
-                        <div className="flex items-center">
-                          <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                          <span>{tour.title}</span>
-                        </div>
-                      </TableCell>
-                      <TableCell className="text-gray-400 pt-4 pb-4">
-                        {formatDate(tour.departure_date)}
-                      </TableCell>
-                      <TableCell className="text-gray-400 pt-4 pb-4">
-                        {formatDate(tour.return_date)}
-                      </TableCell>
-                      <TableCell className={`${getStatusColor(tour.status)} pt-4 pb-4`}>
-                        {tour.status}
-                      </TableCell>
-                      <TableCell className="text-gray-400 pt-4 pb-4 text-center">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleSetDefault(tour.id)}
-                          className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
-                        >
-                          <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
-                        </Button>
-                      </TableCell>
-                      <TableCell className="pt-4 pb-4">
-                        <div className="flex space-x-2 justify-center">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(tour)}
-                            className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleDeleteTour(tour.id)}
-                            className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {isFormVisible && (
-        <div className="fixed inset-0 bg-black/50 z-50">
-          <div className="fixed inset-0 overflow-y-auto">
-            <div className="flex min-h-full items-center justify-center p-4">
-              <div className="bg-[#111C44] rounded-lg w-full max-w-2xl p-6">
-                <div className="flex justify-between items-center mb-4">
-                  <h1 className="text-3xl font-mono mb-3">
-                    <span className="w-[100%] text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                      {currentTour ? "Edit Tour" : "Add New Tour"}
-                    </span>
-                  </h1>
-                  <Button variant="ghost" onClick={handleCloseForm}>
-                    <X className="h-6 w-6" />
-                  </Button>
+          <div className="overflow-x-auto clear-both">
+            {loading ? (
+              <div className="flex justify-center items-center h-64">
+                <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
+              </div>
+            ) : tours.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-gray-400 mb-4">No tours found</p>
+                <Button 
+                  onClick={handleAddNew}
+                  className="bg-[#008ffb] hover:bg-[#0070cc]"
+                >
+                  Create your first tour
+                </Button>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <div className="border-gray-500 border-2 rounded-lg">
+                  <Table className="w-full">
+                    <TableHeader>
+                      <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Start Date</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">End Date</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Status</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Default</TableHead>
+                        <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 pr-9 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {tours.map((tour) => (
+                        <TableRow key={tour.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
+                          <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                            <div className="flex items-center">
+                              <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                              <span>{tour.title}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4">
+                            {formatDate(tour.departure_date)}
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4">
+                            {formatDate(tour.return_date)}
+                          </TableCell>
+                          <TableCell className={`${getStatusColor(tour.status)} pt-4 pb-4`}>
+                            {tour.status}
+                          </TableCell>
+                          <TableCell className="text-gray-400 pt-4 pb-4 text-center">
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleSetDefault(tour.id)}
+                              className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
+                            >
+                              <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
+                            </Button>
+                          </TableCell>
+                          <TableCell className="pt-4 pb-4">
+                            <div className="flex space-x-2 justify-center">
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(tour)}
+                                className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleDeleteTour(tour.id)}
+                                className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="title">Tour Title</Label>
-                      <Input 
-                        id="title" 
-                        name="title"
-                        defaultValue={currentTour?.title}
-                        required 
-                        className="bg-[#1B2559]" 
-                      />
-                    </div>
+              </div>
+            )}
+          </div>
+        </>
+      ) : (
+        <div className="bg-[#111C44] rounded-lg w-full p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-3xl font-mono mb-3">
+              <span className="w-[100%] text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+                {currentTour ? "Edit Tour" : "Add New Tour"}
+              </span>
+            </h1>
+            <Button variant="ghost" onClick={handleCloseForm}>
+              <X className="h-6 w-6" />
+            </Button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-4">
+              <div>
+                <Label htmlFor="title">Tour Title</Label>
+                <Input 
+                  id="title" 
+                  name="title"
+                  defaultValue={currentTour?.title}
+                  required 
+                  className="bg-[#1B2559]" 
+                />
+              </div>
 
-                    <div>
-                      <Label htmlFor="description">Description</Label>
-                      <Textarea 
-                        id="description" 
-                        name="description"
-                        defaultValue={currentTour?.description}
-                        placeholder="Enter tour description" 
-                        className="bg-[#1B2559] h-[100px] resize-none" 
-                      />
-                    </div>
+              <div>
+                <Label htmlFor="description">Description</Label>
+                <Textarea 
+                  id="description" 
+                  name="description"
+                  defaultValue={currentTour?.description}
+                  placeholder="Enter tour description" 
+                  className="bg-[#1B2559] h-[100px] resize-none" 
+                />
+              </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="departureDate">Departure Date</Label>
-                        <div className="flex space-x-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white w-full"
-                              >
-                                <Calendar className="mr-2 h-4 w-4" />
-                                {format(departureDate, "PPP")}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-[#0f1729] border-[#4A5568]">
-                              <CalendarComponent
-                                mode="single"
-                                selected={departureDate}
-                                onSelect={(date: Date | undefined) => date && setDepartureDate(date)}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
-
-                      <div>
-                        <Label htmlFor="returnDate">Return Date</Label>
-                        <div className="flex space-x-2">
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <Button 
-                                type="button"
-                                variant="outline" 
-                                className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white w-full"
-                              >
-                                <Calendar className="mr-2 h-4 w-4" />
-                                {format(returnDate, "PPP")}
-                              </Button>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0 bg-[#0f1729] border-[#4A5568]">
-                              <CalendarComponent
-                                mode="single"
-                                selected={returnDate}
-                                onSelect={(date: Date | undefined) => date && setReturnDate(date)}
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                        </div>
-                      </div>
-                    </div>
-
-                    <div>
-                      <Label htmlFor="status">Tour Status</Label>
-                      <Select value={status} onValueChange={(value: Tour['status']) => setStatus(value)}>
-                        <SelectTrigger className="bg-[#1B2559]">
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                        <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white">
-                          <SelectItem value="Building">Building</SelectItem>
-                          <SelectItem value="In Progress">In Progress</SelectItem>
-                          <SelectItem value="Closed">Closed</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="flex items-center space-x-2 pt-4">
-                      <Checkbox 
-                        id="isDefault" 
-                        checked={isDefault}
-                        onChange={(e) => setIsDefault(e.target.checked)}
-                        className="border-gray-400"
-                      />
-                      <Label 
-                        htmlFor="isDefault"
-                        className="text-sm font-medium leading-none cursor-pointer"
-                      >
-                        Set as default tour
-                      </Label>
-                    </div>
-
-                    <div className="flex space-x-4 justify-end pt-4">
-                      <Button 
-                        type="submit" 
-                        className="bg-green-800 border border-black hover:bg-green-500 px-8 text-white"
-                        disabled={isSaving}
-                      >
-                        {isSaving ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Saving...
-                          </>
-                        ) : currentTour ? (
-                          "Update Tour"
-                        ) : (
-                          "Create Tour"
-                        )}
-                      </Button>
-                      <Button 
-                        type="button" 
-                        onClick={handleCloseForm} 
-                        className="bg-red-600 hover:bg-red-700 text-white px-8"
-                        disabled={isSaving}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="departureDate">Departure Date</Label>
+                  <div className="flex space-x-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white w-full"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {format(departureDate, "PPP")}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-[#0f1729] border-[#4A5568]">
+                        <CalendarComponent
+                          mode="single"
+                          selected={departureDate}
+                          onSelect={(date: Date | undefined) => date && setDepartureDate(date)}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
                   </div>
-                </form>
+                </div>
+
+                <div>
+                  <Label htmlFor="returnDate">Return Date</Label>
+                  <div className="flex space-x-2">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button 
+                          type="button"
+                          variant="outline" 
+                          className="bg-[#1B2559] hover:text-white focus:text-white hover:bg-black focus:bg-black border-grey-600 text-white w-full"
+                        >
+                          <Calendar className="mr-2 h-4 w-4" />
+                          {format(returnDate, "PPP")}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 bg-[#0f1729] border-[#4A5568]">
+                        <CalendarComponent
+                          mode="single"
+                          selected={returnDate}
+                          onSelect={(date: Date | undefined) => date && setReturnDate(date)}
+                          initialFocus
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label htmlFor="status">Tour Status</Label>
+                <Select value={status} onValueChange={(value: Tour['status']) => setStatus(value)}>
+                  <SelectTrigger className="bg-[#1B2559]">
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-[#0f1729] border-[#4A5568] text-white">
+                    <SelectItem value="Building">Building</SelectItem>
+                    <SelectItem value="In Progress">In Progress</SelectItem>
+                    <SelectItem value="Closed">Closed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="flex items-center space-x-2 pt-4">
+                <Checkbox 
+                  id="isDefault" 
+                  checked={isDefault}
+                  onChange={(e) => setIsDefault(e.target.checked)}
+                  className="border-gray-400"
+                />
+                <Label 
+                  htmlFor="isDefault"
+                  className="text-sm font-medium leading-none cursor-pointer"
+                >
+                  Set as default tour
+                </Label>
+              </div>
+
+              <div className="flex space-x-4 justify-end pt-4">
+                <Button 
+                  type="submit" 
+                  className="bg-green-800 border border-black hover:bg-green-500 px-8 text-white"
+                  disabled={isSaving}
+                >
+                  {isSaving ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Saving...
+                    </>
+                  ) : currentTour ? (
+                    "Update Tour"
+                  ) : (
+                    "Create Tour"
+                  )}
+                </Button>
+                <Button 
+                  type="button" 
+                  onClick={handleCloseForm} 
+                  className="bg-red-600 hover:bg-red-700 text-white px-8"
+                  disabled={isSaving}
+                >
+                  Cancel
+                </Button>
               </div>
             </div>
-          </div>
+          </form>
         </div>
       )}
 

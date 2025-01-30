@@ -40,10 +40,10 @@ export default function LeadsPage() {
   }
 
   return (
-    <CustomSectionHeader 
-      title="Lead Management" 
+      <CustomSectionHeader
+        title="Lead Management"
       underlineColor="#008ffb"
-    >
+            >
       <Card className="bg-[#111C44] min-h-[500px] border-blue-800 p-0 m-0">
         <CardContent className="p-6">
           <div className="flex justify-end mb-4">
@@ -51,12 +51,12 @@ export default function LeadsPage() {
               <Button className="bg-blue-500 hover:bg-blue-600">
                 <Plus className="h-4 w-4 mr-2" />
                 New Lead
-              </Button>
+            </Button>
             </LeadDialog>
           </div>
-          <LeadsDataView />
-        </CardContent>
-      </Card>
+            <LeadsDataView />
+          </CardContent>
+        </Card>
     </CustomSectionHeader>
   );
 } 

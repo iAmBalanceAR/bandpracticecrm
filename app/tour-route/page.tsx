@@ -18,7 +18,7 @@ export default function Page() {
 
   return (
     <CustomSectionHeader title="Tour Route" underlineColor="#D83B34">
-      <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
+      <Card className="bg-[#111C44] min-h-[400px] border-none p-0 m-0">
         <CardHeader className="pb-0 mb-0">
           <CardTitle className="flex justify-between items-center text-3xl font-bold">
             <div className="">

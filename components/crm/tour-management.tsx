@@ -744,7 +744,7 @@ export default function TourManagement() {
 
   return (
     <>
-    <Card className="bg-[#111C44]  min-h-[500px] border-none p-0 m-0">
+    <Card className="bg-[#111C44]  border-none p-0 m-0 mb-6">
     <CardHeader className="pb-0 mb-0">
       <CardTitle className="flex justify-between items-center text-3xl font-bold">
       </CardTitle>
@@ -761,7 +761,7 @@ export default function TourManagement() {
         </Card>        
       <Card className="bg-[#111C44] border-none">
         <CardContent className="p-0">
-            <div className="space-y-6">
+            <div className="space-y-4">
               <div>
                 <h3 className="text-2xl mb-6">
                   <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">

@@ -58,12 +58,68 @@ export default function PrivacyPolicy() {
                 <li>Correct inaccurate data</li>
                 <li>Request deletion of your data</li>
                 <li>Object to data processing</li>
+                <li>Request data portability</li>
+                <li>Withdraw consent at any time</li>
               </ul>
             </section>
 
             <section className="mb-8">
-              <h3 className="text-xl font-semibold mb-3 text-white">6. Contact Us</h3>
-              <p className="text-gray-300">If you have any questions about this Privacy Policy, please contact us at info@bandpracticecrm.com</p>
+              <h3 className="text-xl font-semibold mb-3 text-white">6. GDPR Compliance</h3>
+              <p className="text-gray-300 mb-2">For users in the European Union, we comply with GDPR requirements:</p>
+              <ul className="list-disc pl-6 text-gray-300">
+                <li>Legal basis for processing data</li>
+                <li>Data minimization principles</li>
+                <li>72-hour breach notification</li>
+                <li>Right to be forgotten</li>
+                <li>Data portability</li>
+              </ul>
+              <p className="text-gray-300 mt-2">Our Data Protection Officer can be contacted at <a href="mailto:dpo@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">dpo@bandpracticecrm.com</a></p>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">7. Data Retention</h3>
+              <p className="text-gray-300 mb-2">We retain your data for as long as necessary to:</p>
+              <ul className="list-disc pl-6 text-gray-300">
+                <li>Provide our services to you</li>
+                <li>Comply with legal obligations</li>
+                <li>Resolve disputes</li>
+                <li>Enforce our agreements</li>
+              </ul>
+              <p className="text-gray-300 mt-2">After account deletion, we may retain certain data for up to 30 days for backup purposes.</p>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">8. Data Export</h3>
+              <p className="text-gray-300">You can export your data at any time through your account settings. Exported data includes:</p>
+              <ul className="list-disc pl-6 text-gray-300">
+                <li>Tour and gig information</li>
+                <li>Venue contacts</li>
+                <li>Stage plot designs</li>
+                <li>Account settings</li>
+              </ul>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">9. California Privacy Rights (CCPA)</h3>
+              <p className="text-gray-300 mb-2">California residents have the following additional rights:</p>
+              <ul className="list-disc pl-6 text-gray-300">
+                <li>Right to know what personal information is collected</li>
+                <li>Right to know whether personal information is sold or disclosed</li>
+                <li>Right to say no to the sale of personal information</li>
+                <li>Right to access personal information</li>
+                <li>Right to equal service and price</li>
+              </ul>
+              <p className="text-gray-300 mt-2">To exercise these rights, please contact us at <a href="mailto:privacy@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">privacy@bandpracticecrm.com</a></p>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">10. Changes to This Policy</h3>
+              <p className="text-gray-300">We will notify you of any material changes to this Privacy Policy via email and/or a prominent notice on our website. Changes become effective immediately upon posting.</p>
+            </section>
+
+            <section className="mb-8">
+              <h3 className="text-xl font-semibold mb-3 text-white">11. Contact Us</h3>
+              <p className="text-gray-300">If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">info@bandpracticecrm.com</a></p>
             </section>
           </div>
           </div>

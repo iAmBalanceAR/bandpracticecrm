@@ -65,155 +65,155 @@ const GigDetailsModal = ({ gig, isOpen, onClose }: { gig: Gig | null, isOpen: bo
         <CustomDialog isOpen={isOpen} onClose={onClose} title={gig.title}>
           <div className="space-y-4 p-4 bg-[#0f1729] text-white border border-[#008ffb] rounded-lg">
             <div className="flex  justify-between items-start mb-6">
-              <h2 className="text-2xl font-mono">
-                <span className="text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                  {gig.title}  
-                </span>
-              </h2>
-              <Button 
-                variant="ghost" 
-                onClick={onClose}
-                className="mt-1 hover:bg-[#008ffb]/20 hover:text-white transition-colors rounded-full p-2 h-auto"
-              >
-                <X className="h-5 w-5 text-[#008ffb] hover:text-white" />
-              </Button>
-            </div>
-            <div>
-              <div className="flex items-center gap-2 mb-2">
-                <MapPin className="w-5 h-5 text-[#008ffb]" />
-                <h3 className="font-semibold text-[#008ffb]">Venue</h3>
-              </div>
-              <p className="text-white">{gig.venue}</p>
-              <p className="text-white/80">{gig.venue_address}</p>
-              <p className="text-white/80">{gig.venue_city}, {gig.venue_state} {gig.venue_zip}</p>
-            </div>
-            <div className="grid grid-cols-3 gap-4 border border-[#008ffb]/20 rounded-lg p-3">
-              <div className="flex items-center gap-2">
-                <Truck className="w-4 h-4 text-[#008ffb]" />
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-white">Crew:</span>
-                  {gig.crew_hands_in ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-red-500" />
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <UtensilsCrossed className="w-4 h-4 text-[#008ffb]" />
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-white">Meal:</span>
-                  {gig.meal_included ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-red-500" />
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Hotel className="w-4 h-4 text-[#008ffb]" />
-                <div className="flex items-center gap-1">
-                  <span className="text-sm text-white">Hotel:</span>
-                  {gig.hotel_included ? (
-                    <CheckCircle2 className="w-4 h-4 text-green-500" />
-                  ) : (
-                    <XCircle className="w-4 h-4 text-red-500" />
-                  )}
-                </div>
-              </div>
-            </div>
-            <div className="grid grid-cols-3 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Clock className="w-4 h-4 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Load In</h3>
-                </div>
-                <p className="text-white ml-6">{format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Mic2 className="w-4 h-4 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Sound Check</h3>
-                </div>
-                <p className="text-white pl-7">{format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}</p>
-              </div>
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <Music className="w-4 h-4 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Set Time</h3>
-                </div>
-                <p className="text-white pl-6">{format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}</p>
-              </div>
-            </div>
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <User className="w-5 h-5 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Contact</h3>
-                </div>
-                <div className="space-y-2 pl-7">
-                  <div className="flex items-center gap-2">
-                    <User className="w-4 h-4 text-[#008ffb]/70" />
-                    <p className="text-white">{gig.contact_name}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-4 h-4 text-[#008ffb]/70" />
-                    <p className="text-white/80">{gig.contact_phone}</p>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Mail className="w-4 h-4 text-[#008ffb]/70" />
-                    <p className="text-white/80">{gig.contact_email}</p>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <DollarSign className="w-5 h-5 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Financial</h3>
-                </div>
-                <div className="space-y-2 pl-7">
-                  <div className="flex items-center gap-2">
-                    <Receipt className="w-4 h-4 text-[#008ffb]/70" />
-                    <div className="flex items-center gap-2">
-                      <span className="text-[#008ffb] text-sm">Deposit:</span>
-                      <span className="text-white">${gig.deposit_amount || '0'}</span>
-                      {gig.deposit_paid ? (
-                        <CheckCircle2 className="w-4 h-4 text-green-500 ml-2" />
-                      ) : (
-                        <XCircle className="w-4 h-4 text-red-500 ml-2" />
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <CreditCard className="w-4 h-4 text-[#008ffb]/70" />
-                    <div>
-                      <span className="text-[#008ffb] text-sm">Contract Total:</span>
-                      <span className="text-white ml-2">${gig.contract_total}</span>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <DollarSign className="w-4 h-4 text-[#008ffb]/70" />
-                    <div>
-                      <span className="text-[#008ffb] text-sm">Balance:</span>
-                      <span className="text-white ml-2">${gig.open_balance}</span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            {gig.gig_details && (
-              <div>
-                <div className="flex items-center gap-2 mb-2">
-                  <FileText className="w-5 h-5 text-[#008ffb]" />
-                  <h3 className="font-semibold text-[#008ffb]">Details</h3>
-                </div>
-                <p className="text-white whitespace-pre-line pl-7">{gig.gig_details}</p>
-              </div>
-            )}
+          <h2 className="text-2xl font-mono">
+            <span className="text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+              {gig.title}  
+            </span>
+          </h2>
+          <Button 
+            variant="ghost" 
+            onClick={onClose}
+            className="mt-1 hover:bg-[#008ffb]/20 hover:text-white transition-colors rounded-full p-2 h-auto"
+          >
+            <X className="h-5 w-5 text-[#008ffb] hover:text-white" />
+          </Button>
+        </div>
+        <div>
+          <div className="flex items-center gap-2 mb-2">
+            <MapPin className="w-5 h-5 text-[#008ffb]" />
+            <h3 className="font-semibold text-[#008ffb]">Venue</h3>
           </div>
-        </CustomDialog>
+          <p className="text-white">{gig.venue}</p>
+          <p className="text-white/80">{gig.venue_address}</p>
+          <p className="text-white/80">{gig.venue_city}, {gig.venue_state} {gig.venue_zip}</p>
+        </div>
+        <div className="grid grid-cols-3 gap-4 border border-[#008ffb]/20 rounded-lg p-3">
+          <div className="flex items-center gap-2">
+            <Truck className="w-4 h-4 text-[#008ffb]" />
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-white">Crew:</span>
+              {gig.crew_hands_in ? (
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              ) : (
+                <XCircle className="w-4 h-4 text-red-500" />
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <UtensilsCrossed className="w-4 h-4 text-[#008ffb]" />
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-white">Meal:</span>
+              {gig.meal_included ? (
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              ) : (
+                <XCircle className="w-4 h-4 text-red-500" />
+              )}
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            <Hotel className="w-4 h-4 text-[#008ffb]" />
+            <div className="flex items-center gap-1">
+              <span className="text-sm text-white">Hotel:</span>
+              {gig.hotel_included ? (
+                <CheckCircle2 className="w-4 h-4 text-green-500" />
+              ) : (
+                <XCircle className="w-4 h-4 text-red-500" />
+              )}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-3 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Clock className="w-4 h-4 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Load In</h3>
+            </div>
+            <p className="text-white ml-6">{format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}</p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Mic2 className="w-4 h-4 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Sound Check</h3>
+            </div>
+            <p className="text-white pl-7">{format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}</p>
+          </div>
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <Music className="w-4 h-4 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Set Time</h3>
+            </div>
+            <p className="text-white pl-6">{format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <User className="w-5 h-5 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Contact</h3>
+            </div>
+            <div className="space-y-2 pl-7">
+              <div className="flex items-center gap-2">
+                <User className="w-4 h-4 text-[#008ffb]/70" />
+                <p className="text-white">{gig.contact_name}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Phone className="w-4 h-4 text-[#008ffb]/70" />
+                <p className="text-white/80">{gig.contact_phone}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <Mail className="w-4 h-4 text-[#008ffb]/70" />
+                <p className="text-white/80">{gig.contact_email}</p>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <DollarSign className="w-5 h-5 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Financial</h3>
+            </div>
+            <div className="space-y-2 pl-7">
+              <div className="flex items-center gap-2">
+                <Receipt className="w-4 h-4 text-[#008ffb]/70" />
+                <div className="flex items-center gap-2">
+                  <span className="text-[#008ffb] text-sm">Deposit:</span>
+                  <span className="text-white">${gig.deposit_amount || '0'}</span>
+                  {gig.deposit_paid ? (
+                    <CheckCircle2 className="w-4 h-4 text-green-500 ml-2" />
+                  ) : (
+                    <XCircle className="w-4 h-4 text-red-500 ml-2" />
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <CreditCard className="w-4 h-4 text-[#008ffb]/70" />
+                <div>
+                  <span className="text-[#008ffb] text-sm">Contract Total:</span>
+                  <span className="text-white ml-2">${gig.contract_total}</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <DollarSign className="w-4 h-4 text-[#008ffb]/70" />
+                <div>
+                  <span className="text-[#008ffb] text-sm">Balance:</span>
+                  <span className="text-white ml-2">${gig.open_balance}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {gig.gig_details && (
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-5 h-5 text-[#008ffb]" />
+              <h3 className="font-semibold text-[#008ffb]">Details</h3>
+            </div>
+            <p className="text-white whitespace-pre-line pl-7">{gig.gig_details}</p>
+          </div>
+        )}
       </div>
+        </CustomDialog>
+    </div>
     </PortalContent>
   )
 }
@@ -368,74 +368,74 @@ const VerticalCalendar = () => {
         </HoverCardTrigger>
         {hasGigs && (
           <PortalContent>
-            <HoverCardContent 
-              align="start"
-              side="right"
-              alignOffset={-10}
-              sideOffset={5}
-              className="w-72 bg-[#0f1729] border border-[#008ffb] p-3 shadow-lg shadow-[#008ffb]/20"
-            >
-              <div className="max-h-fit">
-                {gigsForDay.map((gig, index) => (
-                  <div key={index} className="mb-3 last:mb-0">
-                    <div className="space-y-2 hover:bg-[#008ffb]/10 rounded-lg transition-colors p-2">
-                      {/* Header */}
-                      <div className="border-l-2 border-[#008ffb] pl-2">
-                        <h3 className="font-semibold text-white text-base leading-tight truncate">{gig.title}</h3>
-                        <p className="text-[#008ffb] text-sm font-medium truncate">{gig.venue}</p>
-                      </div>
-
-                      {/* Times */}
-                      <div className="text-xs space-y-1 pl-3">
-                        <div className="flex justify-between items-center">
-                          <span className="text-[#008ffb]">Load In:</span>
-                          <span className="text-white/90">
-                            {format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[#008ffb]">Sound Check:</span>
-                          <span className="text-white/90">
-                            {format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}
-                          </span>
-                        </div>
-                        <div className="flex justify-between items-center">
-                          <span className="text-[#008ffb]">Set Time:</span>
-                          <span className="text-white/90">
-                            {format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Contact */}
-                      <div className="text-xs pl-3 pt-1">
-                        <div className="flex items-center gap-2">
-                          <span className="text-[#008ffb]">Contact:</span>
-                          <span className="text-white/90 truncate">{gig.contact_name}</span>
-                        </div>
-                      </div>
-
-                      {/* Action Button */}
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full mt-1 text-white text-xs hover:text-white hover:bg-[#008ffb]/20 border border-[#008ffb]/30"
-                        onClick={() => {
-                          setSelectedGig(gig)
-                          setIsModalOpen(true)
-                        }}
-                      >
-                        View Full Details
-                      </Button>
+          <HoverCardContent 
+            align="start"
+            side="right"
+            alignOffset={-10}
+            sideOffset={5}
+            className="w-72 bg-[#0f1729] border border-[#008ffb] p-3 shadow-lg shadow-[#008ffb]/20"
+          >
+            <div className="max-h-fit">
+              {gigsForDay.map((gig, index) => (
+                <div key={index} className="mb-3 last:mb-0">
+                  <div className="space-y-2 hover:bg-[#008ffb]/10 rounded-lg transition-colors p-2">
+                    {/* Header */}
+                    <div className="border-l-2 border-[#008ffb] pl-2">
+                      <h3 className="font-semibold text-white text-base leading-tight truncate">{gig.title}</h3>
+                      <p className="text-[#008ffb] text-sm font-medium truncate">{gig.venue}</p>
                     </div>
 
-                    {index < gigsForDay.length - 1 && (
-                      <div className="my-2 border-t border-[#008ffb]/20" />
-                    )}
+                    {/* Times */}
+                    <div className="text-xs space-y-1 pl-3">
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#008ffb]">Load In:</span>
+                        <span className="text-white/90">
+                          {format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#008ffb]">Sound Check:</span>
+                        <span className="text-white/90">
+                          {format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}
+                        </span>
+                      </div>
+                      <div className="flex justify-between items-center">
+                        <span className="text-[#008ffb]">Set Time:</span>
+                        <span className="text-white/90">
+                          {format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Contact */}
+                    <div className="text-xs pl-3 pt-1">
+                      <div className="flex items-center gap-2">
+                        <span className="text-[#008ffb]">Contact:</span>
+                        <span className="text-white/90 truncate">{gig.contact_name}</span>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="w-full mt-1 text-white text-xs hover:text-white hover:bg-[#008ffb]/20 border border-[#008ffb]/30"
+                      onClick={() => {
+                        setSelectedGig(gig)
+                        setIsModalOpen(true)
+                      }}
+                    >
+                      View Full Details
+                    </Button>
                   </div>
-                ))}
-              </div>
-            </HoverCardContent>
+
+                  {index < gigsForDay.length - 1 && (
+                    <div className="my-2 border-t border-[#008ffb]/20" />
+                  )}
+                </div>
+              ))}
+            </div>
+          </HoverCardContent>
           </PortalContent>
         )}
       </HoverCard>
@@ -484,14 +484,14 @@ const VerticalCalendar = () => {
       >
         <ChevronDown className="h-4 w-4" />
       </Button>
-      <GigDetailsModal
-        gig={selectedGig}
-        isOpen={isModalOpen}
-        onClose={() => {
+          <GigDetailsModal
+            gig={selectedGig}
+            isOpen={isModalOpen}
+            onClose={() => {
           setIsModalOpen(false)
           setSelectedGig(null)
-        }}
-      />
+            }}
+          />
     </div>
   )
 }
