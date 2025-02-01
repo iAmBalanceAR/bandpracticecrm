@@ -22,10 +22,12 @@ export default async function Pricing() {
     console.error('Error fetching products:', productsError)
   }
 
-  // Don't try to get user/session for pricing page
+  // Get the current user
+  const { data: { user } } = await supabase.auth.getUser()
+
   return (
     <div>
-      <PricingClient products={products || []} user={null} />
+      <PricingClient products={products || []} user={user} />
     </div>
   )
 } 

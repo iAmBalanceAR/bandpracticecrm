@@ -9,18 +9,60 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Loader2 } from 'lucide-react';
 import { Button } from "@/components/ui/button";
 import { Plus } from 'lucide-react';
+import { useSupabase } from '@/components/providers/supabase-client-provider';
+import { useState } from 'react';
+import { FeedbackModal } from '@/components/ui/feedback-modal';
 
 export default function Page() {
   const router = useRouter();
+  const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [activeTab, setActiveTab] = React.useState("upcoming");
   const [isFormVisible, setIsFormVisible] = React.useState(false);
+  const [feedbackModal, setFeedbackModal] = useState({
+    isOpen: false,
+    title: '',
+    message: '',
+    type: 'error' as const
+  });
 
   useEffect(() => {
     if (!isAuthenticated) {
       router.push('/auth/signin');
     }
   }, [isAuthenticated, router]);
+
+  const checkForTours = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('tours')
+        .select('id')
+        .limit(1);
+
+      if (error) throw error;
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Error checking for tours:', error);
+      return false;
+    }
+  };
+
+  const handleAddNewGig = async () => {
+    const hasTours = await checkForTours();
+    
+    if (!hasTours) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'No Tours Available',
+        message: 'Please create at least one tour before adding calendar events. This ensures your gigs are properly organized.',
+        type: 'error'
+      });
+      return;
+    }
+    
+    setIsFormVisible(true);
+  };
 
   if (authLoading) {
     return (
@@ -52,7 +94,7 @@ export default function Page() {
                 </span>
               </div>
               <Button 
-                onClick={() => setIsFormVisible(true)}
+                onClick={handleAddNewGig}
                 className="bg-green-700 text-white hover:bg-green-600"
               >
                 <Plus className="mr-2 h-4 w-4" /> Add New Gig
@@ -106,6 +148,14 @@ export default function Page() {
           )}
         </CardContent>
       </Card>
+
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+      />
     </CustomSectionHeader>
   );
 }

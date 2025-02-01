@@ -12,6 +12,7 @@ import { AuthError } from '@supabase/supabase-js'
 import ReCAPTCHA from 'react-google-recaptcha'
 import { FeedbackModal } from '@/components/ui/feedback-modal'
 import { normalizeEmail, isEmailAvailable } from '@/utils/email-validator'
+import { getURL } from '@/utils/get-url'
 
 type FeedbackModalState = {
   isOpen: boolean
@@ -34,7 +35,6 @@ export function SignUpForm() {
     message: '',
     type: 'success'
   })
-  const recaptchaRef = useRef<ReCAPTCHA>(null)
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -69,52 +69,6 @@ export function SignUpForm() {
     // Normalize email (handles Gmail dots and plus addressing)
     const normalizedEmail = normalizeEmail(email)
 
-    // Verify reCAPTCHA
-    const recaptchaValue = recaptchaRef.current?.getValue()
-    if (!recaptchaValue) {
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Verification Required',
-        message: 'Please complete the CAPTCHA verification',
-        type: 'error'
-      })
-      setLoading(false)
-      return
-    }
-
-    // Verify CAPTCHA server-side
-    try {
-      const verifyResponse = await fetch('/api/verify-captcha', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ token: recaptchaValue }),
-      })
-
-      const verifyData = await verifyResponse.json()
-
-      if (!verifyData.success) {
-        setFeedbackModal({
-          isOpen: true,
-          title: 'Verification Failed',
-          message: 'CAPTCHA verification failed. Please try again.',
-          type: 'error'
-        })
-        setLoading(false)
-        return
-      }
-    } catch (error) {
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Verification Error',
-        message: 'Failed to verify CAPTCHA. Please try again.',
-        type: 'error'
-      })
-      setLoading(false)
-      return
-    }
-
     if (password !== confirmPassword) {
       setFeedbackModal({
         isOpen: true,
@@ -127,6 +81,8 @@ export function SignUpForm() {
     }
     
     try {
+      console.log('Signup attempt with redirect URL:', `${getURL()}auth/callback`)
+      
       const { data, error: signUpError } = await supabase.auth.signUp({
         email: normalizedEmail,
         password,
@@ -136,11 +92,20 @@ export function SignUpForm() {
             last_name: lastName,
             stripe_customer_id: searchParams.get('stripe_customer_id') || null
           },
-          emailRedirectTo: `${process.env.NEXT_PUBLIC_SITE_URL || window.location.origin}/auth/callback`
+          emailRedirectTo: `${getURL()}auth/callback`
         }
       })
 
+      // Add this log right after the signUp call
+      console.log('Signup attempt result:', { 
+        success: !signUpError,
+        user: data?.user?.id,
+        email: normalizedEmail,
+        confirmEmailSent: data?.user && !data?.session
+      })
+
       if (signUpError) {
+        console.error('Signup error:', signUpError)
         setFeedbackModal({
           isOpen: true,
           title: 'Registration Error',
@@ -183,6 +148,13 @@ export function SignUpForm() {
           type: 'error'
         })
       }
+
+      // Add this log
+      console.log('Signup response:', {
+        user: data?.user ? 'User created' : 'No user',
+        session: data?.session ? 'Session created' : 'No session',
+        identities: data?.user?.identities?.length
+      })
     } catch (error: any) {
       setFeedbackModal({
         isOpen: true,
@@ -192,7 +164,6 @@ export function SignUpForm() {
       })
     } finally {
       setLoading(false)
-      recaptchaRef.current?.reset()
     }
   }
 
@@ -306,22 +277,6 @@ export function SignUpForm() {
                 </div>
               </div>
               
-              <div className="grid col-span-2 mb-0">
-                {process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ? (
-                  <div className="w-full flex justify-center items-center py-4">
-                    <ReCAPTCHA
-                      ref={recaptchaRef}
-                      sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY}
-                      theme="dark"
-                    />
-                  </div>
-                ) : (
-                  <Alert variant="destructive" className="bg-red-900 border-red-600 text-white">
-                    <AlertDescription>ReCAPTCHA configuration is missing. Please contact support.</AlertDescription>
-                  </Alert>
-                )}
-              </div>
-
               <div className="grid col-span-2">
                 <Button
                   type="submit"

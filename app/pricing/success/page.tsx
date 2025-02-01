@@ -28,11 +28,21 @@ export default function SuccessPage() {
         const response = await fetch(`/api/stripe/session?sessionId=${sessionId}`)
         const data = await response.json()
         
+        console.log('Session data:', data)
+        
         if (!response.ok) throw new Error(data.message || 'Failed to get session')
         
         const email = data.customer_email
         const name = data.customer_details?.name
         const stripeCustomerId = data.customer
+        const subscriptionId = data.subscription
+
+        console.log('Customer data:', {
+          email,
+          name,
+          stripeCustomerId,
+          subscriptionId
+        })
 
         // Check if email exists using our safe endpoint
         const checkResponse = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)

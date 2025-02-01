@@ -1,12 +1,16 @@
 import { headers } from 'next/headers'
 import Stripe from 'stripe'
-import { createClient } from '@/utils/supabase/server'
+import { createServerClient } from '@supabase/ssr'
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16'
 })
 
 const relevantEvents = new Set([
+  'checkout.session.completed',
+  'customer.subscription.created',
+  'customer.subscription.updated',
+  'customer.subscription.deleted',
   'product.created',
   'product.updated',
   'product.deleted',
@@ -35,9 +39,114 @@ export async function POST(req: Request) {
 
   if (relevantEvents.has(event.type)) {
     try {
-      const supabase = createClient()
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.SUPABASE_SERVICE_ROLE_KEY!,
+        {
+          cookies: {
+            get: () => undefined,
+            set: () => {},
+            remove: () => {}
+          }
+        }
+      )
 
       switch (event.type) {
+        case 'checkout.session.completed': {
+          const session = event.data.object as Stripe.Checkout.Session
+          const userId = session.metadata?.supabase_user_id
+
+          console.log('Webhook: Checkout completed:', {
+            sessionId: session.id,
+            userId,
+            subscription: session.subscription,
+            customer: session.customer,
+            metadata: session.metadata,  // Log all metadata
+            mode: session.mode          // Check if it's in subscription mode
+          })
+          
+          if (!userId) {
+            console.error('No userId found in session metadata')
+            return
+          }
+
+          if (!session.subscription) {
+            console.error('No subscription found in session')
+            return
+          }
+
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+          console.log('Webhook: Subscription details:', {
+            id: subscription.id,
+            status: subscription.status,
+            customerId: subscription.customer,
+            metadata: subscription.metadata
+          })
+          
+          // First check if we can read the profile
+          const { data: profile, error: readError } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single()
+
+          if (readError) {
+            console.error('Error reading profile:', readError)
+            return
+          }
+
+          console.log('Found profile:', profile)
+
+          // Then try to update
+          const { data, error } = await supabase
+            .rpc('handle_subscription_update', {
+              user_id: userId,
+              customer_id: subscription.customer,
+              subscription_id: subscription.id,
+              status: subscription.status,
+              price_id: subscription.items.data[0]?.price.id || null
+            })
+          
+          if (error) {
+            console.error('Stored procedure error:', error)
+          } else {
+            console.log('Subscription updated:', data)
+          }
+          break
+        }
+
+        case 'customer.subscription.created':
+        case 'customer.subscription.updated': {
+          const subscription = event.data.object as Stripe.Subscription
+          const userId = subscription.metadata?.supabase_user_id
+
+          console.log('Subscription event:', {
+            type: event.type,
+            userId,
+            subscriptionId: subscription.id,
+            status: subscription.status
+          })
+
+          if (userId) {
+            const { data, error } = await supabase
+              .from('profiles')
+              .update({
+                subscription_status: subscription.status,
+                subscription_id: subscription.id,
+                subscription_price_id: subscription.items.data[0]?.price.id || null
+              })
+              .eq('id', userId)
+              .select()
+
+            if (error) {
+              console.error('Supabase update error:', error)
+            } else {
+              console.log('Profile updated:', data)
+            }
+          }
+          break
+        }
+
         case 'product.created':
         case 'product.updated': {
           const product = event.data.object as Stripe.Product

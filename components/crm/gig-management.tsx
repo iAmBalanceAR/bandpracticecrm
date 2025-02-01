@@ -319,13 +319,16 @@ export default function GigManagement({
       
       setGigs(gigsWithTours)
     } catch (error) {
-      console.error('Error loading gigs:', error)
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Error',
-        message: 'Failed to load gigs. Please try again.',
-        type: 'error'
-      })
+      // Only show error if it's not a "no tours" error
+      if (error instanceof Error && !error.message.includes('No default tour found')) {
+        console.error('Error loading gigs:', error)
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Error',
+          message: 'Failed to load gigs. Please try again.',
+          type: 'error'
+        })
+      }
     } finally {
       setIsLoading(false)
     }

@@ -3,13 +3,14 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 const protectedPaths = [
+  '/',
   '/dashboard',
   '/account',
   '/members',
   '/bands',
   '/calendar',
   '/messages',
-  '/settings'
+  '/settings',
   // Add any other paths that require subscription
 ]
 
@@ -38,7 +39,7 @@ const publicPaths = [
   '/images',
   '/robots.txt',
   '/sitemap.xml',
-  '/'
+  '/api/checkout',
 ]
 
 export async function middleware(request: NextRequest) {
@@ -125,7 +126,8 @@ export const config = {
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
      * - public folder
+     * - api routes
      */
-    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+    '/((?!_next/static|_next/image|favicon.ico|api/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
 } 

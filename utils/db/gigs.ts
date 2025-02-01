@@ -73,6 +73,20 @@ export const gigHelpers = {
 
       if (defaultTour) {
         tourId = defaultTour.id
+      } else {
+        // If no default tour exists, check if any tours exist
+        const { data: anyTour } = await supabase
+          .from('tours')
+          .select('id')
+          .eq('user_id', user.id)
+          .limit(1)
+          .single()
+
+        if (!anyTour) {
+          // No tours exist at all
+          return []
+        }
+        tourId = anyTour.id
       }
     }
 

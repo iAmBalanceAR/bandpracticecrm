@@ -4,60 +4,53 @@ import { NextResponse } from 'next/server'
 
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
-  const code = requestUrl.searchParams.get('code')
-  const TokenHash = requestUrl.searchParams.get('TokenHash')
+  const token_hash = requestUrl.searchParams.get('token_hash')
   const type = requestUrl.searchParams.get('type')
-  const email = requestUrl.searchParams.get('email')
-  const next = requestUrl.searchParams.get('next') || '/'
+  const next = requestUrl.searchParams.get('next') ?? '/'
 
   const cookieStore = cookies()
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
-      cookies: {
-        get(name: string) {
-          return cookieStore.get(name)?.value
-        },
-        set(name: string, value: string, options: any) {
-          cookieStore.set({ name, value, ...options })
-        },
-        remove(name: string, options: any) {
-          cookieStore.set({ name, value: '', ...options })
-        },
-      },
-    }
-  )
+  const codeVerifier = cookieStore.get('sb-xasfpbzzvsgzvdpjqwqe-auth-token-code-verifier')?.value
+
+  if (!token_hash || !codeVerifier) {
+    console.error('Missing token_hash or code verifier')
+    return NextResponse.redirect(new URL('/auth/auth-code-error', request.url))
+  }
 
   try {
-    // Handle PKCE flow with code
-    if (code) {
-      const { error } = await supabase.auth.exchangeCodeForSession(code)
-      if (!error) {
-        return NextResponse.redirect(new URL(next, request.url))
+    const supabase = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      {
+        cookies: {
+          get(name: string) {
+            return cookieStore.get(name)?.value
+          },
+          set(name: string, value: string, options: any) {
+            cookieStore.set({ name, value, ...options })
+          },
+          remove(name: string, options: any) {
+            cookieStore.set({ name, value: '', ...options })
+          },
+        },
       }
-      throw error
+    )
+
+    // Exchange the code for a session using the code verifier
+    const { error } = await supabase.auth.verifyOtp({
+      token_hash,
+      type: 'email'
+    })
+
+    if (error) {
+      console.error('Verification error:', error.message)
+      return NextResponse.redirect(new URL('/auth/auth-code-error', request.url))
     }
 
-    // Handle email verification with TokenHash
-    if (TokenHash && type === 'signup' && email) {
-      const { error } = await supabase.auth.verifyOtp({
-        email,
-        token: TokenHash,
-        type: 'signup'
-      })
-      if (!error) {
-        return NextResponse.redirect(new URL(next, request.url))
-      }
-      throw error
-    }
+    // Successful verification
+    return NextResponse.redirect(new URL('/pricing', request.url))
 
-    throw new Error('No code or token found')
-  } catch (error) {
-    // Log the error for debugging
-    console.error('Auth callback error:', error)
-    
-    // Return the user to an error page with instructions
+  } catch (err) {
+    console.error('Unexpected error during verification:', err)
     return NextResponse.redirect(new URL('/auth/auth-code-error', request.url))
   }
 } 

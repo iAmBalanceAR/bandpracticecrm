@@ -7,7 +7,6 @@ interface CheckoutRequest {
 }
 
 export async function POST(request: Request) {
-  let body;
   try {
     // Verify Stripe is initialized
     if (!process.env.STRIPE_SECRET_KEY) {
@@ -16,13 +15,8 @@ export async function POST(request: Request) {
     }
 
     // Parse request body
-    try {
-      body = await request.json()
-      console.log('Request body:', body)
-    } catch (e) {
-      console.error('Failed to parse request body:', e)
-      return new NextResponse('Invalid request body', { status: 400 })
-    }
+    const body = await request.json()
+    console.log('Request body:', body)
 
     const supabase = createClient()
     const { data: { user }, error: userError } = await supabase.auth.getUser()
@@ -31,6 +25,13 @@ export async function POST(request: Request) {
       console.error('Auth error:', userError)
       return new NextResponse('Unauthorized', { status: 401 })
     }
+
+    console.log('User found:', user.id)
+    console.log('Creating checkout session with:', {
+      priceId: body.priceId,
+      customerId: user.id,
+      siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+    })
 
     let { priceId } = body as CheckoutRequest
 
@@ -48,9 +49,14 @@ export async function POST(request: Request) {
     const customerId = await createOrRetrieveCustomer(user.id, user.email!, user.user_metadata?.full_name)
     console.log('Customer ID:', customerId)
 
-    console.log('Creating checkout session with price:', priceId)
+    console.log('Creating session with metadata:', {
+      userId: user.id,
+      customerId,
+      priceId
+    })
+
     // Ensure site URL is properly formatted
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || ''
+    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
     const baseUrl = siteUrl.startsWith('http') 
       ? siteUrl 
       : `https://${siteUrl.replace(/^\/+/, '')}`
@@ -72,6 +78,9 @@ export async function POST(request: Request) {
           supabase_user_id: user.id,
         },
       },
+      metadata: {
+        supabase_user_id: user.id
+      }
     })
 
     if (!session?.url) {
@@ -79,7 +88,11 @@ export async function POST(request: Request) {
       return new NextResponse('Could not create checkout session', { status: 500 })
     }
 
-    console.log('Checkout session created:', session.id)
+    console.log('Checkout session created:', {
+      sessionId: session.id,
+      metadata: session.metadata,
+      subscription: session.subscription
+    })
     return NextResponse.json({ url: session.url })
   } catch (error) {
     // Log the full error details

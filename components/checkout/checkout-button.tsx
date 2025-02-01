@@ -15,6 +15,7 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
   const handleCheckout = async () => {
     try {
       setLoading(true)
+      console.log('Starting checkout with priceId:', priceId)
 
       const response = await fetch('/api/checkout', {
         method: 'POST',
@@ -25,6 +26,7 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
       })
       
       const data = await response.json()
+      console.log('Checkout response:', data)
 
       if (!response.ok) {
         throw new Error(data.message || 'Error creating checkout session')
@@ -32,12 +34,13 @@ export function CheckoutButton({ priceId }: CheckoutButtonProps) {
 
       // Redirect to Stripe Checkout
       if (data.url) {
+        console.log('Redirecting to:', data.url)
         router.push(data.url)
       } else {
         throw new Error('No checkout URL returned')
       }
     } catch (error) {
-      console.error('Error:', error)
+      console.error('Checkout error:', error)
       setLoading(false)
     }
   }

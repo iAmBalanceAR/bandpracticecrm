@@ -13,6 +13,7 @@ interface PricingClientProps {
 }
 
 export function PricingClient({ products, user }: PricingClientProps) {
+  console.log('PricingClient user:', user)
   return (
     <>
     <div className="pl-4 pr-4 pt-3 pb-6 bg-[#0f1729] text-white">
