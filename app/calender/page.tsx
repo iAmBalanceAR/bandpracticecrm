@@ -83,7 +83,7 @@ export default function Page() {
   }
 
   return (
-    <CustomSectionHeader title="Gig Calendar" underlineColor="#D9862F">
+    <CustomSectionHeader title="Tour Calendar" underlineColor="#D9862F">
       <Card className="bg-[#111C44] border-none p-0 m-0">
         {!isFormVisible && (
           <CardHeader className="pb-0 mb-0">
@@ -104,26 +104,32 @@ export default function Page() {
         )}
         <CardContent>
           {!isFormVisible ? (
+          <div className="mx-auto max-w-7xl px-0 sm:px-3 lg:px-0 py0">
+            <div className="flex justify-center mb-8">
             <Tabs 
               defaultValue="upcoming"
               className="w-full mt-4"
               value={activeTab}
               onValueChange={setActiveTab}
+
             >
-              <TabsList className="grid w-full grid-cols-2 bg-[#192555] mb-4">
+              <div className="flex justify-center">
+              <TabsList  className="w-full max-w-lg">
                 <TabsTrigger 
                   value="upcoming"
-                  className="data-[state=active]:bg-[#111C44] data-[state=active]:text-white text-gray-400"
+                  className="data-[state=active]:bg-[#111C44] data-[state=active]:text-white text-gray-400 flex-1"
                 >
                   Upcoming Gigs
                 </TabsTrigger>
+
                 <TabsTrigger 
                   value="past"
-                  className="data-[state=active]:bg-[#111C44] data-[state=active]:text-white text-gray-400"
+                  className="data-[state=active]:bg-[#111C44] data-[state=active]:text-white text-gray-400 flex-1"
                 >
                   Past Gigs
                 </TabsTrigger>
               </TabsList>
+              </div>
               <TabsContent value="upcoming">
                 <GigManagement 
                   filterType="upcoming" 
@@ -139,9 +145,12 @@ export default function Page() {
                 />
               </TabsContent>
             </Tabs>
+            </div>
+            </div>
           ) : (
             <GigManagement 
               filterType={activeTab as 'upcoming' | 'past'}
+
               isFormVisible={isFormVisible}
               setIsFormVisible={setIsFormVisible}
             />

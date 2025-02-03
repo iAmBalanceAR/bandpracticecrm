@@ -65,6 +65,7 @@
 		"embla-carousel-react": "^8.5.1",
 		"esbuild": "^0.24.0",
 		"framer-motion": "^11.15.0",
+		"googleapis": "^144.0.0",
 		"html2canvas": "^1.4.1",
 		"input-otp": "^1.4.1",
 		"jspdf": "^2.5.2",

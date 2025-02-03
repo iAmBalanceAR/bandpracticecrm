@@ -133,55 +133,56 @@ export default function LeadsDataView() {
                 transition={{ type: 'tween', duration: 0.02 }}
               >
                 <Card className="bg-[#1B2559] border-blue-800 hover:bg-[#0F1729] transition-colors cursor-pointer min-h-[150px]">
-                  <div className="p-4 pt-0">
-                    <div className="flex float-right items-start mb-0 mt-1">
-                    
-                      <div className=" ">
-                        <Badge 
-                          variant="secondary"
-                          className={priorityColors[lead.priority]}
-                        >
-                          {lead.priority}
-                        </Badge>
-                        &nbsp;
-                        <Badge 
-                          variant="secondary"
-                          className={statusColors[lead.status]}
-                        >
-                          {lead.status.replace('_', ' ')}
-                        </Badge>
-                      </div>
+                  <div className="p-0 pt-0">
+                    <div className='bg-[#0F1729] rounded-md pt-1 pl-2 pr-2 pb-2'>
 
+                    <h3 className="clear-both pt-0 mt-0 text-lg font-semibold text-white truncate flex flex-row gap-1">
+                      {lead.title}
+                    </h3>
+                    <div className="flex items-start mb-0 mt-1">
+                    
+                    <div className="text-black flex gap-1">
+                      <Badge 
+                        variant="secondary"
+                        className={priorityColors[lead.priority]}
+                      >
+                        {lead.priority}
+                      </Badge>
+                      &nbsp;
+                      <Badge 
+                        variant="secondary"
+                        className={statusColors[lead.status]}
+                      >
+                        {lead.status.replace('_', ' ')}
+                      </Badge>
                     </div>
-                   <h3 className="clear-both pt-0 mt-0 text-lg font-semibold text-white truncate">
-                        {lead.title}
-                      </h3>
-                    
-                    {lead.company && (
-                      <p className="text-gray-400 mb-2">{lead.company}</p>
-                    )}
-                    
-                    <div className="flex flex-col gap-1 text-sm text-gray-300">
+                  </div>
+                    </div>
+                    <div className="text-sm text-gray-300m mb-0 pl-2 pr-2 pt-2 pb-0 ">
+                      <p className="text-gray-400 pt-0 mt-0 pb-0 font-bold">{lead.company || ''}</p>
                       {lead.contact_info.name && (
                         <p>Contact: {lead.contact_info.name}</p>
                       )}
+
                       <p className="text-gray-400">
                         Last Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
                       </p>
                     </div>
 
                     {lead.tags && lead.tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {/* {lead.tags.slice(0, 3).map((tag) => (
+                      <div className="flex flex-wrap gap-1 mt-3 pb-2 pl-2 pr-2">
+                        {lead.tags.slice(0, 3).map((tag) => (
                           <Badge key={tag} variant="outline" className="text-xs">
                             {tag}
                           </Badge>
-                        ))} */}
-                        {/* {lead.tags.length > 3 && (()
-                          // <Badge variant="outline" className="text-xs">
-                          //   +{lead.tags.length - 3}
-                          // </Badge>
-                        )} */}
+                        ))}
+                        {lead.tags.length > 3 && (
+                         <Badge variant="outline" className="text-xs">
+                           +{lead.tags.length - 3}
+                         </Badge>
+                        )}
+
+
                       </div>
                     )}
                   </div>

@@ -2,7 +2,7 @@ import { gigHelpers } from '@/utils/db/gigs'
 import createClient from '@/utils/supabase/client'
 import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
-import { format } from 'date-fns'
+import { format, isAfter, startOfDay } from 'date-fns'
 
 interface ReportOptions {
   includeMap: boolean;
@@ -66,10 +66,26 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
   }
 
   // Get gigs for the tour
-  const gigs = await gigHelpers.getGigs(tourId)
+  const allGigs = await gigHelpers.getGigs(tourId)
+  
+  // Filter gigs to only include future dates
+  const today = startOfDay(new Date())
+  const futureGigs = allGigs.filter(gig => {
+    const gigDate = startOfDay(new Date(gig.gig_date))
+    return isAfter(gigDate, today) || gigDate.getTime() === today.getTime()
+  }).sort((a, b) => new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime())
 
-  // Get coordinates and calculate route
+  if (futureGigs.length === 0) {
+    throw new Error('No upcoming gigs found for this tour')
+  }
+
+  // Get coordinates and calculate route for future gigs only
   const { tourStops } = await gigHelpers.getGigsWithCoordinates(tourId)
+
+  // Filter tourStops to match futureGigs
+  const filteredTourStops = tourStops.filter(stop => 
+    futureGigs.some(gig => gig.venue === stop.name && gig.gig_date === stop.gig_date)
+  ).sort((a, b) => new Date(a.gig_date).getTime() - new Date(b.gig_date).getTime())
 
   // Calculate total mileage and get directions if needed
   let totalMileage = 0;
@@ -81,10 +97,10 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
     estimatedTime: string;
   }[] = [];
 
-  if (tourStops.length > 1) {
-    for (let i = 0; i < tourStops.length - 1; i++) {
-      const start = tourStops[i]
-      const end = tourStops[i + 1]
+  if (filteredTourStops.length > 1) {
+    for (let i = 0; i < filteredTourStops.length - 1; i++) {
+      const start = filteredTourStops[i]
+      const end = filteredTourStops[i + 1]
       const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=full&steps=true&annotations=true`
       
       try {
@@ -125,8 +141,8 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
     }
   }
 
-  // Transform gigs data
-  const formattedGigs = gigs.map((gig, index) => {
+  // Transform gigs data using filtered future gigs
+  const formattedGigs = futureGigs.map((gig, index) => {
     // Find the corresponding direction for this gig (if it exists)
     const previousLegDistance = index > 0 && directions.length >= index 
       ? directions[index - 1].distance 
@@ -135,7 +151,7 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
     return {
       venue: gig.venue,
       date: gig.gig_date,
-      address: `${gig.venue_address}, ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`,
+      address: `${gig.venue_address} ${gig.venue_city}, ${gig.venue_state} ${gig.venue_zip}`,
       loadIn: gig.load_in_time,
       setTime: gig.set_time,
       contactInfo: options.includeContactInfo ? {
@@ -147,11 +163,11 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
     };
   });
 
-  // Calculate financials if needed
+  // Calculate financials if needed (using only future gigs)
   let financials
   if (options.includeFinancials) {
-    const totalDeposits = gigs.reduce((sum, gig) => sum + (gig.deposit_amount || 0), 0)
-    const totalPayments = gigs.reduce((sum, gig) => sum + gig.contract_total, 0)
+    const totalDeposits = futureGigs.reduce((sum, gig) => sum + (gig.deposit_amount || 0), 0)
+    const totalPayments = futureGigs.reduce((sum, gig) => sum + gig.contract_total, 0)
     // Calculate estimated expenses based on total mileage
     const estimatedExpenses = totalMileage * 0.65 // $0.65 per mile
 
@@ -245,9 +261,9 @@ export async function generatePDF(reportData: ReportData) {
   pdf.addFont('fonts/lucide-icons.ttf', 'LucideIcons', 'normal');
 
   // Helper functions
-  const splitText = (text: string, fontSize: number): string[] => {
+  const splitText = (text: string, fontSize: number, width?: number): string[] => {
     pdf.setFontSize(fontSize);
-    return pdf.splitTextToSize(text, contentWidth);
+    return pdf.splitTextToSize(text, width || contentWidth);
   };
 
   const renderText = (
@@ -470,9 +486,12 @@ export async function generatePDF(reportData: ReportData) {
       textColor: '#6B7280'
     });
     y += 6; // Reduced from 8
-    const addressLines = splitText(gig.address, 10);
+    
+    // Use a narrower width for address text to force earlier wrapping
+    const addressWidth = contentWidth * 0.35; // Reduced from full column width
+    const addressLines = splitText(gig.address, 10, addressWidth);
     addressLines.forEach((line, index) => {
-      renderText(line, margin + 5, y + (index * 4), { // Reduced from 5 
+      renderText(line, margin + 5, y + (index * 4), {
         fontSize: 10,
         textColor: '#6B7280'
       });

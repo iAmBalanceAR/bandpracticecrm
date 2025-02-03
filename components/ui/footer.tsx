@@ -17,7 +17,7 @@ export function Footer() {
             <ul className="space-y-2 text-sm">
               <li><a href="/pricing" className="hover:text-[#008ffb] transition-colors">Pricing</a></li>
               <li><a href="https://docs.bandpracticecrm.com" className="hover:text-[#008ffb] transition-colors">Documentation</a></li>
-              <li><a href="/faq" className="hover:text-[#008ffb] transition-colors">FAQ</a></li>
+              {/* <li><a href="/faq" className="hover:text-[#008ffb] transition-colors">FAQ</a></li> */}
             </ul>
           </div>
           <div className="flex-auto   mx-4 mb-6">
@@ -33,8 +33,8 @@ export function Footer() {
             <h3 className="text-sm font-semibold mb-3 text-[#008ffb]">Support</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/support/contact" className="hover:text-[#008ffb] transition-colors">Contact Us</a></li>
-              <li><a href="/status" className="hover:text-[#008ffb] transition-colors">System Status</a></li>
-              <li><a href="/feedback" className="hover:text-[#008ffb] transition-colors">Feedback</a></li>
+              {/* <li><a href="/status" className="hover:text-[#008ffb] transition-colors">System Status</a></li> */}
+              {/* <li><a href="/feedback" className="hover:text-[#008ffb] transition-colors">Feedback</a></li> */}
             </ul>
           </div>
           <div className="flex-auto  px-4 mb-6">
@@ -49,18 +49,18 @@ export function Footer() {
             />
             <ul className="space-y-2 text-sm clear-both float-right mr-10 mt-2">
               <li className="flex space-x-4 mt-0 mr-1">
-                <a href="mailto:support@bandpracticecrm.com" className="hover:text-[#008ffb] transition-colors">
+                <a href="mailto:info@bandpracticecrm.com" className="hover:text-[#008ffb] transition-colors">
                   <Mail className="h-5 w-5 -mt-1 ml-0" />
                 </a>
-                <a href="https://twitter.com/bandpracticecrm" className="hover:text-[#008ffb] transition-colors">
+                {/* <a href="https://twitter.com/bandpracticecrm" className="hover:text-[#008ffb] transition-colors">
                   <Xlogo  className="h-5 w-5 mt-0 ml-1" />
-                </a>
-                <a href="https://facebook.com/bandpracticecrm" className="hover:text-[#008ffb] transition-colors">
+                </a> */}
+                <a href="https://www.facebook.com/BandPracticeCRM/" className="hover:text-[#008ffb] transition-colors">
                   <Facebook className="h-5 w-5" />
                 </a>
-                <a href="https://linkedin.com/company/bandpracticecrm" className="hover:text-[#008ffb] transition-colors">
+                {/* <a href="https://linkedin.com/company/bandpracticecrm" className="hover:text-[#008ffb] transition-colors">
                   <Linkedin className="h-5 w-5" />
-                </a>
+                </a> */}
               </li>
             </ul>
             <div className="pt-2  text-right clear-both mr-10 mt-2">

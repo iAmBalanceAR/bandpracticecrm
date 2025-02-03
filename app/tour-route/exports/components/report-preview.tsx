@@ -1,10 +1,16 @@
 "use client"
 
 import React from 'react'
+import dynamic from 'next/dynamic'
 import { Card } from "@/components/ui/card"
-import TourMap from '@/components/crm/tour-map'
 import { useTour } from '@/components/providers/tour-provider'
 import { MapPin, Calendar, Clock, Phone, Mail, User, DollarSign, Navigation } from 'lucide-react'
+
+// Dynamically import the map component with no SSR
+const TourMap = dynamic(
+  () => import('@/components/crm/tour-map'),
+  { ssr: false }
+)
 
 interface ReportPreviewProps {
   data: any; // TODO: Add proper type
@@ -102,7 +108,7 @@ export function ReportPreview({ data }: ReportPreviewProps) {
                   </div>
                   <div className="flex items-center text-gray-300">
                     <MapPin className="w-4 h-4 mr-2" />
-                    <span>{gig.address}</span>
+                    <span className="whitespace-pre-wrap">{gig.address}</span>
                   </div>
                 </div>
                 {gig.contactInfo && (

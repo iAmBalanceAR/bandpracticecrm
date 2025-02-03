@@ -38,6 +38,7 @@ export function SignUpForm() {
   const supabase = createClient()
   const router = useRouter()
   const searchParams = useSearchParams()
+  const recaptchaRef = useRef<ReCAPTCHA>(null)
 
   useEffect(() => {
     // Get email and name from URL parameters
@@ -62,8 +63,40 @@ export function SignUpForm() {
     }
   }, [searchParams])
 
+  const verifyRecaptcha = async (token: string | null) => {
+    if (!token) return false;
+    
+    try {
+      const response = await fetch('/api/verify-captcha', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ token }),
+      });
+      
+      const data = await response.json();
+      return data.success;
+    } catch (error) {
+      console.error('reCAPTCHA verification failed:', error);
+      return false;
+    }
+  };
+
   const handleRegister = async (e: React.FormEvent) => {
     e.preventDefault()
+    
+    const token = recaptchaRef.current?.getValue()
+    if (!token) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Verification Required',
+        message: 'Please check the reCAPTCHA box before proceeding.',
+        type: 'error'
+      })
+      return
+    }
+
     setLoading(true)
 
     // Normalize email (handles Gmail dots and plus addressing)
@@ -79,92 +112,94 @@ export function SignUpForm() {
       setLoading(false)
       return
     }
+
+    // Check if email is available before attempting registration
+    const { available, message } = await isEmailAvailable(normalizedEmail)
+    if (!available) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Account Exists',
+        message: message || 'This email address is already registered. Please sign in instead.',
+        type: 'error'
+      })
+      setLoading(false)
+      return
+    }
     
-    try {
-      console.log('Signup attempt with redirect URL:', `${getURL()}auth/callback`)
-      
-      const { data, error: signUpError } = await supabase.auth.signUp({
-        email: normalizedEmail,
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            stripe_customer_id: searchParams.get('stripe_customer_id') || null
-          },
-          emailRedirectTo: `${getURL()}auth/callback`
-        }
-      })
-
-      // Add this log right after the signUp call
-      console.log('Signup attempt result:', { 
-        success: !signUpError,
-        user: data?.user?.id,
-        email: normalizedEmail,
-        confirmEmailSent: data?.user && !data?.session
-      })
-
-      if (signUpError) {
-        console.error('Signup error:', signUpError)
-        setFeedbackModal({
-          isOpen: true,
-          title: 'Registration Error',
-          message: signUpError.message,
-          type: 'error'
-        })
-        setLoading(false)
-        return
+    console.log('Signup attempt with redirect URL:', `${getURL()}auth/callback`)
+    
+    const { data, error: signUpError } = await supabase.auth.signUp({
+      email: normalizedEmail,
+      password,
+      options: {
+        data: {
+          first_name: firstName,
+          last_name: lastName,
+          stripe_customer_id: searchParams.get('stripe_customer_id') || null
+        },
+        emailRedirectTo: `${getURL()}auth/callback`
       }
+    })
 
-      // Check if this is a dummy user (indicating email exists)
-      if (data?.user && data.user.identities?.length === 0) {
-        setFeedbackModal({
-          isOpen: true,
-          title: 'Account Exists',
-          message: 'This email address is already registered. Please sign in instead.',
-          type: 'error'
-        })
-        setLoading(false)
-        return
-      }
+    // Add this log right after the signUp call
+    console.log('Signup attempt result:', { 
+      success: !signUpError,
+      user: data?.user?.id,
+      email: normalizedEmail,
+      confirmEmailSent: data?.user && !data?.session
+    })
 
-      if (data?.user) {
-        if (data.session === null) {
-          setFeedbackModal({
-            isOpen: true,
-            title: 'Check Your Email!d',
-            message: 'Check your email and verify via the provided link. Welcome to Band Practice!.',
-            type: 'success'
-          })
-          setLoading(false)
-          return
-        }
-        router.push('/account')
-      } else {
-        setFeedbackModal({
-          isOpen: true,
-          title: 'Registration Error',
-          message: 'Something went wrong. Please try again.',
-          type: 'error'
-        })
-      }
-
-      // Add this log
-      console.log('Signup response:', {
-        user: data?.user ? 'User created' : 'No user',
-        session: data?.session ? 'Session created' : 'No session',
-        identities: data?.user?.identities?.length
-      })
-    } catch (error: any) {
+    if (signUpError) {
+      console.error('Signup error:', signUpError)
       setFeedbackModal({
         isOpen: true,
         title: 'Registration Error',
-        message: error.message || 'An unexpected error occurred',
+        message: signUpError.message,
         type: 'error'
       })
-    } finally {
       setLoading(false)
+      return
     }
+
+    // Check if this is a dummy user (indicating email exists)
+    if (data?.user && data.user.identities?.length === 0) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Account Exists',
+        message: 'This email address is already registered. Please sign in instead.',
+        type: 'error'
+      })
+      setLoading(false)
+      return
+    }
+
+    if (data?.user) {
+      if (data.session === null) {
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Check Your Email!d',
+          message: 'Check your email and verify via the provided link. Welcome to Band Practice!.',
+          type: 'success'
+        })
+        setLoading(false)
+        return
+      }
+      router.push('/account')
+    } else {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Registration Error',
+        message: 'Something went wrong. Please try again.',
+        type: 'error'
+      })
+    }
+
+    // Add this log
+    console.log('Signup response:', {
+      user: data?.user ? 'User created' : 'No user',
+      session: data?.session ? 'Session created' : 'No session',
+      identities: data?.user?.identities?.length
+    })
   }
 
   const handleFeedbackClose = () => {
@@ -276,16 +311,27 @@ export function SignUpForm() {
                   </div>
                 </div>
               </div>
-              
-              <div className="grid col-span-2">
-                <Button
-                  type="submit"
-                  disabled={loading}
-                  className="float-right bg-green-700 font-semibold text-white shadow-sm hover:bg-green-800 focus-visible:outline outline-black w-auto p-6"
-                >
-                  {loading ? 'Creating Account...' : 'Create Account'}
-                </Button>
-              </div>
+            </div>
+            
+            <div className="mt-6 flex justify-center">
+              <ReCAPTCHA
+                ref={recaptchaRef}
+                sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+                theme="dark"
+                hl="en"
+                badge="inline"
+                type="image"
+              />
+            </div>
+
+            <div className="mt-6 flex justify-center">
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-green-700 font-semibold text-white shadow-sm hover:bg-green-800 focus-visible:outline outline-black p-6"
+              >
+                {loading ? 'Creating Account...' : 'Create Account'}
+              </Button>
             </div>
           </form>
           <div className="text-white text-xs text-grey-200 w-full mt-2 justify-center items-center flex mb-4">

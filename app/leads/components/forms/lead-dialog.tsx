@@ -430,10 +430,10 @@ export default function LeadDialog({ children, lead, mode = 'create', venue }: L
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/80 z-[100]" />
           <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[95vh] w-[95vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] overflow-y-auto rounded-lg bg-[#192555] border border-blue-800 p-6 text-white shadow-lg z-[101]">
-            <Dialog.Title className="text-xl font-bold mb-4">
+            <Dialog.Title className="text-xl font-bold mb-2">
               {mode === 'create' ? 'Create New Lead' : 'Edit Lead'}
             </Dialog.Title>
-            <Dialog.Description className="text-gray-400 mt-2">
+            <Dialog.Description className="text-gray-400 text-xs mb-2">
               <p>
                 {mode === 'create' 
                   ? 'Add a new lead to your pipeline. Fill out the form below with the lead\'s details.'
@@ -517,6 +517,18 @@ export default function LeadDialog({ children, lead, mode = 'create', venue }: L
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                    {/* Put Tags Here */}
+                    <div className="space-y-2">
+                      <Label htmlFor="tags">Tags (comma-separated)</Label>
+                      <Input
+                        id="tags"
+                        name="tags"
+                        value={tagsInput}
+                        onChange={(e) => setTagsInput(e.target.value)}
+                        placeholder="Enter tags separated by commas"
+                        className="bg-[#1B2559]"
+                      />
                     </div>
                   </div>
 
@@ -682,18 +694,6 @@ export default function LeadDialog({ children, lead, mode = 'create', venue }: L
                     placeholder="Enter lead description"
                     defaultValue={activeLead?.description || ''}
                     className="bg-[#1B2559] "
-                  />
-                </div>
-
-                <div className="space-y-2">
-                  <Label htmlFor="tags">Tags (comma-separated)</Label>
-                  <Input
-                    id="tags"
-                    name="tags"
-                    value={tagsInput}
-                    onChange={(e) => setTagsInput(e.target.value)}
-                    placeholder="Enter tags separated by commas (e.g., vip, priority, follow-up)"
-                    className="bg-[#1B2559]"
                   />
                 </div>
 

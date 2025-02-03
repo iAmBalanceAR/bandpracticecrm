@@ -1,11 +1,11 @@
 "use client"
 
 import React, { useState } from 'react'
+import dynamic from 'next/dynamic'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Label } from "@/components/ui/label"
-import { ReportPreview } from '@/app/tour-route/exports/components/report-preview'
 import { useTour } from '@/components/providers/tour-provider'
 import { useAuth } from '@/components/providers/auth-provider'
 import { Loader2, Sparkles } from 'lucide-react'
@@ -17,12 +17,19 @@ import PDFLoadingOverlay from './pdf-loading-overlay'
 import ReportLoadingOverlay from './report-loading-overlay'
 import { format } from 'date-fns'
 
+// Dynamically import the preview component with no SSR
+const ReportPreview = dynamic(
+  () => import('./report-preview').then(mod => mod.ReportPreview),
+  { ssr: false }
+)
+
 interface ReportOptions {
   includeMap: boolean;
   includeDirections: boolean;
   includeFinancials: boolean;
   includeContactInfo: boolean;
 }
+
 const formatDate = (dateString: string | null) => {
   if (!dateString) return 'Not set';
   try {
@@ -33,6 +40,7 @@ const formatDate = (dateString: string | null) => {
     return 'Invalid date';
   }
 };
+
 export function TourReportGenerator() {
   const { currentTour, isLoading: tourLoading } = useTour()
   const { isAuthenticated, loading: authLoading } = useAuth()

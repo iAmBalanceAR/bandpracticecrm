@@ -1,24 +1,45 @@
 import { NextResponse } from 'next/server';
 import nodemailer from 'nodemailer';
+import { google } from 'googleapis';
+import SMTPTransport from 'nodemailer/lib/smtp-transport';
+
+const OAuth2 = google.auth.OAuth2;
 
 export async function POST(request: Request) {
   try {
     const { name, email, message, to } = await request.json();
 
-    // Create a transporter using SMTP
+    // Create OAuth2 client
+    const oauth2Client = new OAuth2(
+      process.env.GMAIL_CLIENT_ID,
+      process.env.GMAIL_CLIENT_SECRET,
+      'https://developers.google.com/oauthplayground'
+    );
+
+    oauth2Client.setCredentials({
+      refresh_token: process.env.GMAIL_REFRESH_TOKEN
+    });
+
+    const accessToken = (await oauth2Client.getAccessToken()).token || '';
+
+    // Create transporter with OAuth2
     const transporter = nodemailer.createTransport({
-      host: process.env.SMTP_HOST,
-      port: Number(process.env.SMTP_PORT),
+      host: 'smtp.gmail.com',
+      port: 465,
       secure: true,
       auth: {
-        user: process.env.SMTP_USER,
-        pass: process.env.SMTP_PASSWORD,
-      },
-    });
+        type: 'OAuth2',
+        user: process.env.GMAIL_USER,
+        clientId: process.env.GMAIL_CLIENT_ID,
+        clientSecret: process.env.GMAIL_CLIENT_SECRET,
+        refreshToken: process.env.GMAIL_REFRESH_TOKEN,
+        accessToken
+      }
+    } as SMTPTransport.Options);
 
     // Email content
     const mailOptions = {
-      from: process.env.SMTP_FROM_EMAIL,
+      from: process.env.GMAIL_USER,
       to,
       subject: `Contact Form Submission from ${name}`,
       text: `Name: ${name}\nEmail: ${email}\n\nMessage:\n${message}`,

@@ -23,6 +23,9 @@ export default function Template({
   if (pathname === '/auth/signup') {
     return <>{children}</>
   }
+  if (pathname === '/account/password/reset') {
+    return <>{children}</>
+  }
   return (
     <AuthProvider>
       <TourProvider>

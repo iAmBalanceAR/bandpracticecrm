@@ -18,9 +18,10 @@ import type { Database } from '@/types/supabase'
 interface ChangePasswordFormProps {
   isOpen: boolean
   onClose: () => void
+  resetCode?: string
 }
 
-export default function ChangePasswordForm({ isOpen, onClose }: ChangePasswordFormProps) {
+export default function ChangePasswordForm({ isOpen, onClose, resetCode }: ChangePasswordFormProps) {
   const [loading, setLoading] = useState(false)
   const [password, setPassword] = useState('')
   const [confirmPassword, setConfirmPassword] = useState('')
@@ -41,11 +42,19 @@ export default function ChangePasswordForm({ isOpen, onClose }: ChangePasswordFo
     }
 
     try {
-      const { error: updateError } = await supabase.auth.updateUser({
-        password: password
-      })
-
-      if (updateError) throw updateError
+      if (resetCode) {
+        // Handle password reset with code
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: password
+        })
+        if (updateError) throw updateError
+      } else {
+        // Handle normal password change
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: password
+        })
+        if (updateError) throw updateError
+      }
 
       setSuccess(true)
       setTimeout(() => {
@@ -62,7 +71,9 @@ export default function ChangePasswordForm({ isOpen, onClose }: ChangePasswordFo
     <Dialog open={isOpen} onOpenChange={() => onClose()}>
       <DialogContent className="bg-[#111c44] text-white border-0 rounded-md">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-bold text-white mt-6 ml-6">Change Password</DialogTitle>
+          <DialogTitle className="text-2xl font-bold text-white mt-6 ml-6">
+            {resetCode ? 'Reset Password' : 'Change Password'}
+          </DialogTitle>
           <Button
             variant="ghost"
             className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
@@ -73,61 +84,49 @@ export default function ChangePasswordForm({ isOpen, onClose }: ChangePasswordFo
           </Button>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6 p-6">
+        <form onSubmit={handleSubmit} className="space-y-4 p-6">
           {error && (
             <Alert variant="destructive" className="bg-red-900 border-red-600">
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           )}
-
           {success && (
             <Alert className="bg-green-900 border-green-600">
-              <AlertDescription>Password updated successfully! Redirecting...</AlertDescription>
+              <AlertDescription>Password updated successfully</AlertDescription>
             </Alert>
           )}
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-gray-400">New Password</Label>
+            <Label htmlFor="password">New Password</Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="Enter new password"
-              className="bg-[#1B2559] border-blue-800 text-white"
-              disabled={loading}
+              className="bg-[#111c44] border focus:border-white border-gray-400 text-white"
+              required
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="text-gray-400">Confirm Password</Label>
+            <Label htmlFor="confirmPassword">Confirm New Password</Label>
             <Input
               id="confirmPassword"
               type="password"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder="Confirm new password"
-              className="bg-[#1B2559] border-blue-800 text-white"
-              disabled={loading}
+              className="bg-[#111c44] border focus:border-white border-gray-400 text-white"
+              required
             />
           </div>
 
-          <div className="flex justify-end space-x-2 mt-6">
-            <Button
-              variant="destructive"
-              onClick={onClose}
-              type="button"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              className="bg-green-600 hover:bg-green-700 text-white"
-              disabled={loading}
-            >
-              {loading ? "Saving..." : "Change Password"}
-            </Button>
-          </div>
+          <Button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-700 text-white hover:bg-green-800"
+          >
+            {loading ? 'Updating...' : 'Update Password'}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>

@@ -25,6 +25,11 @@ export default function SignIn() {
                     Register one  for free.
                 </Link>
             </p>
+            <p className="mt-2 text-sm text-muted-foreground text-white mx-auto text-center">
+                <Link href="/pricing" className="font-medium text-base hover:text-blue-500/90 text-blue-400 hover:underline">
+                    Pricing
+                </Link>
+            </p>
             </div>
             </div>
             </div>
