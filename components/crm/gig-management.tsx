@@ -681,10 +681,12 @@ export default function GigManagement({
                     </TableRow>
                   ) : gigs.length === 0 ? (
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center text-gray-400">
-                        No gigs found
+                      <TableCell colSpan={5} className="h-24 text-center text-lg text-gray-400">
+                        <Calendar className="h-24 w-24 text-[#ff9920] mb-4 mx-auto" />
+                        No gigs found in the database. <br />Ensure you have created a tour and then: <br />Click the "Add New Gig" button above to create one.
                       </TableCell>
                     </TableRow>
+
                   ) : (
                     gigs.map((gig) => (
                       <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">

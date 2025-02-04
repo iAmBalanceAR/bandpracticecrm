@@ -1,0 +1,76 @@
+config:
+  target: "http://localhost:3000"
+  phases:
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 20
+      name: "Warm up phase"
+    - duration: 120
+      arrivalRate: 20
+      name: "Sustained load"
+    - duration: 60
+      arrivalRate: 50
+      name: "High load spike"
+
+  processor: "./tests/load/load-test-functions.js"
+  defaults:
+    headers:
+      Content-Type: "application/json"
+
+scenarios:
+  - name: "User journey simulation"
+    flow:
+      # Authenticate with Supabase
+      - post:
+          url: "/api/auth/login"
+          json:
+            email: "{{ $processEnvironment.TEST_USER_EMAIL }}"
+            password: "{{ $processEnvironment.TEST_USER_PASSWORD }}"
+          capture:
+            - json: "$.session.access_token"
+              as: "authToken"
+          afterResponse: "handleAuthResponse"
+          think: 2
+
+      # Load protected pages with auth token
+      - get:
+          url: "/"
+          headers:
+            Cookie: "sb-xasfpbzzvsgzvdpjqwqe-auth-token={{ authToken }}"
+          think: 3
+
+      - get:
+          url: "/api/tours/current"
+          headers:
+            Cookie: "sb-xasfpbzzvsgzvdpjqwqe-auth-token={{ authToken }}"
+          capture:
+            - json: "$.id"
+              as: "tourId"
+          think: 2
+
+      - get:
+          url: "/data-tracking"
+          headers:
+            Cookie: "sb-xasfpbzzvsgzvdpjqwqe-auth-token={{ authToken }}"
+          think: 3
+
+      - get:
+          url: "/calendar"
+          headers:
+            Cookie: "sb-xasfpbzzvsgzvdpjqwqe-auth-token={{ authToken }}"
+          think: 2
+
+      - get:
+          url: "/api/gigs"
+          headers:
+            Cookie: "sb-xasfpbzzvsgzvdpjqwqe-auth-token={{ authToken }}"
+          think: 2
+
+plugins:
+    expect: 
+      - statusCode: 200
+      - statusCode: 201
+      - statusCode: 401
+      - statusCode: 403
+      - statusCode: 404
+      - statusCode: 500 

@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
-import { Plus, Pencil, Trash2, Loader2, X, Calendar, Star } from 'lucide-react';
+import { Plus, Pencil, Trash2, Loader2, X, Calendar, Star, Route } from 'lucide-react';
 import { format } from 'date-fns';
 import Link from 'next/link';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
@@ -334,14 +334,16 @@ export default function TourList() {
                 <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
               </div>
             ) : tours.length === 0 ? (
-              <div className="text-center py-12">
-                <p className="text-gray-400 mb-4">No tours found</p>
-                <Button 
+              <div className="text-center text-lg py-12">
+                <Route className="h-24 w-24 mb-4 mx-auto text-[#d83b34]" />
+                <p className="text-gray-400 mb-4">No Tours in the database. <br />Click the "Add New Tour" button above to create one.</p>
+                {/* <Button 
                   onClick={handleAddNew}
+
                   className="bg-[#008ffb] hover:bg-[#0070cc]"
                 >
                   Create your first tour
-                </Button>
+                </Button> */}
               </div>
             ) : (
               <div className="overflow-x-auto">

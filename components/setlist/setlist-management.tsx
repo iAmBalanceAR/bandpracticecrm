@@ -9,7 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { PlusCircle, Pencil, Trash2, FileDown, Calendar, Frown } from "lucide-react";
+import { PlusCircle, Pencil, Trash2, FileDown, Calendar, Frown, ListVideo } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import SetlistEditor from './setlist-editor';
@@ -198,7 +198,7 @@ export default function SetlistManagement() {
         <Button
           onClick={handleCreateNew}
           variant="default"
-          className="bg-blue-700 hover:bg-blue-500 text-white float-right"
+          className="bg-green-700 text-white hover:bg-green-600 float-right"
         >
           <PlusCircle className="mr-2 h-4 w-4" />
           Create New Setlist
@@ -226,9 +226,9 @@ export default function SetlistManagement() {
               </TableRow>
             ) : setlists.length === 0 ? (
               <TableRow className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
-                <TableCell colSpan={5} className="text-center text-lg text-white">
-                  <Frown className="w-24 h-24 mx-auto text-red-500" />
-                  No setlists found in the database.<br />Click the button above to create one.
+                <TableCell colSpan={5} className="text-center text-lg text-gray-400">
+                  <ListVideo className="w-24 h-24 mx-auto text-[#008ffb]" />
+                  No setlists found in the database.<br />Click the "Create New Setlist" button above to create one.
                 </TableCell>
               </TableRow>
             ) : (

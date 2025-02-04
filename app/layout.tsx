@@ -23,7 +23,7 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'Band Practice CRM',
   description: 'Tour Management Simplified',
-   metadataBase: new URL('http://localhost:3000'),
+  metadataBase: new URL('https://app.bandpracticecrm.com'),
   formatDetection: {
     telephone: true,
     date: true,

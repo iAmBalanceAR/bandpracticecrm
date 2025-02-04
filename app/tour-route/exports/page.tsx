@@ -8,6 +8,7 @@ import CustomSectionHeader from "@/components/common/CustomSectionHeader"
 import { TourReportGenerator } from './components/tour-report-generator'
 import { Loader2 } from 'lucide-react'
 
+
 export default function TourExports() {
   const router = useRouter();
   const { isAuthenticated, loading: authLoading } = useAuth();

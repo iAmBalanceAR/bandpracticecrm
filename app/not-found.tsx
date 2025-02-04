@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
+
 export default function NotFound() {
   return (
     <div className="min-h-screen bg-[#0f1729] flex items-center justify-center p-4">

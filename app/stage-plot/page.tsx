@@ -6,11 +6,12 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Table, TableHeader, TableBody, TableCell, TableHead, TableRow } from "@/components/ui/table"
 import CustomSectionHeader from "@/components/common/CustomSectionHeader"
-import { Plus, FileDown, Edit, Trash, Loader2, ArrowLeft, X } from "lucide-react"
+import { Plus, FileDown, Edit, Trash, Loader2, ArrowLeft, X, Guitar } from "lucide-react"
 import { FeedbackModal } from "@/components/ui/feedback-modal"
 import StagePlotEditor from './components/stage-plot-editor'
 import { listStagePlots, deleteStagePlot, getStagePlot } from './utils/db'
 import { generateStagePlotPDF } from './utils/export'
+
 import type { StagePlot, StagePlotItem } from './types'
 import Link from 'next/link'
 
@@ -134,7 +135,8 @@ export default function StagePlotPage() {
                       Saved  Stage Plots
                       </span> 
                   </div>
-                  <div className="f tracking-tight float-right text-3xl"><Button onClick={() => setIsCreating(true)} className="gap-2 bg-blue-600 hover:bg-blue-700">
+                  <div className="f tracking-tight float-right text-3xl">
+                    <Button onClick={() => setIsCreating(true)} className="gap-2  bg-green-700 text-white hover:bg-green-600">
                     <Plus size={20} />
                     Create New Plot
                   </Button>
@@ -208,15 +210,16 @@ export default function StagePlotPage() {
                       </div>
                     </div>
                   ) : plots.length === 0 ? (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center text-gray-400">
-                      <p className="text-lg mb-4">No stage plots found</p>
-                      <Button 
+                    <div className="text-center text-lg text-gray-400">
+                      <Guitar className="h-24 w-24 text-[#ff9920] mb-4 mx-auto" />
+                      <p className="text-lg mb-4">No stage plots found in the database. <br />Click the "Create New Plot" button above to create one.</p>
+                      {/* <Button 
                         onClick={() => setIsCreating(true)}
                         className="gap-2"
                       >
                         <Plus size={16} />
                         Create your first stage plot
-                      </Button>
+                      </Button> */}
                     </div>
                   ) : (
                     <>

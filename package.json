@@ -13,7 +13,8 @@
 		"lint": "next lint",
 		"stripe:sync": "node scripts/stripe-sync.mjs",
 		"postinstall": "node node_modules/esbuild/install.js",
-		"test:stripe": "cross-env DEBUG=true tsx scripts/test-stripe-flow.ts"
+		"test:stripe": "cross-env DEBUG=true tsx scripts/test-stripe-flow.ts",
+		"test:load": "npx artillery run tests/load/load-test.yml"
 	},
 	"dependencies": {
 		"@designbycode/tailwindcss-text-shadow": "^2.2.1",
@@ -101,14 +102,17 @@
 	"devDependencies": {
 		"@tailwindcss/aspect-ratio": "^0.4.2",
 		"@types/leaflet": "^1.9.15",
+		"@types/next": "^9.0.0",
 		"@types/node": "20.4.6",
 		"@types/react": "18.2.18",
 		"@types/react-dom": "18.2.7",
+		"artillery": "^2.0.22",
 		"autoprefixer": "^10.4.20",
 		"case-sensitive-paths-webpack-plugin": "^2.4.0",
 		"cross-env": "^7.0.3",
 		"dotenv": "^16.4.7",
 		"postcss": "^8.4.49",
+		"tailwind-scrollbar": "^4.0.0",
 		"tailwindcss": "^3.4.16",
 		"tailwindcss-animate": "^1.0.7",
 		"tsx": "^4.19.2",
