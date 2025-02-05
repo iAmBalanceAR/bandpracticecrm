@@ -245,6 +245,21 @@ const VerticalCalendar = () => {
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { isAuthenticated, loading: authLoading } = useAuth()
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [popoverPosition, setPopoverPosition] = useState<{ x: number, y: number } | null>(null)
+
+  // Add click handler to close popover when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (selectedDate) {
+        setSelectedDate(null)
+        setPopoverPosition(null)
+      }
+    }
+
+    document.addEventListener('click', handleClickOutside)
+    return () => document.removeEventListener('click', handleClickOutside)
+  }, [selectedDate])
 
   useEffect(() => {
     if (!isAuthenticated) return
@@ -352,93 +367,112 @@ const VerticalCalendar = () => {
     const hasGigs = gigsForDay.length > 0
 
     return (
-      <HoverCard>
-        <HoverCardTrigger asChild>
-          <div
-            className={`h-8 flex items-center justify-center text-sm hover:text-black hover:bg-yellow-400 hover:rounded-sm font-semibold cursor-pointer transition-colors relative
-              ${hasGigs ? 'bg-yellow-600 text-black rounded-sm' : 'text-white'}`}
-          >
-            {day}
-            {hasGigs && gigsForDay.length > 1 && (
-              <span className="absolute -top-1 -right-1 bg-[#008ffb] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
-                {gigsForDay.length}
-              </span>
-            )}
-          </div>
-        </HoverCardTrigger>
-        {hasGigs && (
+      <div
+        onClick={(e) => {
+          e.stopPropagation()
+          if (hasGigs) {
+            const rect = e.currentTarget.getBoundingClientRect()
+            setPopoverPosition({ x: rect.right + 5, y: rect.top })
+            setSelectedDate(selectedDate === dateStr ? null : dateStr)
+          }
+        }}
+        className={`h-8 flex items-center justify-center text-sm hover:text-black hover:bg-yellow-400 hover:rounded-sm font-semibold cursor-pointer transition-colors relative
+          ${hasGigs ? 'bg-yellow-600 text-black rounded-sm' : 'text-white'}`}
+      >
+        {day}
+        {hasGigs && gigsForDay.length > 1 && (
+          <span className="absolute -top-1 -right-1 bg-[#008ffb] text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+            {gigsForDay.length}
+          </span>
+        )}
+        {hasGigs && selectedDate === dateStr && popoverPosition && (
           <PortalContent>
-          <HoverCardContent 
-            align="start"
-            side="right"
-            alignOffset={-10}
-            sideOffset={5}
-            className="w-72 bg-[#0f1729] border border-[#008ffb] p-3 shadow-lg shadow-[#008ffb]/20"
-          >
-            <div className="max-h-fit">
-              {gigsForDay.map((gig, index) => (
-                <div key={index} className="mb-3 last:mb-0">
-                  <div className="space-y-2 hover:bg-[#008ffb]/10 rounded-lg transition-colors p-2">
-                    {/* Header */}
-                    <div className="border-l-2 border-[#008ffb] pl-2">
-                      <h3 className="font-semibold text-white text-base leading-tight truncate">{gig.title}</h3>
-                      <p className="text-[#008ffb] text-sm font-medium truncate">{gig.venue}</p>
+            <div 
+              style={{ 
+                position: 'fixed',
+                left: `${popoverPosition.x}px`,
+                top: `${popoverPosition.y}px`,
+                zIndex: 50
+              }}
+              className="w-72 bg-[#0f1729] border border-[#008ffb] p-3 shadow-lg shadow-[#008ffb]/20 rounded-lg relative"
+            >
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  setSelectedDate(null)
+                  setPopoverPosition(null)
+                }}
+                className="absolute -top-2 -right-2 h-6 w-6 rounded-full bg-[#0f1729] border border-[#008ffb] hover:bg-[#008ffb]/20 p-1"
+              >
+                <X className="h-4 w-4 text-[#008ffb]" />
+              </Button>
+              <div className="max-h-fit">
+                {gigsForDay.map((gig, index) => (
+                  <div key={index} className="mb-3 last:mb-0">
+                    <div className="space-y-2 hover:bg-[#008ffb]/10 rounded-lg transition-colors p-2">
+                      {/* Header */}
+                      <div className="border-l-2 border-[#008ffb] pl-2">
+                        <h3 className="font-semibold text-white text-base leading-tight truncate">{gig.title}</h3>
+                        <p className="text-[#008ffb] text-sm font-medium truncate">{gig.venue}</p>
+                      </div>
+
+                      {/* Times */}
+                      <div className="text-xs space-y-1 pl-3">
+                        <div className="flex justify-between items-center">
+                          <span className="text-[#008ffb]">Load In:</span>
+                          <span className="text-white/90">
+                            {format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[#008ffb]">Sound Check:</span>
+                          <span className="text-white/90">
+                            {format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}
+                          </span>
+                        </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[#008ffb]">Set Time:</span>
+                          <span className="text-white/90">
+                            {format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Contact */}
+                      <div className="text-xs pl-3 pt-1">
+                        <div className="flex items-center gap-2">
+                          <span className="text-[#008ffb]">Contact:</span>
+                          <span className="text-white/90 truncate">{gig.contact_name}</span>
+                        </div>
+                      </div>
+
+                      {/* Action Button */}
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="w-full mt-1 text-white text-xs hover:text-white hover:bg-[#008ffb]/20 border border-[#008ffb]/30"
+                        onClick={() => {
+                          setSelectedGig(gig)
+                          setIsModalOpen(true)
+                          setSelectedDate(null)
+                        }}
+                      >
+                        View Full Details
+                      </Button>
                     </div>
 
-                    {/* Times */}
-                    <div className="text-xs space-y-1 pl-3">
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#008ffb]">Load In:</span>
-                        <span className="text-white/90">
-                          {format(new Date(`2000-01-01 ${gig.load_in_time}`), 'h:mm a')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#008ffb]">Sound Check:</span>
-                        <span className="text-white/90">
-                          {format(new Date(`2000-01-01 ${gig.sound_check_time}`), 'h:mm a')}
-                        </span>
-                      </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-[#008ffb]">Set Time:</span>
-                        <span className="text-white/90">
-                          {format(new Date(`2000-01-01 ${gig.set_time}`), 'h:mm a')}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Contact */}
-                    <div className="text-xs pl-3 pt-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-[#008ffb]">Contact:</span>
-                        <span className="text-white/90 truncate">{gig.contact_name}</span>
-                      </div>
-                    </div>
-
-                    {/* Action Button */}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="w-full mt-1 text-white text-xs hover:text-white hover:bg-[#008ffb]/20 border border-[#008ffb]/30"
-                      onClick={() => {
-                        setSelectedGig(gig)
-                        setIsModalOpen(true)
-                      }}
-                    >
-                      View Full Details
-                    </Button>
+                    {index < gigsForDay.length - 1 && (
+                      <div className="my-2 border-t border-[#008ffb]/20" />
+                    )}
                   </div>
-
-                  {index < gigsForDay.length - 1 && (
-                    <div className="my-2 border-t border-[#008ffb]/20" />
-                  )}
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </HoverCardContent>
           </PortalContent>
         )}
-      </HoverCard>
+      </div>
     )
   }
 

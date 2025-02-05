@@ -118,7 +118,7 @@ export default function StagePlotPage() {
           </div>
         </Card>
       ) : (
-        <CustomSectionHeader title="Stage Plot Generator" underlineColor="#FF9921">
+        <CustomSectionHeader title="Stage Plot Builder" underlineColor="#FF9921">
           <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
             <CardHeader className="pb-4 mb-2">
               <CardTitle className="flex justify-end ittems-center text-3xl font-bold">
@@ -132,7 +132,7 @@ export default function StagePlotPage() {
                   <>
                   <div className="flex flex-auto tracking-tight text-3xl mt-2">
                       <span className=" gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-                      Saved  Stage Plots
+                        Stage Plots
                       </span> 
                   </div>
                   <div className="f tracking-tight float-right text-3xl">

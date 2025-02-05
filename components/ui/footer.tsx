@@ -33,7 +33,7 @@ export function Footer() {
             <h3 className="text-sm font-semibold mb-3 text-[#008ffb]">Support</h3>
             <ul className="space-y-2 text-sm">
               <li><a href="/support/contact" className="hover:text-[#008ffb] transition-colors">Contact Us</a></li>
-              {/* <li><a href="/status" className="hover:text-[#008ffb] transition-colors">System Status</a></li> */}
+              <li><a href="/status" className="hover:text-[#008ffb] transition-colors">System Status</a></li>
               {/* <li><a href="/feedback" className="hover:text-[#008ffb] transition-colors">Feedback</a></li> */}
             </ul>
           </div>

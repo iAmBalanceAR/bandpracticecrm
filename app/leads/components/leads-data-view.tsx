@@ -12,7 +12,7 @@ import { useRouter } from 'next/navigation';
 import { RealtimePostgresChangesPayload } from '@supabase/supabase-js';
 import { motion, AnimatePresence } from 'framer-motion';
 import LeadsSearch, { LeadFilters } from './leads-search';
-
+import { ClipboardList } from 'lucide-react';
 const statusColors = {
   new: 'bg-blue-500',
   contacted: 'bg-yellow-500',
@@ -179,9 +179,12 @@ export default function LeadsDataView() {
         <LeadsSearch onFiltersChange={setFilters} />
         <Card className="bg-[#192555] border-blue-800">
           <div className="p-6 text-center text-white">
-            <p className="mb-4">No leads found.</p>
-            <p className="text-gray-400">
+            <ClipboardList className="w-24 h-24 mx-auto mb-4 text-[#d83b34]" />
+            <p className="mb-4 text-md">No leads found.</p>
+            <p className="text-gray-400 text-md">
               Click the "New Lead" button to create your first lead.
+
+
             </p>
           </div>
         </Card>
@@ -215,8 +218,8 @@ export default function LeadsDataView() {
                         <h3 className="clear-both pt-0 mt-0 text-lg font-semibold text-white truncate flex flex-row gap-1">
                           {lead.title}
                         </h3>
-                        <div className="flex items-start mb-0 mt-1">
-                          <div className="text-black flex gap-1">
+                        <div className="flex items-start mb-0 mt-1 p-0">
+                          <div className="text-black flex gap-1 p-0">
                             <Badge 
                               variant="secondary"
                               className={priorityColors[lead.priority as keyof typeof priorityColors]}

@@ -95,13 +95,13 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   // Define menu items based on subscription status
   const menuItems = hasSubscription ? [
     { href: '/', icon: LayoutDashboard, text: 'Dashboard', color: '#00e396' },
-    { href: '/tours', icon: Route, text: 'Tours', color: '#d83b34' },
+    { href: '/tours', icon: Route, text: 'Tour Management', color: '#d83b34' },
     { href: '/calender', icon: Calendar, text: 'Tour Calendar', color: '#ff9920' },
     { href: '/tour-route', icon: MapPin, text: 'Tour Route', color: '#008ffb' },
     { href: '/data-tracking', icon: BarChart3, text: 'Tour Analytics', color: '#008ffb' },
-    { href: '/stage-plot', icon: Guitar, text: 'Stage Plot Tool', color: '#ff9920' },
-    { href: '/setlist', icon: ListVideo, text: 'Setlist Tool', color: '#008ffb' },
-    { href: '/leads', icon: ClipboardList, text: 'Leads', color: '#d83b34' },
+    { href: '/stage-plot', icon: Guitar, text: 'Stage Plot Builder', color: '#ff9920' },
+    { href: '/setlist', icon: ListVideo, text: 'Setlist Builder', color: '#008ffb' },
+    { href: '/leads', icon: ClipboardList, text: 'Lead Management', color: '#d83b34' },
     { href: '/venues', icon: Users, text: 'Venue Search', color: '#00e396' }
   ] : [
     { href: '/pricing', icon: CreditCard, text: 'Pricing Information', color: '#00e396' },

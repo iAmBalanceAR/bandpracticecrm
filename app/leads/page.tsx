@@ -46,9 +46,12 @@ export default function LeadsPage() {
             >
       <Card className="bg-[#111C44] min-h-[500px] border-blue-800 p-0 m-0">
         <CardContent className="p-6">
+          <h1 className="font-mono text-white text-2xl float-left text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+            Search Leads
+          </h1>
           <div className="flex justify-end mb-4">
             <LeadDialog>
-              <Button className="bg-blue-500 hover:bg-blue-600">
+              <Button className="bg-green-700 text-white hover:bg-green-600">
                 <Plus className="h-4 w-4 mr-2" />
                 New Lead
             </Button>

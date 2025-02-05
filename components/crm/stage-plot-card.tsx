@@ -3,12 +3,13 @@
 import React, { useState, useEffect, useRef } from 'react'
 import CustomCard from '@/components/common/CustomCard'
 import { Table, TableHeader, TableBody, TableCell, TableHead, TableRow } from "@/components/ui/table"
-import { Loader2 } from "lucide-react"
+import { Guitar, Loader2, ExternalLink, ArrowUpRight } from "lucide-react"
 import StageGrid from '@/app/stage-plot/components/stage-grid'
 import { listStagePlots, getStagePlot } from '@/app/stage-plot/utils/db'
 import type { StagePlot, StagePlotItem } from '@/app/stage-plot/types'
 import { useAuth } from '@/components/providers/auth-provider'
 import { useSupabase } from '@/components/providers/supabase-client-provider'
+import Link from 'next/link'
 
 interface StagePlotWithItems extends StagePlot {
   items: StagePlotItem[]
@@ -160,30 +161,34 @@ export default function StagePlotCard() {
             </div>
           </div>
         ) : plots.length === 0 ? (
-          <div className="w-full flex items-center justify-center text-gray-400">
-            <p>No stage plots found</p>
+          <div className="w-full  align-center text-gray-400">
+            <Guitar className="w-24 h-24 mx-auto mb-4 text-[#ff9920] mt-20" />
+            <p className="align-center text-center">No Stage Plots in the Database.</p>
           </div>
+
         ) : (
           <>
             {/* Data Table */}
             <div 
               ref={tableRef}
               style={{ width: tableWidth, height: plotHeight }} 
-              className="border border-gray-500 rounded-lg"
+              className="border-2 border-solid border-gray-500 rounded-lg"
             >
               <Table>
                 <TableHeader>
+
                   <TableRow className="bg-[#1F2937] text-gray-100">
                     <TableHead>Plot Title</TableHead>
                     <TableHead>Created On</TableHead>
                     <TableHead>Items</TableHead>
+                    <TableHead className="w-10"></TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {plots.slice(0, visibleRecords).map((plot) => (
                     <TableRow 
                       key={plot.id} 
-                      className={`bg-[#111827] border-gray-500 cursor-pointer hover:bg-[#1F2937] transition-colors
+                      className={`bg-[#111827] border-gray-500  cursor-pointer hover:bg-[#1F2937] transition-colors
                         ${selectedPlot === plot.id ? 'bg-[#1F2937]' : ''}`}
                       onClick={() => handlePlotSelect(plot)}
                     >
@@ -192,6 +197,16 @@ export default function StagePlotCard() {
                         {new Date(plot.created_at).toLocaleDateString()}
                       </TableCell>
                       <TableCell className="text-gray-400">{plot.items.length} Items</TableCell>
+                      <TableCell className="text-gray-400 p-0">
+                        <Link 
+                          href="/stage-plot"
+                          className="flex items-center justify-center p-2 hover:text-[#ff9920] transition-colors"
+                          onClick={(e) => e.stopPropagation()}
+                          aria-label={`Open ${plot.name} stage plot`}
+                        >
+                          <ExternalLink className="h-5 w-5" />
+                        </Link>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>

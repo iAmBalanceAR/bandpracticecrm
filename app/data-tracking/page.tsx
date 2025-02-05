@@ -239,6 +239,17 @@ export default function DataTrackingPage() {
           </div>
         </Card>
       ) : !currentTour ? (
+        <>
+        <div className="bg-[#0F1729] px-4 pb-6">
+        <header className="flex items-center justify-between ml-0 pr-0 h-16 p-4 pb-0 ">
+        <h1 className="text-4xl text-white -ml-4 pl-0">
+          <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+           Tour Analytics
+          </span>
+        </h1>
+       
+      </header> 
+      <div className="clear-both border-[#018FFB] border-b-2 -mt-4 mb-8 ml-0 mr-8 h-4">&nbsp;</div>
         <div className="min-h-[300px] bg-[#131d43] rounded-lg p-4 border border-blue-600 flex items-center justify-center">
           <div className="text-center">
             <BarChart3 className="h-24 w-24 text-[#008ffb] mb-4 mx-auto" />
@@ -248,9 +259,12 @@ export default function DataTrackingPage() {
             </p>
           </div>
         </div>
+        </div>
+        </>
       ) : !gigs.length ? (
         <div className="min-h-[300px] bg-[#131d43] rounded-lg p-4 border border-blue-600 flex items-center justify-center">
           <div className="bg-[#1B2559] p-8 rounded-lg border border-blue-600 max-w-md">
+          <BarChart3 className="h-24 w-24 text-[#008ffb] mb-4 mx-auto" />
             <h3 className="text-xl font-semibold text-white mb-3">No Data Available</h3>
             <p className="text-gray-400 mb-4">
               There are no gigs added to this tour yet. Add some gigs to start tracking your tour data.
@@ -267,7 +281,7 @@ export default function DataTrackingPage() {
               </span>
             </h1>
           </header>
-          <div className="clear-both border-[#018FFB] border-b-2 -mt-6 mb-0 ml-8 mr-8 h-4">&nbsp;</div>
+          <div className="clear-both border-[#018FFB] border-b-2 -mt-6 mb-4 ml-4 mr-8 h-4">&nbsp;</div>
           {/* End Common Header Component */}
 
           {/* Main Container */}

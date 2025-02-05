@@ -270,7 +270,8 @@ export default function VenueGrid({
   if (!loading && (!venues || venues.length === 0)) {
     return (
       <div className="text-center py-8">
-        <p className="text-lg text-gray-400">No venues found matching your criteria.</p>
+        <Users className="w-24 h-24 mx-auto mb-4 text-[#00e396]" />
+        <p className="text-md text-gray-400">No saved venues found.<br />Use the search tab to find venues and save them for later.</p>
       </div>
     );
   }

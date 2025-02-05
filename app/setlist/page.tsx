@@ -17,13 +17,13 @@ export default function Page() {
   }, [isAuthenticated, router]);
 
   return (
-    <CustomSectionHeader title="SetList Generator" underlineColor="#ff9920">
+    <CustomSectionHeader title="SetList Builder" underlineColor="#ff9920">
       <Card className="bg-[#111C44] min-h-[500px] border-none p-0 m-0">
         <CardHeader className="pb-0 mb-0">
           <CardTitle className="text-2xl">
             {/* <h1 className="font-mono text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
               Saved Setlists
-            </h1> */}
+            </h1>  */}
           </CardTitle>
         </CardHeader>
         <CardContent>

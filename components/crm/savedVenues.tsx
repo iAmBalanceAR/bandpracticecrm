@@ -1,7 +1,7 @@
 'use client'
 
 import * as React from "react"
-import { Heart, Loader2 } from 'lucide-react'
+import { ExternalLink, Heart, Loader2, Users } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import CustomCard from "@/components/common/CustomCard"
 import { useState, useEffect } from "react"
@@ -160,17 +160,18 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
         cardColor="[#008ffb]"
         addclassName="h-[350x] bg-[#020817]"
       >
-        <div className="bg-[#020817] h-[calc(370px-3.5rem)] overflow-y-auto">
+        <div className="bg-[#020817] h-[calc(379px-3.5rem)] overflow-y-auto rounded-lg">
           <Table className="w-full">
             <TableHeader className="text-black border-0 bg-white sticky top-0 z-10">
               <TableRow>
-                <TableHead className="bg-white p-[7px] pl-4 text-left text-xs font-medium">Venue</TableHead>
-                <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">City</TableHead>
-                <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">State</TableHead>
-                <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">Action</TableHead>
+                <TableHead className="text-gray-200  p-[7px] pl-4 text-left text-sm font-bold">Venue</TableHead>
+                <TableHead className="text-gray-200  p-2 pl-4 text-left text-sm font-bold">City</TableHead>
+                <TableHead className="text-gray-200  p-2 pl-4 text-left text-sm font-bold">State</TableHead>
+                <TableHead className="text-gray-200  p-2 pl-4 text-left text-sm font-bold">Action</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
+
               {authLoading ? (
                 <TableRow>
                   <TableCell colSpan={4} className="px-4 py-8">
@@ -196,7 +197,8 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
               ) : venues.length === 0 ? (
                 <TableRow>
                   <TableCell colSpan={4} className="px-4 py-8 text-center text-sm text-gray-400">
-                    No saved venues found
+                    <Users className="w-16 h-16 mx-auto mb-4 text-[#00e396] mt-12" />
+                    No Saved Venues in the Database
                   </TableCell>
                 </TableRow>
               ) : (
@@ -207,7 +209,7 @@ export default function SavedVenuesCard({ onVenueSaved }: SavedVenuesCardProps) 
                         href={`/venues/${venue.id}`}
                         className="hover:text-blue-400 transition-colors"
                       >
-                        {venue.title}
+                        {venue.title} <ExternalLink className="h-5 w-5 hover:text-blue-300 float-right" />
                       </Link>
                     </TableCell>
                     <TableCell className="px-4 py-2 text-xs">{venue.city}</TableCell>

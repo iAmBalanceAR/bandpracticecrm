@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { useEffect, useState } from "react"
-import { Mail, Phone, Loader2 } from 'lucide-react'
+import { Mail, Phone, Loader2, ClipboardList, ExternalLink } from 'lucide-react'
 import CustomCard from '@/components/common/CustomCard'
 import Link from 'next/link'
 import { cn } from '@/lib/utils'
@@ -84,19 +84,23 @@ export default function ContactsLeadsCard() {
     <CustomCard 
       title="Latest Working Leads"
       cardColor="[#ff9920]"      
-      addclassName="h-[332px] ] bg-[#020817]  mt-2"
+      addclassName="h-[342px] ] bg-[#020817]  mt-2"
     >
-      <div className="h-[calc(370px-3.5rem)] overflow-y-auto">
+      <div className="h-[calc(378px-3.5rem)] overflow-y-auto rounded-lg">
         <Table className="w-full">
           <TableHeader className="text-black  bg-white sticky top-0 z-10">
             <TableRow>
-              <TableHead className="bg-white p-[7px] pl-4 text-left text-xs font-medium">Title</TableHead>
-              <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">Contact</TableHead>
-              <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">Type</TableHead>
-              <TableHead className="bg-white p-2 pl-4 text-left text-xs font-medium">Status</TableHead>
+              <TableHead className="bg-[#1F2937] text-gray-200  p-[7px] pl-4 text-left text-sm font-bold">Title</TableHead>
+              <TableHead className="bg-[#1F2937] text-gray-200  p-[7px] pl-4 text-left text-sm font-bold">Contact</TableHead>
+              <TableHead className="bg-[#1F2937] text-gray-200  p-2 pl-4 text-left text-sm font-bold">Type</TableHead>
+              <TableHead className="bg-[#1F2937] text-gray-200  p-2 pl-4 text-left text-sm font-bold">Status</TableHead>
             </TableRow>
           </TableHeader>
+
+
+
           <TableBody>
+
             {authLoading ? (
               <TableRow className="border-0">
                 <TableCell colSpan={4} className="px-4 py-8 border-0">
@@ -122,7 +126,8 @@ export default function ContactsLeadsCard() {
             ) : leads.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={4} className="border-0 px-4 py-8 text-center text-sm text-gray-400">
-                  No leads found
+                  <ClipboardList className="w-16 h-16 mx-auto mb-4 text-[#d83b34] mt-12" />
+                  No Leads in the Database.
                 </TableCell>
               </TableRow>
             ) : (
@@ -133,7 +138,7 @@ export default function ContactsLeadsCard() {
                       href={`/leads/${lead.id}`}
                       className="text-white hover:text-blue-300"
                     >
-                      {lead.title}
+                      {lead.title} <ExternalLink className="h-5 w-5 hover:text-blue-300 float-right" />
                     </Link>
                   </TableCell>
                   <TableCell className="p-[7px] pl-4 text-xs py-4">

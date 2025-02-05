@@ -18,7 +18,7 @@ import {
 import { useTour } from '@/components/providers/tour-provider'
 import { gigHelpers, type Gig } from '@/utils/db/gigs'
 import { format } from 'date-fns'
-import { Loader2 } from "lucide-react"
+import { BarChart3, Loader2 } from "lucide-react"
 import { FeedbackModal } from '@/components/ui/feedback-modal'
 import { useAuth } from '@/components/providers/auth-provider'
 
@@ -233,12 +233,14 @@ export default function AnalyticsCard() {
             <p className="text-gray-400">Loading...</p>
           </div>
         ) : !isAuthenticated ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <p className="text-gray-400">Please sign in to view analytics</p>
+          <div className="w-full h-full ">
+            <BarChart3 className="w-24 h-24 mx-auto mb-4 text-[#008ffb] mt-20" />
+            <p className="text-gray-400 text-center">Please sign in to view analytics</p>
           </div>
         ) : !currentTour ? (
-          <div className="w-full h-full flex items-center justify-center">
-            <p className="text-gray-400">Please select a tour to view analytics</p>
+          <div className="w-full h-full">
+            <BarChart3 className="w-24 h-24 mx-auto mb-4 text-[#008ffb] mt-20" />
+            <p className="text-gray-400 text-center">Tour Analytics will Auto-Populate when the Tour Calendar is Updated with Gigs.</p>
           </div>
         ) : (
           <>
@@ -302,7 +304,7 @@ export default function AnalyticsCard() {
                     <p className="text-white font-medium">Calculating route information...</p>
                   </div>
                 )}
-                <div className="h-[360px] w-full border border-[#6B7280] rounded-lg bg-[#020817]">
+                <div className="h-[360px] w-full border-2 border-solid border-[#6B7280] rounded-lg bg-[#020817]">
                   <ResponsiveContainer width="100%" height="100%" style={{ border: '1px solid #6B7280' }}>
                     <LineChart 
                       data={routeInfo?.distances?.map((distance: number, index: number) => ({
