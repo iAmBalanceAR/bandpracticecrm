@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
-import { AlertCircle } from 'lucide-react'
+import { AlertCircle, X } from 'lucide-react'
 
 interface DangerZoneProps {
   customerStripeId: string
@@ -13,6 +13,8 @@ interface DangerZoneProps {
 }
 
 export function DangerZone({ customerStripeId, subscriptionEndDate, onCancel }: DangerZoneProps) {
+  console.log('Debug - Danger Zone Props:', { customerStripeId, subscriptionEndDate })
+  
   const [confirmCancel, setConfirmCancel] = useState('')
   const [showDangerZone, setShowDangerZone] = useState(false)
   const CANCEL_CONFIRMATION = 'CANCEL SUBSCRIPTION'
@@ -25,61 +27,72 @@ export function DangerZone({ customerStripeId, subscriptionEndDate, onCancel }: 
           onClick={() => setShowDangerZone(true)}
           className="bg-red-600 hover:bg-red-700 text-white"
         >
-          <AlertCircle className="w-4 h-4 mr-2" />
-          Cancel Subscription
+          <AlertCircle className="w-4 h-8 mr9 flex" />
+          <span className="flex text-shadow-sm -text-shadow-x-2 text-shadow-y-2">Cancel Subscription</span>
         </Button>
       </div>
+
     )
   }
 
   return (
-    <div className="mt-4 p-4 bg-gray-300 rounded-lg border-red-800/50 border">
+    <div className=" bg-neutral-300 rounded-lg border-orange-400 border-2 mt-4">
       <div className="space-y-4">
-        <div className="border-b border-red-800/30 pb-3 flex justify-between items-center">
-          <h3 className="text-lg font-medium text-red-600">Danger Zone</h3>
+        <div className="pt-4 pb-4 p-4 bg-red-600 border-b-2 border-lime-500   flex justify-between items-center">
+
+          <h3 className=" font-mediu text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black font-mono font-bold text-3xl text-yellow-400">Danger Zone</h3>
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowDangerZone(false)}
-            className="text-gray-700 hover:text-gray-900 hover:bg-gray-400/20"
+            className="text-white bg-orange-400 hover:bg-orange-300 border-red-700 border"
           >
-            Cancel
+          <span className="flex font-bold">
+            <X className="w-26 h-26 text-red-700 font-bold flex mr-2 ml-2" />
+            </span>
           </Button>
         </div>
-        
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="px-4 flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-red-600">Cancel Subscription</p>
-              <p className="text-xs text-gray-700 mt-1">
+              <p className="text-2xl  text-black font-bold text-shadow-red-600 text-shadow-sm -text-shadow-x-1 text-shadow-y-1">Cancel Subscription</p>
+              <p className="text-lg text-slate-800 mt-1">
                 This will cancel your subscription at the end of the current billing period. 
                 You will continue to have access until {subscriptionEndDate}.
               </p>
             </div>
           </div>
 
-          <div className="space-y-3">
-            <p className="text-sm text-gray-700">
-              To confirm cancellation, type <span className="font-mono text-red-600">{CANCEL_CONFIRMATION}</span> below:
+          <div className="space-y-3 px-4">
+            <p className="text-lg text-black">
+              To confirm cancellation, type <span className="font-mono text-red-600 font-bold">{CANCEL_CONFIRMATION}</span> below:
             </p>
+            <div className="flex-1">
             <Input
               type="text"
               value={confirmCancel}
               onChange={(e) => setConfirmCancel(e.target.value)}
-              className="bg-white border-red-800/30 text-black w-full max-w-md"
+              className="flex bg-white border-red-800/30 text-black w-full max-w-md"
               placeholder="Type to confirm"
             />
-            <form action={onCancel}>
+            </div>
+            <div className="flex-1">
+            <form action={onCancel} className="pb-4">
               <input type="hidden" name="customerStripeId" value={customerStripeId} />
               <Button 
+
+
                 type="submit"
                 variant="destructive"
-                className="border border-red-800 bg-red-900/30 hover:bg-red-900/50 mt-2 text-white"
+                className=" border border-red-800 bg-red-600 hover:bg-yellow-400  mt-2 text-yellow-200 "
                 disabled={confirmCancel !== CANCEL_CONFIRMATION}
               >
-                Cancel Subscription
+                <span className='text-md text-shadow-sm -text-shadow-x-1 text-shadow-y-1'>Cancel Subscription</span>
+
               </Button>
             </form>
+
+            </div>
           </div>
         </div>
       </div>

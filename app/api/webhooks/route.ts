@@ -162,13 +162,16 @@ export async function POST(req: Request) {
   let event: Stripe.Event | undefined
 
   try {
-    if (!signature) throw new Error('No signature')
+    if (!signature) {
+      console.log('Missing signature')
+      return new NextResponse(JSON.stringify({ received: true }))
+    }
     
     // Try multiple webhook secrets
     const webhookSecrets = [
       process.env.STRIPE_WEBHOOK_SECRET,
       process.env.STRIPE_WEBHOOK_SECRET_SUBSCRIPTION
-    ].filter(Boolean) // Remove any undefined secrets
+    ].filter(Boolean)
 
     let error: any
     
@@ -176,23 +179,22 @@ export async function POST(req: Request) {
     for (const secret of webhookSecrets) {
       try {
         event = stripe.webhooks.constructEvent(body, signature, secret!)
-        // If we get here, the signature was valid
         break
       } catch (err) {
         error = err
-        // Continue to try next secret
         continue
       }
     }
 
     // If we get here and event is not defined, no secrets worked
     if (!event) {
-      throw error || new Error('Invalid signature')
+      console.error('Invalid signature:', error?.message)
+      return new NextResponse(JSON.stringify({ received: true }))
     }
 
   } catch (err: any) {
     console.error('Error verifying webhook signature:', err.message)
-    return new NextResponse(`Webhook Error: ${err.message}`, { status: 400 })
+    return new NextResponse(JSON.stringify({ received: true }))
   }
 
   if (relevantEvents.has(event.type)) {
@@ -299,7 +301,7 @@ export async function POST(req: Request) {
       }
     } catch (error) {
       console.error('Error handling Stripe webhook:', error)
-      return new NextResponse('Webhook handler failed', { status: 500 })
+      return new NextResponse(JSON.stringify({ received: true }))
     }
   }
 

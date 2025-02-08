@@ -1,0 +1,42 @@
+STRIPE CUSTOMER ID ISSUE - February 1, 2024
+
+ISSUE:
+- Error encountered: "No such customer: '8d7a73c6-b048-44e5-a298-717676d538bf'"
+- The system was using Supabase user UUID instead of actual Stripe customer ID
+- This occurred when trying to cancel subscriptions or access billing portal
+
+INVESTIGATION:
+1. Found that stripe_customer_id in profiles table contained Supabase UUID instead of Stripe cus_* ID
+2. Traced data flow:
+   - Stripe checkout success page correctly receives customer ID
+   - Webhook handler properly receives Stripe customer ID
+   - Issue identified in profile creation/update logic
+
+ATTEMPTED FIXES:
+1. Updated webhook handler to store correct Stripe customer ID:
+   ```typescript
+   .update({
+     subscription_status: subscription.status,
+     subscription_id: subscription.id,
+     subscription_price_id: subscription.items.data[0]?.price.id || null,
+     stripe_customer_id: subscription.customer as string  // Added this line
+   })
+   ```
+
+2. Added sync endpoints:
+   - /api/sync-subscriptions (POST) - Syncs all users
+   - /api/sync-subscription (GET) - Syncs single user
+
+NEXT STEPS:
+1. Verify stripe_customer_id in profiles table starts with 'cus_'
+2. Run sync to update existing profiles with correct Stripe customer IDs
+3. Monitor webhook handler to ensure it continues storing correct IDs
+
+RELATED FILES:
+- app/api/webhooks/stripe/route.ts
+- app/api/sync-subscription/route.ts
+- app/api/sync-subscriptions/route.ts
+- components/billing/danger-zone.tsx
+- app/account/billing/page.tsx
+
+Note: Rate limit errors were encountered during troubleshooting - may need to implement better request throttling. 

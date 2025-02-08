@@ -55,14 +55,14 @@ export async function POST(req: Request) {
         case 'checkout.session.completed': {
           const session = event.data.object as Stripe.Checkout.Session
           const userId = session.metadata?.supabase_user_id
+          const stripeCustomerId = session.customer as string
 
           console.log('Webhook: Checkout completed:', {
             sessionId: session.id,
             userId,
+            stripeCustomerId,
             subscription: session.subscription,
-            customer: session.customer,
-            metadata: session.metadata,  // Log all metadata
-            mode: session.mode          // Check if it's in subscription mode
+            metadata: session.metadata
           })
           
           if (!userId) {
@@ -70,19 +70,6 @@ export async function POST(req: Request) {
             return
           }
 
-          if (!session.subscription) {
-            console.error('No subscription found in session')
-            return
-          }
-
-          const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
-          console.log('Webhook: Subscription details:', {
-            id: subscription.id,
-            status: subscription.status,
-            customerId: subscription.customer,
-            metadata: subscription.metadata
-          })
-          
           // First check if we can read the profile
           const { data: profile, error: readError } = await supabase
             .from('profiles')
@@ -96,21 +83,49 @@ export async function POST(req: Request) {
           }
 
           console.log('Found profile:', profile)
+          console.log('Updating profile with stripe_customer_id:', stripeCustomerId)
 
-          // Then try to update
-          const { data, error } = await supabase
-            .rpc('handle_subscription_update', {
-              user_id: userId,
-              customer_id: subscription.customer,
-              subscription_id: subscription.id,
-              status: subscription.status,
-              price_id: subscription.items.data[0]?.price.id || null
+          // Update the profile with the stripe customer ID immediately
+          const { error: customerIdError } = await supabase
+            .from('profiles')
+            .update({
+              stripe_customer_id: stripeCustomerId
             })
+            .eq('id', userId)
+
+          if (customerIdError) {
+            console.error('Error updating stripe_customer_id:', customerIdError)
+            return
+          }
+
+          if (!session.subscription) {
+            console.log('No subscription in session, but customer ID updated')
+            return
+          }
+
+          // Get subscription details and update profile with subscription info
+          const subscription = await stripe.subscriptions.retrieve(session.subscription as string)
+          console.log('Webhook: Subscription details:', {
+            id: subscription.id,
+            status: subscription.status,
+            customerId: subscription.customer,
+            metadata: subscription.metadata
+          })
+
+          // Then update subscription details
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({
+              subscription_status: subscription.status,
+              subscription_id: subscription.id,
+              subscription_price_id: subscription.items.data[0]?.price.id || null
+            })
+            .eq('id', userId)
           
-          if (error) {
-            console.error('Stored procedure error:', error)
+          if (updateError) {
+            console.error('Error updating subscription details:', updateError)
           } else {
-            console.log('Subscription updated:', data)
+            console.log('Profile fully updated with subscription details')
           }
           break
         }

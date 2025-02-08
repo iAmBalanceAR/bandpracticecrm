@@ -51,23 +51,39 @@ export default function BillingPage() {
             .single()
 
           if (subscriptionData) {
+            console.log('Debug - Subscription Data:', {
+              subscriptionId: subscriptionData.id,
+              stripeCustomerId: subscriptionData.stripe_customer_id,
+              userId: subscriptionData.user_id
+            })
             setSubscription(subscriptionData)
             
             // Update profile with stripe_customer_id if it's missing
-            if (!profileData.stripe_customer_id && subscriptionData.user_id) {
+            if (!profileData.stripe_customer_id && subscriptionData.stripe_customer_id) {
+              console.log('Debug - Updating profile with stripe_customer_id:', subscriptionData.stripe_customer_id)
               const { error: updateError } = await supabase
                 .from('profiles')
                 .update({
-                  stripe_customer_id: subscriptionData.user_id
+                  stripe_customer_id: subscriptionData.stripe_customer_id
                 })
                 .eq('id', user.id)
 
               if (!updateError) {
-                profileData.stripe_customer_id = subscriptionData.user_id
+                profileData.stripe_customer_id = subscriptionData.stripe_customer_id
+              } else {
+                console.error('Debug - Error updating profile:', updateError)
               }
             }
+          } else {
+            console.log('Debug - No subscription data found')
           }
         }
+
+        console.log('Debug - Final Profile Data:', {
+          profileId: profileData?.id,
+          stripeCustomerId: profileData?.stripe_customer_id,
+          subscriptionId: profileData?.subscription_id
+        })
 
         setProfile(profileData)
       } catch (error) {
@@ -106,9 +122,10 @@ export default function BillingPage() {
             Billing & Subscription
           </span>
         </h1>
-        <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
+        <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[98.55%] h-4"></div>
         
-        <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border flex items-center justify-center">
+
+        <div className="pr-6 pl-8 pb-6 pt-4 mr-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border flex items-center justify-center">
           <div className="flex flex-col items-center gap-2">
             <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
             <span className="text-sm text-gray-400">Loading subscription details...</span>
@@ -132,7 +149,8 @@ export default function BillingPage() {
         <Card>
           <div>
             <div className="flex items-center justify-between mb-8 border-0">
-              <div className="flex items-top space-x-4"><div className="space-y-2">
+              <div className="flex items-top space-x-4">
+                <div className="space-y-2">
                     <h3 className="text-lg font-medium text-white">Current Plan</h3>
                     <p className="text-gray-400 text-sm">
                       {profile?.stripe_customer_id ? 'No active plan' : 'No subscription'}

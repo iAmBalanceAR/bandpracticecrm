@@ -10,10 +10,37 @@ import { Check } from 'lucide-react'
 interface PricingClientProps {
   products: Array<any>
   user: any | null
+  userSubscription?: {
+    status: string
+    stripe_customer_id: string
+  } | null
 }
 
-export function PricingClient({ products, user }: PricingClientProps) {
+export function PricingClient({ products, user, userSubscription }: PricingClientProps) {
   console.log('PricingClient user:', user)
+  console.log('PricingClient userSubscription:', userSubscription)
+
+  const handleManageSubscription = async () => {
+    try {
+      const response = await fetch('/api/billing/manage', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          customerStripeId: userSubscription?.stripe_customer_id 
+        }),
+      })
+      
+      const data = await response.json()
+      if (data.url) {
+        window.location.href = data.url
+      }
+    } catch (error) {
+      console.error('Error managing subscription:', error)
+    }
+  }
+
   return (
     <>
     <div className="pl-4 pr-4 pt-3 pb-6 bg-[#0f1729] text-white">
@@ -31,7 +58,7 @@ export function PricingClient({ products, user }: PricingClientProps) {
             Cancel anytime.
             </p>
         <div className=" items-center max-w-[31%] min-w-[299px] mx-auto">
-          {products?.map((product, index) => {
+          {products?.map((product) => {
             const price = product.prices[0]
             const priceString = new Intl.NumberFormat('en-US', {
               style: 'currency',
@@ -44,7 +71,7 @@ export function PricingClient({ products, user }: PricingClientProps) {
                 key={product.id}
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
+                transition={{ duration: 0.5 }}
                 className="bg-[#0f1729] rounded-lg border border-blue-700 shadow-lg overflow-hidden"
               >
                 <div className="p-6">
@@ -94,9 +121,7 @@ export function PricingClient({ products, user }: PricingClientProps) {
                       </ul>
                     </div>
                   )}
-                  {user ? (
-                    <CheckoutButton priceId={price.id?.trim()} />
-                  ) : (
+                  {!user ? (
                     <Button
                       asChild
                       className="w-full bg-green-700 hover:bg-green-600 text-white text-lg"
@@ -105,6 +130,15 @@ export function PricingClient({ products, user }: PricingClientProps) {
                         Sign up to subscribe
                       </Link>
                     </Button>
+                  ) : userSubscription?.status === 'active' ? (
+                    <Button
+                      onClick={handleManageSubscription}
+                      className="w-full bg-[#1B2559] border-blue-800 text-white hover:bg-[#242f6a]"
+                    >
+                      Manage Subscription
+                    </Button>
+                  ) : (
+                    <CheckoutButton priceId={price.id?.trim()} />
                   )}
                 </div>
               </motion.div>

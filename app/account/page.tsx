@@ -52,9 +52,10 @@ export default function AccountPage() {
           Account Settings
         </span>
       </h1>
-      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[100%] h-4"></div>
+      <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 mr-4 w-[98.55%] h-4"></div>
       
-      <div className="pr-6 pl-8  pb-4  pt-4 bg-[#131d43] text-white  shadow-sm shadow-green-400 rounded-md border-blue-800 border">
+
+      <div className="pr-6 pl-8  pb-4  pt-4 bg-[#131d43] text-white  shadow-sm shadow-green-400 rounded-md border-blue-800 border mr-4">
         <Card className="border-0">
           <div className="border-0">
             <div className="flex items-center justify-between mb-8 border-0">
