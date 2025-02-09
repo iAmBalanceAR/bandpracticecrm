@@ -181,7 +181,7 @@ export async function middleware(request: NextRequest) {
         });
       }
 
-      if (!profile?.subscription_status || profile.subscription_status !== 'active') {
+      if (!profile?.subscription_status || !['active', 'trialing'].includes(profile.subscription_status)) {
         return NextResponse.redirect(new URL('/pricing', request.url))
       }
     }

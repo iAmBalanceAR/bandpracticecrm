@@ -90,7 +90,7 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   }
 
   // Check if user has active subscription
-  const hasSubscription = profile?.subscription_status === 'active'
+  const hasSubscription = profile?.subscription_status === 'active' || profile?.subscription_status === 'trialing'
 
   // Define menu items based on subscription status
   const menuItems = hasSubscription ? [

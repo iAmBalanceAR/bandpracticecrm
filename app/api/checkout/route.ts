@@ -74,13 +74,20 @@ export async function POST(request: Request) {
       success_url: `${baseUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pricing/cancelled`,
       subscription_data: {
+        trial_period_days: 7,
         metadata: {
           supabase_user_id: user.id,
         },
       },
       metadata: {
         supabase_user_id: user.id
-      }
+      },
+      custom_text: {
+        submit: {
+          message: "Your subscription will start with a 7-day free trial. You won't be charged until the trial ends."
+        }
+      },
+      allow_promotion_codes: true
     })
 
     if (!session?.url) {

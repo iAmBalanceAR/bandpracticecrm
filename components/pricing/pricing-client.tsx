@@ -2,9 +2,12 @@
 
 import { motion } from 'framer-motion'
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '@/components/ui/button'
 import { CheckoutButton } from '@/components/checkout/checkout-button'
 import { Check } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Label } from '@/components/ui/label'
 //import type { Database } from '@/types/supabase'
 
 interface PricingClientProps {
@@ -17,6 +20,8 @@ interface PricingClientProps {
 }
 
 export function PricingClient({ products, user, userSubscription }: PricingClientProps) {
+  const [isAnnual, setIsAnnual] = useState(false)
+
   console.log('PricingClient user:', user)
   console.log('PricingClient userSubscription:', userSubscription)
 
@@ -51,20 +56,52 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
       </h1>
       <div className="border-[#008ffb] border-b-2 -mt-7 w-[100%] h-4 mb-4"></div>
       
-      <div className=" pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
-        <p className="align-center text-center mb-8"><span className="text-lg text-white text-shadow-sm text-shadow-blur-4 text-shadow-black">
-          Enjoy the first 7 days of your new plan for FREE.<br />
-            </span>
-            Cancel anytime.
-            </p>
-        <div className=" items-center max-w-[31%] min-w-[299px] mx-auto">
+      <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
+        <p className="align-center text-center mb-4">
+          <span className="text-lg text-white text-shadow-sm text-shadow-blur-4 text-shadow-black">
+            Enjoy the first 7 days of your new plan for FREE.<br />
+          </span>
+          Cancel anytime.
+        </p>
+        
+        {/* Billing Toggle */}
+        <div className="flex items-center justify-center gap-4 mb-8">
+          <Label className="text-lg">Monthly</Label>
+          <Switch
+            checked={isAnnual}
+            onCheckedChange={setIsAnnual}
+            className="data-[state=checked]:bg-green-500"
+          />
+          <div className="flex flex-col items-start">
+            <Label className="text-lg">Annual</Label>
+            {isAnnual && (
+              <span className="text-xs text-green-400">Save 25%</span>
+            )}
+          </div>
+        </div>
+
+        <div className="items-center max-w-[31%] min-w-[299px] mx-auto">
           {products?.map((product) => {
-            const price = product.prices[0]
+            // Find the appropriate price based on interval
+            const prices = product.prices || []
+            const price = prices.find((p: any) => 
+              p.interval === (isAnnual ? 'year' : 'month')
+            ) || prices[0]
+
             const priceString = new Intl.NumberFormat('en-US', {
               style: 'currency',
               currency: price.currency,
               minimumFractionDigits: 0,
             }).format((price.unit_amount || 0) / 100)
+
+            // Calculate monthly equivalent for annual plans
+            const monthlyEquivalent = isAnnual 
+              ? new Intl.NumberFormat('en-US', {
+                  style: 'currency',
+                  currency: price.currency,
+                  minimumFractionDigits: 0,
+                }).format((price.unit_amount || 0) / 1200)
+              : null
 
             return (
               <motion.div
@@ -76,32 +113,41 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
               >
                 <div className="p-6">
                   <div className="space-y-2">
-                    <h3 className="text-3xl pt-0 mt-0 font-mono text-white  text-shadow-blur-4 text-shadow-blue-900 text-shadow-sm">
+                    <h3 className="text-3xl pt-0 mt-0 font-mono text-white text-shadow-blur-4 text-shadow-blue-900 text-shadow-sm">
                       {product.name}
                     </h3>
                     <div className="mb-4">
                       <div className="mb-3">
-                          <span className=" text-shadow-blur-4 text-shadow-blue-900 text-shadow-sm text-3xl font-mono text-white ">
-                            {priceString}
-                          </span>
-                          {price.type === 'recurring' && (
-                            <span className="text-gray-400">
-                              /{price.interval}
-                            </span>
-                          )}
-                       </div>
+                        <span className="text-shadow-blur-4 text-shadow-blue-900 text-shadow-sm text-3xl font-mono text-white">
+                          {priceString}
+                        </span>
+                        <span className="text-gray-400">
+                          /{isAnnual ? 'year' : 'month'}
+                        </span>
+                        {isAnnual && (
+                          <div className="text-sm text-gray-400 mt-1">
+                            {monthlyEquivalent}/mo when paid annually
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
-                  <p className="text-gray-400 mb-3 text-sm text-shadow-sm text-shadow-blur-4 text-shadow-black">{product.description}</p>
+                  <p className="text-gray-400 mb-3 text-sm text-shadow-sm text-shadow-blur-4 text-shadow-black">
+                    {product.description}
+                  </p>
                   {/* Marketing Features */}
                   {product.marketing_features && product.marketing_features.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-white pt-0 mt-0 mb-3  text-shadow-blur-4 text-shadow-blue-900 text-shadow-smm">Features</h4>
+                      <h4 className="text-lg font-semibold text-white pt-0 mt-0 mb-3 text-shadow-blur-4 text-shadow-blue-900 text-shadow-smm">
+                        Features
+                      </h4>
                       <ul className="space-y-4">
                         {product.marketing_features.map((feature: string, i: number) => (
                           <li key={i} className="flex items-start text-gray-300">
                             <Check className="h-5 w-5 mr-3 text-[#00e396] mt-1 flex-shrink-0" />
-                            <span className=" text-shadow-blur-4 text-shadow-black text-shadow-sm text-sm">{feature}</span>
+                            <span className="text-shadow-blur-4 text-shadow-black text-shadow-sm text-sm">
+                              {feature}
+                            </span>
                           </li>
                         ))}
                       </ul>
@@ -110,7 +156,9 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
                   {/* Additional Features */}
                   {product.features && product.features.length > 0 && (
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-white mb-3">Additional Features</h4>
+                      <h4 className="text-lg font-semibold text-white mb-3">
+                        Additional Features
+                      </h4>
                       <ul className="space-y-4">
                         {product.features.map((feature: string, i: number) => (
                           <li key={i} className="flex items-start text-gray-300">

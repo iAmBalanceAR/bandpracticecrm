@@ -228,7 +228,31 @@ export async function POST(req: Request) {
             return new NextResponse('Missing user ID in metadata', { status: 400 })
           }
 
-          // Update the subscription record
+          if (event.type === 'customer.subscription.deleted') {
+            // Clear subscription data from profile
+            await supabase
+              .from('profiles')
+              .update({
+                subscription_status: null,
+                subscription_price_id: null,
+                subscription_id: null
+              })
+              .eq('id', userId)
+
+            // Mark subscription as ended in subscriptions table
+            await supabase
+              .from('subscriptions')
+              .update({
+                status: 'canceled',
+                ended_at: new Date().toISOString()
+              })
+              .eq('id', subscription.id)
+
+            console.log(`Subscription ${subscription.id} deleted and data cleaned up for user ${userId}`)
+            break
+          }
+
+          // For created/updated events, continue with normal update
           await upsertSubscriptionRecord(subscription, userId)
 
           // Also update the profile subscription status
