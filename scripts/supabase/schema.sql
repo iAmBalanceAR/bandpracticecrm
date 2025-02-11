@@ -161,4 +161,86 @@ $$ language plpgsql security definer;
 
 create trigger on_auth_user_created
   after insert on auth.users
-  for each row execute procedure public.handle_new_user(); 
+  for each row execute procedure public.handle_new_user();
+
+-- Create stageplots table
+create table if not exists public.stageplots (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  description text,
+  stage_layout jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS for stageplots
+alter table public.stageplots enable row level security;
+
+-- Create RLS policies for stageplots
+create policy "Users can view their own stageplots"
+  on public.stageplots for select
+  using (auth.uid() = user_id);
+
+create policy "Users can create their own stageplots"
+  on public.stageplots for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own stageplots"
+  on public.stageplots for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own stageplots"
+  on public.stageplots for delete
+  using (auth.uid() = user_id);
+
+-- Create setlists table
+create table if not exists public.setlists (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references auth.users(id) on delete cascade not null,
+  title text not null,
+  description text,
+  songs jsonb,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  updated_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+
+-- Enable RLS for setlists
+alter table public.setlists enable row level security;
+
+-- Create RLS policies for setlists
+create policy "Users can view their own setlists"
+  on public.setlists for select
+  using (auth.uid() = user_id);
+
+create policy "Users can create their own setlists"
+  on public.setlists for insert
+  with check (auth.uid() = user_id);
+
+create policy "Users can update their own setlists"
+  on public.setlists for update
+  using (auth.uid() = user_id);
+
+create policy "Users can delete their own setlists"
+  on public.setlists for delete
+  using (auth.uid() = user_id);
+
+-- Create function to automatically set updated_at
+create or replace function public.handle_updated_at()
+returns trigger as $$
+begin
+  new.updated_at = timezone('utc'::text, now());
+  return new;
+end;
+$$ language plpgsql;
+
+-- Create triggers for updated_at
+create trigger handle_stageplots_updated_at
+  before update on public.stageplots
+  for each row
+  execute function public.handle_updated_at();
+
+create trigger handle_setlists_updated_at
+  before update on public.setlists
+  for each row
+  execute function public.handle_updated_at(); 

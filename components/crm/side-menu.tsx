@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen, ListVideo, LogIn} from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ShipWheel, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen, ListVideo, LogIn} from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -101,6 +101,7 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
     { href: '/data-tracking', icon: BarChart3, text: 'Tour Analytics', color: '#008ffb' },
     { href: '/stage-plot', icon: Guitar, text: 'Stage Plot Builder', color: '#ff9920' },
     { href: '/setlist', icon: ListVideo, text: 'Setlist Builder', color: '#008ffb' },
+    { href: '/riders', icon: ShipWheel, text: 'Rider Creation', color: '#008ffb' },
     { href: '/leads', icon: ClipboardList, text: 'Lead Management', color: '#d83b34' },
     { href: '/venues', icon: Users, text: 'Venue Search', color: '#00e396' }
   ] : [

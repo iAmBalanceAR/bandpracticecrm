@@ -62,8 +62,8 @@ export function FeedbackModal({
         }
       `}</style>
       <DialogPortal>
-        <DialogOverlay className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50" />
-        <DialogContent className="fixed left-[50%] top-[50%] z-50 translate-x-[-50%] translate-y-[-50%] max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm -z-50">
+        <DialogContent className="fixed left-[50%] top-[50%] z-0 translate-x-[-50%] translate-y-[-50%] max-w-[400px] bg-[#0B1437] rounded-2xl border border-blue-900/50 shadow-[0_0_15px_rgba(0,0,0,0.5)] p-6">
           <button
             onClick={onClose}
             className="absolute right-4 top-4 text-gray-400 hover:text-white"
@@ -110,6 +110,7 @@ export function FeedbackModal({
             )}
           </div>
         </DialogContent>
+        </div>
       </DialogPortal>
     </Dialog>
   )
