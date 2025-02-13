@@ -61,6 +61,7 @@ export interface TechnicalRiderDetails {
   power_requirements: Record<string, any>
   additional_requirements: Record<string, any>
   sections?: Record<string, any>
+  input_list?: InputListRow[]
 }
 
 export interface HospitalityRiderDetails {
@@ -128,6 +129,23 @@ export interface RiderSectionProps {
   content: string
   onContentChange: (content: string) => void
   onRemove: () => void
-} 
+}
+
+export interface InputListRow {
+  id: string
+  rider_id: string
+  channel_number: number
+  instrument: string
+  microphone: string
+  created_at?: string
+  updated_at?: string
+}
+
+export interface InputListProps {
+  riderId?: string
+  initialRows?: InputListRow[]
+  onRowsChange: (rows: InputListRow[]) => void
+  readOnly?: boolean
+}
 
 export type { StagePlot }

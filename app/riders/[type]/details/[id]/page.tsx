@@ -6,7 +6,7 @@ import { getRiderDetails } from '@/app/riders/actions'
 import { RiderDetails } from '@/app/riders/components/rider-details'
 import { notFound } from 'next/navigation'
 import { StagePlot, StagePlotItem } from '@/app/stage-plot/types'
-import { Setlist, SetlistItem } from '@/app/riders/types'
+import { Setlist, SetlistItem, InputListRow } from '@/app/riders/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
@@ -116,15 +116,45 @@ export default async function RiderDetailsPage({ params }: Props) {
       sort_order: section.sort_order,
       is_custom: isCustomSection,
       is_default: false,
-      content: section.content  // Pass the HTML content directly
+      content: section.content  // Pass the content directly without wrapping
     }
   }).sort((a, b) => a.sort_order - b.sort_order) || []
 
   // Get the rider type-specific details
-  const riderDetails = {
+  type RiderDetailsType = {
+    id: string;
+    rider_id: string;
+    sections?: {
+      id: string;
+      name: string;
+      sort_order: number;
+      is_custom: boolean;
+      is_default: boolean;
+      content: Record<string, any>;
+    }[];
+    input_list?: InputListRow[];
+  }
+
+  const riderDetails: RiderDetailsType = {
     id: rider.id,
     rider_id: rider.id,
     sections: sections
+  }
+
+  // For technical riders, get input list data
+  if (params.type === 'technical') {
+    const { data: inputListData, error: inputListError } = await supabase
+      .from('input_list')
+      .select('*')
+      .eq('rider_id', params.id)
+      .order('channel_number', { ascending: true })
+
+    if (!inputListError) {
+      console.log('Fetched input list data:', inputListData)
+      riderDetails.input_list = inputListData || []
+    } else {
+      console.error('Error fetching input list:', inputListError)
+    }
   }
 
   // Get associated gig details if there's a gig_id

@@ -5,7 +5,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as z from 'zod'
 import { motion, AnimatePresence } from 'framer-motion'
-import { RiderFormProps, RiderSection, RiderSectionContent } from '../types'
+import { RiderFormProps, RiderSection, RiderSectionContent, InputListRow, TechnicalRiderDetails } from '../types'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Loader2, Copy } from 'lucide-react'
@@ -33,6 +33,8 @@ import { FeedbackModal } from "@/components/ui/feedback-modal"
 import { SectionSelect } from './section-select'
 import { RiderSection as RiderSectionComponent } from './rider-section'
 import { Label } from "@/components/ui/label"
+import { InputList } from './input-list'
+import { v4 as uuidv4 } from 'uuid'
 
 interface Template {
   id: string
@@ -75,8 +77,10 @@ export function RiderForm({
   isLoading = false,
   stagePlots = [],
   setlists = [],
-
 }: RiderFormProps) {
+  console.log('RiderForm initialData:', initialData) // Debug log for all initial data
+  console.log('RiderForm initialData.details:', initialData?.details) // Debug log for details specifically
+
   const [isSaving, setIsSaving] = useState(false)
   const [sections, setSections] = useState<Section[]>(initialData?.sections || [])
   const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set())
@@ -86,6 +90,26 @@ export function RiderForm({
   const [customSections, setCustomSections] = useState<Map<string, string>>(new Map(
     initialData?.sections?.filter((s: Section) => s.is_custom).map((s: Section) => [s.id, s.name]) || []
   ))
+  const [inputListRows, setInputListRows] = useState<InputListRow[]>(() => {
+    console.log('Initializing inputListRows with type:', type)
+    console.log('Initializing inputListRows with details:', initialData?.details)
+    
+    if (type === 'technical' && initialData?.details) {
+      const inputList = (initialData.details as TechnicalRiderDetails).input_list || []
+      console.log('Found input list in details:', inputList)
+      return inputList
+    }
+    
+    // Default to one empty row
+    console.log('No input list found, creating empty row')
+    return [{
+      id: uuidv4(),
+      rider_id: initialData?.id || '',
+      channel_number: 1,
+      instrument: '',
+      microphone: ''
+    }]
+  })
   const [availableGigs, setAvailableGigs] = useState<Array<{ id: string; title: string; gig_date: string }>>([])
   const [availableTemplates, setAvailableTemplates] = useState<Template[]>([])
   const router = useRouter()
@@ -293,7 +317,29 @@ export function RiderForm({
       setIsLoadingTemplate(true)
       const response = await fetch(`/api/riders/${templateId}`)
       const template = await response.json()
+      console.log('Loaded template data:', template)
       
+      // Update form values
+      form.setValue('title', `Copy of ${template.title}`)
+      
+      // Fetch input list if this is a technical rider
+      if (type === 'technical') {
+        const inputListResponse = await fetch(`/api/riders/${templateId}/input-list`)
+        const inputListData = await inputListResponse.json()
+        console.log('Template input list data:', inputListData)
+        
+        if (inputListData && Array.isArray(inputListData)) {
+          // Map the input list data to new rows with new IDs
+          const newInputListRows = inputListData.map(row => ({
+            ...row,
+            id: uuidv4(), // Generate new IDs for the copied rows
+            rider_id: '' // This will be set when the new rider is created
+          }))
+          setInputListRows(newInputListRows)
+        }
+      }
+      
+      // Update sections and contents
       if (template.sections) {
         const templateSections = template.sections as Section[]
         console.log('Template sections:', templateSections)
@@ -366,10 +412,6 @@ export function RiderForm({
 
       // Prepare section contents for submission
       const sectionData = Array.from(selectedSections).map((sectionId, index) => {
-        // Check if this is a custom section by:
-        // 1. Looking for the zero UUID
-        // 2. Checking if it's marked as custom in sections array
-        // 3. Checking if it has a custom prefix (for newly created sections)
         const isCustom = sectionId === '00000000-0000-0000-0000-000000000000' || 
                         sections.find(s => s.id === sectionId)?.is_custom ||
                         sectionId.startsWith('custom-')
@@ -393,7 +435,8 @@ export function RiderForm({
           stage_plot_id: data.stage_plot_id,
           setlist_id: data.setlist_id,
           gig_id: data.gig_id,
-          sections: sectionData
+          sections: sectionData,
+          input_list: type === 'technical' ? inputListRows : undefined
         })
 
         if (!result.success) throw new Error('Failed to update rider')
@@ -405,7 +448,8 @@ export function RiderForm({
           stage_plot_id: data.stage_plot_id,
           setlist_id: data.setlist_id,
           gig_id: data.gig_id,
-          sections: sectionData
+          sections: sectionData,
+          input_list: type === 'technical' ? inputListRows : undefined
         })
 
         if (!result.success) throw new Error('Failed to create rider')
@@ -709,6 +753,23 @@ export function RiderForm({
           />
           )}
         </div>
+
+        {type === 'technical' && (
+          <div className="border-blue-500/60 border rounded-lg p-4 bg-[#111C44]">
+            <h3 className="text-xl mb-4">
+              <span className="mx-0 text-white text-shadow-sm font-mono text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
+                Input List
+              </span>
+              <div className="border-[#ff9920] border-b-2 -mt-2 mb-0 h-2 ml-0 mr-0"></div>
+            </h3>
+            <InputList
+              riderId={initialData?.id}
+              initialRows={inputListRows}
+              onRowsChange={setInputListRows}
+            />
+          </div>
+        )}
+
         <div className="border-blue-500/60 border rounded-lg p-4 bg-[#0F1729] mb-6"> 
           <div className="space-y-4">
             <SectionSelect

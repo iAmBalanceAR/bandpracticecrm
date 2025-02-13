@@ -46,7 +46,7 @@ import {
 } from 'lucide-react'
 import { format } from "date-fns"
 import { useRouter } from 'next/navigation'
-import { TechnicalRiderDetails, HospitalityRiderDetails, Setlist, SetlistItem } from '../types'
+import { TechnicalRiderDetails, HospitalityRiderDetails, Setlist, SetlistItem, InputListRow } from '../types'
 import { StagePlot, StagePlotItem } from '@/app/stage-plot/types'
 import { ScrollArea } from "@/components/ui/scroll-area"
 import StageGrid from '@/app/stage-plot/components/stage-grid'
@@ -60,6 +60,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { CheckmarkIcon } from 'react-hot-toast'
+import { InputList } from './input-list'
 
 interface RiderDetailsProps {
   type: 'technical' | 'hospitality'
@@ -67,6 +68,7 @@ interface RiderDetailsProps {
     id?: string
     rider_id: string
     sections?: RiderSection[]
+    input_list?: InputListRow[]
   }
   gig?: any
   stagePlot?: StagePlot
@@ -291,7 +293,6 @@ export function RiderDetails({
                   </div>
                 </div>
               </div>
-           
           </div>
         </div>
       )}
@@ -397,6 +398,34 @@ export function RiderDetails({
               </div>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Input List Section */}
+      {type === 'technical' && details?.input_list && details.input_list.length > 0 && (
+        <div className="border border-gray-500 rounded-lg overflow-hidden flex flex-col bg-[#030817]">
+          <div className="bg-[#1F2937] p-2 border-b border-gray-500">
+            <div className="flex items-center gap-2">
+              <List className="h-5 w-5 text-[#008ffb] text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black" />
+              <h3 className="text-lg font-semibold text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">Input List</h3>
+            </div>
+          </div>
+          <div className="p-4">
+            <div className="grid grid-cols-[80px_1fr_1fr] gap-4 items-center font-semibold text-sm text-gray-400 mb-2 px-2">
+              <div>CH</div>
+              <div>INSTRUMENT</div>
+              <div>MICROPHONE</div>
+            </div>
+            <div className="space-y-1">
+              {details.input_list.map((row) => (
+                <div key={row.id} className="grid grid-cols-[80px_1fr_1fr] gap-4 items-center text-sm bg-[#111827] p-2 rounded">
+                  <div className="text-white font-mono">{row.channel_number}</div>
+                  <div className="text-white">{row.instrument}</div>
+                  <div className="text-white">{row.microphone}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 

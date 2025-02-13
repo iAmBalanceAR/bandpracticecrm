@@ -4,7 +4,7 @@ import { RiderForm } from '@/app/riders/components/rider-form'
 import { getStagePlots, getSetlists } from '@/app/riders/actions'
 import CustomSectionHeader from '@/components/common/CustomSectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
-import { Rider, Setlist } from '@/app/riders/types'
+import { Rider, Setlist, TechnicalRiderDetails } from '@/app/riders/types'
 
 interface Props {
   params: {
@@ -47,6 +47,15 @@ export default async function EditTechnicalRider({ params }: Props) {
     .eq('user_id', user.id)
     .single()
 
+  // Fetch input list data
+  const { data: inputListData } = await supabase
+    .from('input_list')
+    .select('*')
+    .eq('rider_id', params.id)
+    .order('channel_number', { ascending: true })
+
+  console.log('Fetched input list data:', inputListData) // Debug log
+
   // Transform the data to match the Rider type
   const rider: Rider | undefined = riderData ? {
     id: riderData.id,
@@ -67,7 +76,20 @@ export default async function EditTechnicalRider({ params }: Props) {
       is_custom: !section.section_id || section.section_id === '00000000-0000-0000-0000-000000000000',
       is_default: false,
       content: section.content
-    }))
+    })),
+    details: {
+      rider_id: riderData.id,
+      pa_system: {},
+      mixing_console: {},
+      monitoring: {},
+      microphones: {},
+      backline: {},
+      lighting: {},
+      stage_requirements: {},
+      power_requirements: {},
+      additional_requirements: {},
+      input_list: inputListData || []
+    } as TechnicalRiderDetails
   } : undefined
 
   console.log('Transformed rider data:', rider)

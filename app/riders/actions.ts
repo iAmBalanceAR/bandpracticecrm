@@ -3,7 +3,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { Rider, TechnicalRiderDetails, HospitalityRiderDetails } from './types'
+import { Rider, TechnicalRiderDetails, HospitalityRiderDetails, RiderType, InputListRow } from './types'
 
 export async function getRiders(userId: string) {
   const cookieStore = cookies()
@@ -29,170 +29,202 @@ export async function getRiderDetails(riderId: string, type: 'technical' | 'hosp
 
   const table = type === 'technical' ? 'technical_rider_details' : 'hospitality_rider_details'
 
-  const { data, error } = await supabase
+  // Get the rider details
+  const { data: details, error: detailsError } = await supabase
     .from(table)
     .select('*')
     .eq('rider_id', riderId)
     .maybeSingle()
 
-  if (error && error.code !== 'PGRST116') {
-    console.error(`Error fetching ${type} rider details:`, error)
-    throw error
+  if (detailsError && detailsError.code !== 'PGRST116') {
+    console.error(`Error fetching ${type} rider details:`, detailsError)
+    throw detailsError
+  }
+
+  // For technical riders, also get the input list
+  let inputList = []
+  if (type === 'technical') {
+    const { data: inputListData, error: inputListError } = await supabase
+      .from('input_list')
+      .select('*')
+      .eq('rider_id', riderId)
+      .order('channel_number', { ascending: true })
+
+    if (inputListError) {
+      console.error('Error fetching input list:', inputListError)
+      throw inputListError
+    }
+
+    inputList = inputListData || []
+    console.log('Fetched input list:', inputList) // Debug log
   }
 
   // If no details exist, return an empty object with the rider_id
-  if (!data) {
+  const baseDetails = details || { rider_id: riderId, sections: {} }
+
+  // For technical riders, always include the input list
+  if (type === 'technical') {
     return {
-      rider_id: riderId,
-      sections: {}
-    } as TechnicalRiderDetails | HospitalityRiderDetails
+      ...baseDetails,
+      input_list: inputList
+    } as TechnicalRiderDetails
   }
 
-  return data as TechnicalRiderDetails | HospitalityRiderDetails
+  return baseDetails as HospitalityRiderDetails
 }
 
-export async function createRider({
-  type,
-  title,
-  is_template,
-  stage_plot_id,
-  setlist_id,
-  gig_id,
-  sections
-}: {
-  type: 'technical' | 'hospitality'
+interface CreateRiderData {
+  type: RiderType
   title: string
-  is_template?: boolean
-  gig_id?: string
+  is_template: boolean
   stage_plot_id?: string
   setlist_id?: string
+  gig_id?: string
   sections: {
-    section_id: string | null
+    section_id: string
     custom_section_name: string | null
     content: Record<string, any>
     sort_order: number
   }[]
-}) {
-  const cookieStore = cookies()
-  const supabase = createClient()
+  input_list?: InputListRow[]
+}
 
+interface UpdateRiderData extends CreateRiderData {
+  riderId: string
+}
+
+export async function createRider(data: CreateRiderData) {
   try {
-    // Get the authenticated user
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) throw new Error('Not authenticated')
+    const cookieStore = cookies()
+    const supabase = createClient()
 
-    // First, create the rider
+    // Get the current user
+    const { data: { user }, error: userError } = await supabase.auth.getUser()
+    if (userError || !user) throw userError || new Error('User not found')
+
+    // Start a transaction
     const { data: rider, error: riderError } = await supabase
       .from('riders')
-      .insert([{
+      .insert({
         user_id: user.id,
-        title,
-        type,
-        is_template,
-        stage_plot_id,
-        setlist_id,
-        gig_id,
-      }])
+        type: data.type,
+        title: data.title,
+        is_template: data.is_template,
+        stage_plot_id: data.stage_plot_id,
+        setlist_id: data.setlist_id,
+        gig_id: data.gig_id
+      })
       .select()
       .single()
 
     if (riderError) throw riderError
 
-    // Then, create the rider sections
-    const { error: sectionsError } = await supabase
-      .from('rider_section_content')
-      .insert(
-        sections.map(section => ({
-          rider_id: rider.id,
-          section_id: section.section_id,
-          custom_section_name: section.custom_section_name,
-          content: section.content,
-          sort_order: section.sort_order,
-        }))
-      )
+    // Insert sections
+    if (data.sections.length > 0) {
+      const { error: sectionsError } = await supabase
+        .from('rider_section_content')
+        .insert(
+          data.sections.map(section => ({
+            rider_id: rider.id,
+            section_id: section.section_id,
+            custom_section_name: section.custom_section_name,
+            content: section.content,
+            sort_order: section.sort_order
+          }))
+        )
 
-    if (sectionsError) {
-      // If sections creation fails, delete the rider
-      await supabase.from('riders').delete().eq('id', rider.id)
-      throw sectionsError
+      if (sectionsError) throw sectionsError
+    }
+
+    // Insert input list if provided and rider is technical
+    if (data.type === 'technical' && data.input_list && data.input_list.length > 0) {
+      const { error: inputListError } = await supabase
+        .from('input_list')
+        .insert(
+          data.input_list.map(row => ({
+            ...row,
+            rider_id: rider.id
+          }))
+        )
+
+      if (inputListError) throw inputListError
     }
 
     revalidatePath('/riders')
-    return { success: true, data: rider }
+    return { success: true }
   } catch (error) {
     console.error('Error creating rider:', error)
     return { success: false, error }
   }
 }
 
-export async function updateRider({
-  riderId,
-  type,
-  title,
-  is_template,
-  stage_plot_id,
-  setlist_id,
-  gig_id,
-  sections
-}: {
-  riderId: string
-  type: 'technical' | 'hospitality'
-  title?: string
-  is_template?: boolean
-  stage_plot_id?: string
-  setlist_id?: string
-  gig_id?: string
-  sections: {
-    section_id: string | null
-    custom_section_name: string | null
-    content: Record<string, any>
-    sort_order: number
-  }[]
-}) {
-  const cookieStore = cookies()
-  const supabase = createClient()
-
+export async function updateRider(data: UpdateRiderData) {
   try {
-    // Update rider
-    if (title || is_template || stage_plot_id || setlist_id || gig_id !== undefined) {
-      const { error: riderError } = await supabase
-        .from('riders')
-        .update({
-          title,
-          is_template,
-          stage_plot_id,
-          setlist_id,
-          gig_id,
-          updated_at: new Date().toISOString(),
-        })
-        .eq('id', riderId)
+    const cookieStore = cookies()
+    const supabase = createClient()
 
-      if (riderError) throw riderError
-    }
+    // Update rider
+    const { error: riderError } = await supabase
+      .from('riders')
+      .update({
+        title: data.title,
+        is_template: data.is_template,
+        stage_plot_id: data.stage_plot_id,
+        setlist_id: data.setlist_id,
+        gig_id: data.gig_id
+      })
+      .eq('id', data.riderId)
+
+    if (riderError) throw riderError
 
     // Delete existing sections
-    const { error: deleteError } = await supabase
+    const { error: deleteSectionsError } = await supabase
       .from('rider_section_content')
       .delete()
-      .eq('rider_id', riderId)
+      .eq('rider_id', data.riderId)
 
-    if (deleteError) throw deleteError
+    if (deleteSectionsError) throw deleteSectionsError
 
-    // Create new sections
-    if (sections.length > 0) {
+    // Insert new sections
+    if (data.sections.length > 0) {
       const { error: sectionsError } = await supabase
         .from('rider_section_content')
         .insert(
-          sections.map(section => ({
-            rider_id: riderId,
+          data.sections.map(section => ({
+            rider_id: data.riderId,
             section_id: section.section_id,
             custom_section_name: section.custom_section_name,
             content: section.content,
-            sort_order: section.sort_order,
+            sort_order: section.sort_order
           }))
         )
 
       if (sectionsError) throw sectionsError
+    }
+
+    // Handle input list if this is a technical rider
+    if (data.type === 'technical') {
+      // Delete existing input list
+      const { error: deleteInputListError } = await supabase
+        .from('input_list')
+        .delete()
+        .eq('rider_id', data.riderId)
+
+      if (deleteInputListError) throw deleteInputListError
+
+      // Insert new input list if provided
+      if (data.input_list && data.input_list.length > 0) {
+        const { error: inputListError } = await supabase
+          .from('input_list')
+          .insert(
+            data.input_list.map(row => ({
+              ...row,
+              rider_id: data.riderId
+            }))
+          )
+
+        if (inputListError) throw inputListError
+      }
     }
 
     revalidatePath('/riders')
