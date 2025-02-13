@@ -35,8 +35,7 @@ export default async function EditHospitalityRider({ params }: Props) {
         section_id,
         custom_section_name,
         content,
-        sort_order,
-        name
+        sort_order
       )
     `)
     .eq('id', params.id)
@@ -56,7 +55,7 @@ export default async function EditHospitalityRider({ params }: Props) {
     version: riderData.version,
     sections: riderData.rider_section_content.map(section => ({
       id: section.section_id || `custom-${section.sort_order}`,
-      name: section.custom_section_name || section.name || '',
+      name: section.custom_section_name || '',
       sort_order: section.sort_order,
       is_custom: !section.section_id || section.section_id === '00000000-0000-0000-0000-000000000000',
       is_default: false,
