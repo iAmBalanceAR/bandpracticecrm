@@ -10,8 +10,9 @@ export default function DraggableItem({
   onPositionChange,
   onSizeChange,
   onRotationChange,
-  children
-}: DraggableItemProps) {
+  children,
+  readOnly = false
+}: DraggableItemProps & { readOnly?: boolean }) {
   const itemRef = useRef<HTMLDivElement>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [isResizing, setIsResizing] = useState(false)
@@ -68,6 +69,7 @@ export default function DraggableItem({
   }, [id, isDragging, isResizing, dragStart, initialPosition, initialSize, position, size, onPositionChange, onSizeChange])
 
   const handleMouseDown = (e: React.MouseEvent, type: 'drag' | 'resize') => {
+    if (readOnly) return
     e.stopPropagation()
     if (type === 'drag') {
       setIsDragging(true)
@@ -89,18 +91,20 @@ export default function DraggableItem({
         width: `${size.width}%`,
         height: `${size.height}%`,
         transform: `rotate(${rotation}deg)`,
-        cursor: isDragging ? 'grabbing' : 'grab',
+        cursor: readOnly ? 'default' : isDragging ? 'grabbing' : 'grab',
         userSelect: 'none'
       }}
       onMouseDown={(e) => handleMouseDown(e, 'drag')}
     >
       {children}
       
-      {/* Resize handle */}
-      <div
-        className="absolute bottom-0 right-0 w-4 h-4 bg-white/20 rounded-bl cursor-se-resize"
-        onMouseDown={(e) => handleMouseDown(e, 'resize')}
-      />
+      {/* Resize handle - only show if not readOnly */}
+      {!readOnly && (
+        <div
+          className="absolute bottom-0 right-0 w-4 h-4 bg-white/20 rounded-bl cursor-se-resize"
+          onMouseDown={(e) => handleMouseDown(e, 'resize')}
+        />
+      )}
     </div>
   )
 } 

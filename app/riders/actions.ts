@@ -33,11 +33,19 @@ export async function getRiderDetails(riderId: string, type: 'technical' | 'hosp
     .from(table)
     .select('*')
     .eq('rider_id', riderId)
-    .single()
+    .maybeSingle()
 
-  if (error) {
+  if (error && error.code !== 'PGRST116') {
     console.error(`Error fetching ${type} rider details:`, error)
     throw error
+  }
+
+  // If no details exist, return an empty object with the rider_id
+  if (!data) {
+    return {
+      rider_id: riderId,
+      sections: {}
+    } as TechnicalRiderDetails | HospitalityRiderDetails
   }
 
   return data as TechnicalRiderDetails | HospitalityRiderDetails

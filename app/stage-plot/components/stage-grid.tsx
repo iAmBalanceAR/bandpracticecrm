@@ -15,6 +15,7 @@ interface StageGridProps {
   onRotationChange: (id: string, rotation: number) => void
   onDeleteItem: (id: string) => void
   onLabelChange?: (id: string, label: string) => void
+  readOnly?: boolean
 }
 
 export default function StageGrid({
@@ -25,7 +26,8 @@ export default function StageGrid({
   onSizeChange,
   onRotationChange,
   onDeleteItem,
-  onLabelChange
+  onLabelChange,
+  readOnly = false
 }: StageGridProps) {
   return (
     <div 
@@ -61,6 +63,7 @@ export default function StageGrid({
             onPositionChange={onPositionChange}
             onSizeChange={onSizeChange}
             onRotationChange={onRotationChange}
+            readOnly={readOnly}
           >
             <div
               className={`w-full h-full flex flex-col items-center justify-center p-1 rounded-md cursor-move

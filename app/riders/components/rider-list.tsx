@@ -3,7 +3,7 @@
 import { RiderListProps } from '../types'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
-import { Loader2, Trash2, Pencil, ShipWheel, Check, X } from 'lucide-react'
+import { Loader2, Trash2, Pencil, ShipWheel, Check, X, Eye } from 'lucide-react'
 import {
   Table,
   TableBody,
@@ -18,6 +18,7 @@ export function RiderList({
   riders,
   onSelect,
   onDelete,
+  onViewDetails,
   isLoading = false
 }: RiderListProps) {
 
@@ -104,6 +105,17 @@ export function RiderList({
               </TableCell>
               <TableCell className="text-center mx-auto text-2xl text-gray-400">
                 <div className="flex items-center justify-center space-x-2">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-[#008ffb] hover:text-[#008ffb] hover:bg-[#008ffb]/10"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onViewDetails && onViewDetails(rider)
+                    }}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
                   <Button
                     variant="ghost"
                     size="icon"

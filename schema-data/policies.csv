@@ -1,0 +1,132 @@
+﻿"schemaname","tablename","policyname","permissive","roles","cmd","qual","with_check"
+"public","attachments","Users can delete their own attachments","PERMISSIVE","{public}","DELETE","(uploaded_by = auth.uid())","null"
+"public","attachments","Users can insert attachments for their leads","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = attachments.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))"
+"public","attachments","Users can insert their own attachments","PERMISSIVE","{public}","INSERT","null","(uploaded_by = auth.uid())"
+"public","attachments","Users can update their own attachments","PERMISSIVE","{public}","UPDATE","(uploaded_by = auth.uid())","null"
+"public","attachments","Users can view attachments for their leads","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = attachments.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))","null"
+"public","attachments","Users can view their own attachments","PERMISSIVE","{public}","SELECT","(uploaded_by = auth.uid())","null"
+"public","communications","Users can insert communications for their leads","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = communications.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))"
+"public","communications","Users can view communications for their leads","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = communications.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))","null"
+"public","gigs","Users can delete their own gigs","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","gigs","Users can insert their own gigs","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","gigs","Users can update their own gigs","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","gigs","Users can view their own gigs","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","hospitality_rider_details","Users can delete their own hospitality rider details","PERMISSIVE","{public}","DELETE","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = hospitality_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","hospitality_rider_details","Users can insert their own hospitality rider details","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = hospitality_rider_details.rider_id) AND (riders.user_id = auth.uid()))))"
+"public","hospitality_rider_details","Users can update their own hospitality rider details","PERMISSIVE","{public}","UPDATE","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = hospitality_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","hospitality_rider_details","Users can view their own hospitality rider details","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = hospitality_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","hospitality_rider_sections","Hospitality sections are viewable by everyone","PERMISSIVE","{public}","SELECT","true","null"
+"public","lead_attachments","Users can delete their own lead attachments","PERMISSIVE","{public}","DELETE","((auth.jwt() ->> 'email'::text) = created_by_email)","null"
+"public","lead_attachments","Users can insert their own lead attachments","PERMISSIVE","{public}","INSERT","null","((auth.jwt() ->> 'email'::text) = created_by_email)"
+"public","lead_attachments","Users can view their own lead attachments","PERMISSIVE","{public}","SELECT","((auth.jwt() ->> 'email'::text) = created_by_email)","null"
+"public","lead_notes","Users can delete their own lead notes","PERMISSIVE","{public}","DELETE","(created_by = auth.uid())","null"
+"public","lead_notes","Users can insert their own lead notes","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = lead_notes.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))"
+"public","lead_notes","Users can update their own lead notes","PERMISSIVE","{public}","UPDATE","(created_by = auth.uid())","null"
+"public","lead_notes","Users can view their own lead notes","PERMISSIVE","{public}","SELECT","(created_by = auth.uid())","null"
+"public","leads","Users can delete leads they own","PERMISSIVE","{public}","DELETE","(created_by = auth.uid())","null"
+"public","leads","Users can delete their own leads","PERMISSIVE","{public}","DELETE","(auth.uid() = created_by)","null"
+"public","leads","Users can insert leads","PERMISSIVE","{public}","INSERT","null","(auth.uid() IS NOT NULL)"
+"public","leads","Users can insert their own leads","PERMISSIVE","{public}","INSERT","null","(auth.uid() = created_by)"
+"public","leads","Users can update leads they own or are assigned to","PERMISSIVE","{public}","UPDATE","((created_by = auth.uid()) OR (assigned_to = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((users.id = auth.uid()) AND ((users.raw_user_meta_data ->> 'role'::text) = 'admin'::text)))))","null"
+"public","leads","Users can update their own leads","PERMISSIVE","{public}","UPDATE","((auth.uid() = created_by) OR (assigned_to = auth.uid()))","null"
+"public","leads","Users can view leads they created or are assigned to","PERMISSIVE","{public}","SELECT","((created_by = auth.uid()) OR (assigned_to = auth.uid()) OR (EXISTS ( SELECT 1
+   FROM auth.users
+  WHERE ((users.id = auth.uid()) AND ((users.raw_user_meta_data ->> 'role'::text) = 'admin'::text)))))","null"
+"public","leads","Users can view their own leads","PERMISSIVE","{public}","SELECT","((auth.uid() = created_by) OR (assigned_to = auth.uid()))","null"
+"public","prices","Prices are viewable by everyone.","PERMISSIVE","{public}","SELECT","true","null"
+"public","products","Products are viewable by everyone.","PERMISSIVE","{public}","SELECT","true","null"
+"public","profiles","Public profiles are viewable by everyone.","PERMISSIVE","{public}","SELECT","true","null"
+"public","profiles","Users can insert their own profile.","PERMISSIVE","{public}","INSERT","null","(auth.uid() = id)"
+"public","profiles","Users can update own profile.","PERMISSIVE","{public}","UPDATE","(auth.uid() = id)","null"
+"public","reminders","Users can delete their own reminders","PERMISSIVE","{public}","DELETE","(created_by = auth.uid())","null"
+"public","reminders","Users can insert their own reminders","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM leads
+  WHERE ((leads.id = reminders.lead_id) AND ((leads.created_by = auth.uid()) OR (leads.assigned_to = auth.uid())))))"
+"public","reminders","Users can update their own reminders","PERMISSIVE","{public}","UPDATE","(created_by = auth.uid())","null"
+"public","reminders","Users can view their own reminders","PERMISSIVE","{public}","SELECT","(created_by = auth.uid())","null"
+"public","rider_section_content","Users can create their own rider section content","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM riders r
+  WHERE ((r.id = rider_section_content.rider_id) AND (r.user_id = auth.uid()))))"
+"public","rider_section_content","Users can delete their own rider section content","PERMISSIVE","{public}","DELETE","(EXISTS ( SELECT 1
+   FROM riders r
+  WHERE ((r.id = rider_section_content.rider_id) AND (r.user_id = auth.uid()))))","null"
+"public","rider_section_content","Users can update their own rider section content","PERMISSIVE","{public}","UPDATE","(EXISTS ( SELECT 1
+   FROM riders r
+  WHERE ((r.id = rider_section_content.rider_id) AND (r.user_id = auth.uid()))))","null"
+"public","rider_section_content","Users can view their own rider section content","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM riders r
+  WHERE ((r.id = rider_section_content.rider_id) AND (r.user_id = auth.uid()))))","null"
+"public","riders","Users can delete their own riders","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","riders","Users can insert their own riders","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","riders","Users can update their own riders","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","(auth.uid() = user_id)"
+"public","riders","Users can view their own riders","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","saved_venues","Users can delete their own saved venues","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","saved_venues","Users can save venues","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","saved_venues","Users can view their own saved venues","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","setlists","Users can create their own setlists","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","setlists","Users can delete their own setlists","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","setlists","Users can update their own setlists","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","setlists","Users can view their own setlists","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","stage_plot_items","Users can delete items from their stage plots","PERMISSIVE","{public}","DELETE","(EXISTS ( SELECT 1
+   FROM stage_plots
+  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))","null"
+"public","stage_plot_items","Users can insert items to their stage plots","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM stage_plots
+  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))"
+"public","stage_plot_items","Users can update items on their stage plots","PERMISSIVE","{public}","UPDATE","(EXISTS ( SELECT 1
+   FROM stage_plots
+  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))","null"
+"public","stage_plot_items","Users can view items of their stage plots","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM stage_plots
+  WHERE ((stage_plots.id = stage_plot_items.stage_plot_id) AND (stage_plots.user_id = auth.uid()))))","null"
+"public","stage_plots","Users can delete their own stage plots","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","stage_plots","Users can insert their own stage plots","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","stage_plots","Users can update their own stage plots","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","stage_plots","Users can view their own stage plots","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","stageplots","Users can create their own stageplots","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","stageplots","Users can delete their own stageplots","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","stageplots","Users can update their own stageplots","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","stageplots","Users can view their own stageplots","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","subscriptions","Service role can manage all subscriptions","PERMISSIVE","{service_role}","ALL","true","true"
+"public","subscriptions","Users can view own subscriptions.","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","technical_rider_details","Users can delete their own technical rider details","PERMISSIVE","{public}","DELETE","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = technical_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","technical_rider_details","Users can insert their own technical rider details","PERMISSIVE","{public}","INSERT","null","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = technical_rider_details.rider_id) AND (riders.user_id = auth.uid()))))"
+"public","technical_rider_details","Users can update their own technical rider details","PERMISSIVE","{public}","UPDATE","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = technical_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","technical_rider_details","Users can view their own technical rider details","PERMISSIVE","{public}","SELECT","(EXISTS ( SELECT 1
+   FROM riders
+  WHERE ((riders.id = technical_rider_details.rider_id) AND (riders.user_id = auth.uid()))))","null"
+"public","technical_rider_sections","Technical sections are viewable by everyone","PERMISSIVE","{public}","SELECT","true","null"
+"public","tourconnect","Users can delete their own tour connections","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","tourconnect","Users can insert their own tour connections","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","tourconnect","Users can update their own tour connections","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","tourconnect","Users can view their own tour connections","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"
+"public","tours","Users can delete their own tours","PERMISSIVE","{public}","DELETE","(auth.uid() = user_id)","null"
+"public","tours","Users can insert their own tours","PERMISSIVE","{public}","INSERT","null","(auth.uid() = user_id)"
+"public","tours","Users can update their own tours","PERMISSIVE","{public}","UPDATE","(auth.uid() = user_id)","null"
+"public","tours","Users can view their own tours","PERMISSIVE","{public}","SELECT","(auth.uid() = user_id)","null"

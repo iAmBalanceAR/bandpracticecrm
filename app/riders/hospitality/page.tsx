@@ -5,7 +5,7 @@ import CustomSectionHeader from '@/components/common/CustomSectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
 import { RiderForm } from '../components/rider-form'
 import { getStagePlots, getSetlists } from '../actions'
-import { StagePlot } from '../types'
+import { Setlist, StagePlot } from '../types'
 
 export default async function HospitalityRiderTool() {
   const cookieStore = cookies()
@@ -29,7 +29,7 @@ export default async function HospitalityRiderTool() {
             <RiderForm
               type="hospitality"
               stagePlots={stagePlots as StagePlot[]}
-              setlists={setlists}
+              setlists={setlists as Setlist[]}
             />
           </Suspense>
           {/* Page Content Ends */}

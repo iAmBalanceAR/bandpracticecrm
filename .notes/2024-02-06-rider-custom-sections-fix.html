@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rider Custom Sections Implementation Fix - Technical Report</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #e4e4e7;
+            background-color: #0f172a;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+        h1, h2, h3 {
+            color: #60a5fa;
+            border-bottom: 2px solid #1e40af;
+            padding-bottom: 0.5rem;
+        }
+        code {
+            background-color: #1e293b;
+            padding: 0.2rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Consolas', monospace;
+            color: #93c5fd;
+        }
+        pre {
+            background-color: #1e293b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            border: 1px solid #3b82f6;
+        }
+        pre code {
+            background-color: transparent;
+            padding: 0;
+        }
+        .note {
+            background-color: #172554;
+            border-left: 4px solid #3b82f6;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .warning {
+            background-color: #451a03;
+            border-left: 4px solid #ea580c;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+        .success {
+            background-color: #14532d;
+            border-left: 4px solid #22c55e;
+            padding: 1rem;
+            margin: 1rem 0;
+            border-radius: 0 0.5rem 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Technical Report: Rider Custom Sections Implementation Fix</h1>
+    <p><strong>Date:</strong> February 6, 2024</p>
+    <p><strong>Component:</strong> RiderForm</p>
+    <p><strong>Files Affected:</strong></p>
+    <ul>
+        <li><code>app/riders/components/rider-form.tsx</code></li>
+        <li><code>app/riders/actions.ts</code></li>
+    </ul>
+
+    <h2>Issue Overview</h2>
+    <div class="note">
+        <p>The application allows users to create and edit rider documents with both predefined and custom sections. A critical bug was identified where custom section names were being lost during the edit process, despite working correctly during initial creation.</p>
+    </div>
+
+    <h2>Technical Background</h2>
+    <h3>Data Structure</h3>
+    <p>Riders in the application consist of multiple sections, which can be either:</p>
+    <ul>
+        <li>Predefined sections (stored in <code>technical_rider_sections</code> or <code>hospitality_rider_sections</code> tables)</li>
+        <li>Custom sections (identified by a zero UUID: <code>00000000-0000-0000-0000-000000000000</code>)</li>
+    </ul>
+
+    <h3>Database Schema</h3>
+    <pre><code>// rider_section_content table
+{
+    id: uuid,
+    rider_id: uuid,
+    section_id: uuid,  // References predefined sections or zero UUID for custom
+    custom_section_name: string | null,
+    content: jsonb,
+    sort_order: integer
+}</code></pre>
+
+    <h2>The Bug</h2>
+    <div class="warning">
+        <p>Custom section names were being lost during the edit process due to incorrect identification of custom sections in the form submission logic. The system was failing to recognize existing custom sections when preparing the data for update.</p>
+    </div>
+
+    <h3>Original Implementation</h3>
+    <pre><code>const sectionData = Array.from(selectedSections).map(sectionId => {
+    const isCustom = sectionId.startsWith('custom-')  // Incorrect identification
+    const content = sectionContents.get(sectionId)
+    return {
+        section_id: isCustom ? '00000000-0000-0000-0000-000000000000' : sectionId,
+        custom_section_name: isCustom ? customSections.get(sectionId) ?? null : null,
+        content: content,
+        sort_order: Array.from(selectedSections).indexOf(sectionId)
+    }
+})</code></pre>
+
+    <h2>The Fix</h2>
+    <div class="success">
+        <p>The solution involved properly identifying custom sections using two criteria:</p>
+        <ol>
+            <li>Sections with the zero UUID (<code>00000000-0000-0000-0000-000000000000</code>)</li>
+            <li>Sections marked with <code>is_custom: true</code> in the sections array</li>
+        </ol>
+    </div>
+
+    <h3>Fixed Implementation</h3>
+    <pre><code>const sectionData = Array.from(selectedSections).map((sectionId, index) => {
+    const isCustom = sectionId === '00000000-0000-0000-0000-000000000000' || 
+                    sections.find(s => s.id === sectionId)?.is_custom
+    const content = sectionContents.get(sectionId)
+    const customName = customSections.get(sectionId) ?? null
+    
+    return {
+        section_id: isCustom ? '00000000-0000-0000-0000-000000000000' : sectionId,
+        custom_section_name: isCustom ? customName : null,
+        content: content || {},
+        sort_order: index
+    }
+})</code></pre>
+
+    <h2>Key Changes</h2>
+    <ol>
+        <li>
+            <strong>Custom Section Identification:</strong>
+            <ul>
+                <li>Changed from string pattern matching to proper UUID comparison</li>
+                <li>Added secondary identification through <code>is_custom</code> flag</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Type Safety:</strong>
+            <ul>
+                <li>Added null coalescing operator to ensure <code>customName</code> is never undefined</li>
+                <li>Ensured content is always an object with <code>content || {}</code></li>
+            </ul>
+        </li>
+        <li>
+            <strong>Sort Order:</strong>
+            <ul>
+                <li>Simplified sort order assignment using map index</li>
+                <li>Maintains section order as displayed in the UI</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>State Management</h2>
+    <p>The form maintains several pieces of state:</p>
+    <pre><code>const [sections, setSections] = useState<Section[]>(initialData?.sections || [])
+const [selectedSections, setSelectedSections] = useState<Set<string>>(new Set())
+const [sectionContents, setSectionContents] = useState<Map<string, any>>(new Map())
+const [customSections, setCustomSections] = useState<Map<string, string>>(new Map())</code></pre>
+
+    <h3>State Purpose</h3>
+    <ul>
+        <li><code>sections</code>: Stores all available sections, both predefined and custom</li>
+        <li><code>selectedSections</code>: Tracks which sections are currently selected in the form</li>
+        <li><code>sectionContents</code>: Maps section IDs to their content</li>
+        <li><code>customSections</code>: Maps custom section IDs to their names</li>
+    </ul>
+
+    <h2>Data Flow</h2>
+    <ol>
+        <li>
+            <strong>Initial Load:</strong>
+            <ul>
+                <li>Form receives initial data through <code>initialData</code> prop</li>
+                <li>Existing sections are loaded into state</li>
+                <li>Custom sections are identified and stored in <code>customSections</code> Map</li>
+            </ul>
+        </li>
+        <li>
+            <strong>Edit Process:</strong>
+            <ul>
+                <li>User can modify section content</li>
+                <li>Changes are tracked in <code>sectionContents</code></li>
+                <li>Custom section names are preserved in <code>customSections</code></li>
+            </ul>
+        </li>
+        <li>
+            <strong>Submission:</strong>
+            <ul>
+                <li>Data is transformed into the correct format for the API</li>
+                <li>Custom sections are properly identified and marked</li>
+                <li>Section order is preserved</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>API Integration</h2>
+    <p>The form interacts with two main API endpoints:</p>
+    <pre><code>// Create new rider
+POST /api/riders
+Body: {
+    type: 'technical' | 'hospitality',
+    title: string,
+    sections: Array<{
+        section_id: string | null,
+        custom_section_name: string | null,
+        content: Record<string, any>,
+        sort_order: number
+    }>
+}
+
+// Update existing rider
+PUT /api/riders/:id
+Body: {
+    // Same structure as create
+}</code></pre>
+
+    <h2>Testing Considerations</h2>
+    <div class="note">
+        <p>When testing this functionality, pay special attention to:</p>
+        <ul>
+            <li>Creating new riders with custom sections</li>
+            <li>Editing existing riders with custom sections</li>
+            <li>Mixed scenarios with both predefined and custom sections</li>
+            <li>Section order preservation</li>
+            <li>Content preservation during edits</li>
+        </ul>
+    </div>
+
+    <h2>Future Considerations</h2>
+    <ul>
+        <li>Consider adding validation for custom section names</li>
+        <li>Implement undo/redo functionality for section changes</li>
+        <li>Add section templates for common custom sections</li>
+        <li>Consider implementing section duplication</li>
+    </ul>
+
+</body>
+</html> 

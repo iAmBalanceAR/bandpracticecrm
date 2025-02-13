@@ -1,0 +1,8 @@
+﻿"table_name","trigger_name","event_manipulation","action_statement","action_timing"
+"gigs","update_gigs_updated_at","UPDATE","EXECUTE FUNCTION update_updated_at_column()","BEFORE"
+"hospitality_rider_sections","handle_hospitality_rider_sections_updated_at","UPDATE","EXECUTE FUNCTION handle_updated_at()","BEFORE"
+"rider_section_content","handle_rider_section_content_updated_at","UPDATE","EXECUTE FUNCTION handle_updated_at()","BEFORE"
+"saved_venues","update_saved_venues_last_updated","UPDATE","EXECUTE FUNCTION update_saved_venues_last_updated()","BEFORE"
+"technical_rider_sections","handle_technical_rider_sections_updated_at","UPDATE","EXECUTE FUNCTION handle_updated_at()","BEFORE"
+"tours","update_tours_last_updated","UPDATE","EXECUTE FUNCTION update_last_updated_column()","BEFORE"
+"venues","update_venues_updated_at","UPDATE","EXECUTE FUNCTION update_updated_at_column()","BEFORE"

@@ -4,7 +4,7 @@ import { RiderForm } from '@/app/riders/components/rider-form'
 import { getStagePlots, getSetlists } from '@/app/riders/actions'
 import CustomSectionHeader from '@/components/common/CustomSectionHeader'
 import { Card, CardContent } from '@/components/ui/card'
-import { Rider } from '@/app/riders/types'
+import { Rider, Setlist } from '@/app/riders/types'
 
 interface Props {
   params: {
@@ -84,7 +84,7 @@ export default async function EditTechnicalRider({ params }: Props) {
             type="technical"
             initialData={rider}
             stagePlots={stagePlots}
-            setlists={setlists}
+            setlists={setlists as Setlist[]}
           />
         </CardContent>
       </Card>

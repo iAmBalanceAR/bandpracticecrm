@@ -1,4 +1,5 @@
 import { type } from "os"
+import { StagePlot, StagePlotItem } from '@/app/stage-plot/types'
 
 export type RiderType = 'technical' | 'hospitality'
 
@@ -23,6 +24,11 @@ export interface Rider {
     is_default: boolean
     content: Record<string, any>
   }[]
+  details?: TechnicalRiderDetails | HospitalityRiderDetails
+  stagePlot?: StagePlot
+  stagePlotItems?: StagePlotItem[]
+  setlist?: Setlist
+  setlistItems?: SetlistItem[]
 }
 
 export interface RiderSection {
@@ -43,47 +49,53 @@ export interface RiderSectionContent {
 }
 
 export interface TechnicalRiderDetails {
-  id: string
+  id?: string
   rider_id: string
-  pa_system?: Record<string, any>
-  mixing_console?: Record<string, any>
-  monitoring?: Record<string, any>
-  microphones?: Record<string, any>
-  backline?: Record<string, any>
-  lighting?: Record<string, any>
-  stage_requirements?: Record<string, any>
-  power_requirements?: Record<string, any>
-  additional_requirements?: Record<string, any>
+  pa_system: Record<string, any>
+  mixing_console: Record<string, any>
+  monitoring: Record<string, any>
+  microphones: Record<string, any>
+  backline: Record<string, any>
+  lighting: Record<string, any>
+  stage_requirements: Record<string, any>
+  power_requirements: Record<string, any>
+  additional_requirements: Record<string, any>
+  sections?: Record<string, any>
 }
 
 export interface HospitalityRiderDetails {
-  id: string
+  id?: string
   rider_id: string
-  dressing_room?: Record<string, any>
-  catering?: Record<string, any>
-  beverages?: Record<string, any>
-  meals?: Record<string, any>
-  hotel?: Record<string, any>
-  transportation?: Record<string, any>
-  parking?: Record<string, any>
-  security?: Record<string, any>
-  merchandise?: Record<string, any>
-  additional_requirements?: Record<string, any>
+  dressing_room: Record<string, any>
+  catering: Record<string, any>
+  beverages: Record<string, any>
+  meals: Record<string, any>
+  hotel: Record<string, any>
+  transportation: Record<string, any>
+  parking: Record<string, any>
+  security: Record<string, any>
+  merchandise: Record<string, any>
+  additional_requirements: Record<string, any>
+  sections?: Record<string, any>
 }
 
-export interface StagePlot {
+export interface SetlistItem {
   id: string
-  user_id: string
-  name: string
-  stage_width: number
-  stage_depth: number
-  created_at: string
-  updated_at: string
+  setlist_id: string
+  title: string
+  duration: string
+  key: string
+  notes?: string
+  sort_order: number
 }
 
 export interface Setlist {
   id: string
+  user_id: string
   title: string
+  created_at: string
+  updated_at: string
+  items?: SetlistItem[]
 }
 
 export interface RiderFormProps {
@@ -99,6 +111,7 @@ export interface RiderListProps {
   riders: Rider[]
   onSelect?: (rider: Rider) => void
   onDelete?: (rider: Rider) => Promise<void>
+  onViewDetails?: (rider: Rider) => void
   isLoading?: boolean
 }
 
@@ -116,3 +129,5 @@ export interface RiderSectionProps {
   onContentChange: (content: string) => void
   onRemove: () => void
 } 
+
+export type { StagePlot }

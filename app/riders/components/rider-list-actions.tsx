@@ -29,6 +29,10 @@ export function RiderListActions(props: RiderListProps) {
     router.push(`/riders/${rider.type}/edit/${rider.id}`)
   }
 
+  const handleViewDetails = (rider: any) => {
+    router.push(`/riders/${rider.type}/details/${rider.id}`)
+  }
+
   const handleDelete = async (rider: any): Promise<void> => {
     setFeedbackModal({
       isOpen: true,
@@ -68,6 +72,7 @@ export function RiderListActions(props: RiderListProps) {
         {...props}
         onSelect={handleSelect}
         onDelete={handleDelete}
+        onViewDetails={handleViewDetails}
       />
       <FeedbackModal
         isOpen={feedbackModal.isOpen}

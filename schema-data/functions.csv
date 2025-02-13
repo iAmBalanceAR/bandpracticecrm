@@ -1,0 +1,2459 @@
+﻿"schema_name","function_name","function_definition","routine_type"
+"public","add_song_to_setlist","CREATE OR REPLACE FUNCTION public.add_song_to_setlist(p_setlist_id uuid, p_title text, p_duration interval, p_key text, p_notes text, p_sort_order integer)
+ RETURNS uuid
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_song_id UUID;
+BEGIN
+    -- Shift existing songs if needed
+    UPDATE setlist_songs
+    SET sort_order = sort_order + 1
+    WHERE setlist_id = p_setlist_id
+    AND sort_order >= p_sort_order;
+
+    -- Insert the new song
+    INSERT INTO setlist_songs (
+        setlist_id,
+        title,
+        duration,
+        key,
+        notes,
+        sort_order
+    ) VALUES (
+        p_setlist_id,
+        p_title,
+        p_duration,
+        p_key,
+        p_notes,
+        p_sort_order
+    ) RETURNING id INTO v_song_id;
+
+    -- Update setlist updated_at
+    UPDATE setlists
+    SET updated_at = NOW()
+    WHERE id = p_setlist_id;
+
+    RETURN v_song_id;
+END;
+$function$
+","function"
+"public","array_to_halfvec","CREATE OR REPLACE FUNCTION public.array_to_halfvec(double precision[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+","function"
+"public","array_to_halfvec","CREATE OR REPLACE FUNCTION public.array_to_halfvec(numeric[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+","function"
+"public","array_to_halfvec","CREATE OR REPLACE FUNCTION public.array_to_halfvec(real[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+","function"
+"public","array_to_halfvec","CREATE OR REPLACE FUNCTION public.array_to_halfvec(integer[], integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_halfvec$function$
+","function"
+"public","array_to_vector","CREATE OR REPLACE FUNCTION public.array_to_vector(integer[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+","function"
+"public","array_to_vector","CREATE OR REPLACE FUNCTION public.array_to_vector(double precision[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+","function"
+"public","array_to_vector","CREATE OR REPLACE FUNCTION public.array_to_vector(numeric[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+","function"
+"public","array_to_vector","CREATE OR REPLACE FUNCTION public.array_to_vector(real[], integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$array_to_vector$function$
+","function"
+"public","binary_quantize","CREATE OR REPLACE FUNCTION public.binary_quantize(vector)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$binary_quantize$function$
+","function"
+"public","binary_quantize","CREATE OR REPLACE FUNCTION public.binary_quantize(halfvec)
+ RETURNS bit
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_binary_quantize$function$
+","function"
+"public","connect_gig_to_default_tour","CREATE OR REPLACE FUNCTION public.connect_gig_to_default_tour(p_gig_id uuid)
+ RETURNS tourconnect
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  default_tour tours;
+  new_connection tourconnect;
+begin
+  -- Get the default tour
+  select *
+  into default_tour
+  from tours
+  where user_id = auth.uid()
+    and is_default = true
+  limit 1;
+  
+  if default_tour is null then
+    return null; -- No default tour set
+  end if;
+  
+  -- Create the connection
+  insert into tourconnect (tour_id, gig_id, user_id)
+  values (default_tour.id, p_gig_id, auth.uid())
+  returning * into new_connection;
+  
+  return new_connection;
+end;
+$function$
+","function"
+"public","cosine_distance","CREATE OR REPLACE FUNCTION public.cosine_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cosine_distance$function$
+","function"
+"public","cosine_distance","CREATE OR REPLACE FUNCTION public.cosine_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cosine_distance$function$
+","function"
+"public","cosine_distance","CREATE OR REPLACE FUNCTION public.cosine_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$cosine_distance$function$
+","function"
+"public","create_attachment","CREATE OR REPLACE FUNCTION public.create_attachment(attachment_data jsonb)
+ RETURNS attachments
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  new_attachment attachments;
+BEGIN
+  INSERT INTO attachments (
+    lead_id,
+    file_name,
+    file_type,
+    file_size,
+    type,
+    file_url,
+    uploaded_by,
+    uploaded_at
+  )
+  VALUES (
+    (attachment_data->>'lead_id')::uuid,
+    attachment_data->>'file_name',
+    attachment_data->>'file_type',
+    (attachment_data->>'file_size')::integer,
+    attachment_data->>'type',
+    attachment_data->>'file_url',
+    auth.uid(),
+    CURRENT_TIMESTAMP
+  )
+  RETURNING * INTO new_attachment;
+
+  RETURN new_attachment;
+END;
+$function$
+","function"
+"public","create_communication","CREATE OR REPLACE FUNCTION public.create_communication(comm_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_comm_id UUID;
+BEGIN
+    INSERT INTO communications (
+        lead_id,
+        type,
+        content,
+        date,
+        sentiment,
+        user_id
+    ) VALUES (
+        (comm_data->>'lead_id')::UUID,
+        comm_data->>'type',
+        comm_data->>'content',
+        COALESCE((comm_data->>'date')::timestamptz, now()),
+        comm_data->>'sentiment',
+        auth.uid()
+    )
+    RETURNING id INTO new_comm_id;
+
+    RETURN new_comm_id;
+END;
+$function$
+","function"
+"public","create_lead","CREATE OR REPLACE FUNCTION public.create_lead(lead_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_lead_id UUID;
+    current_user_id UUID;
+    current_user_email TEXT;
+BEGIN
+    -- Get the current user's ID and email from JWT
+    SELECT auth.uid(), (auth.jwt() ->> 'email')::TEXT 
+    INTO current_user_id, current_user_email;
+
+    -- Insert the new lead
+    INSERT INTO leads (
+        title,
+        type,
+        status,
+        priority,
+        company,
+        description,
+        venue_id,
+        contact_info,
+        tags,
+        next_follow_up,
+        expected_value,
+        created_by,
+        created_by_email,
+        assigned_to,
+        created_at,
+        updated_at
+    ) VALUES (
+        lead_data->>'title',
+        (lead_data->>'type')::lead_type,
+        COALESCE((lead_data->>'status')::lead_status, 'new'),
+        COALESCE((lead_data->>'priority')::lead_priority, 'medium'),
+        lead_data->>'company',
+        lead_data->>'description',
+        (lead_data->>'venue_id')::TEXT,  -- Changed from UUID to TEXT
+        COALESCE(lead_data->'contact_info', '{}'::jsonb),
+        COALESCE(array(SELECT jsonb_array_elements_text(CASE WHEN lead_data ? 'tags' THEN lead_data->'tags' ELSE '[]'::jsonb END)), ARRAY[]::text[]),
+        (lead_data->>'next_follow_up')::timestamptz,
+        (lead_data->>'expected_value')::decimal,
+        current_user_id,
+        current_user_email,
+        (lead_data->>'assigned_to')::UUID,
+        now(),
+        now()
+    )
+    RETURNING id INTO new_lead_id;
+
+    RETURN new_lead_id;
+END;
+$function$
+","function"
+"public","create_lead_attachment","CREATE OR REPLACE FUNCTION public.create_lead_attachment(p_lead_id uuid, p_filename text, p_file_path text, p_file_type text DEFAULT NULL::text, p_file_size bigint DEFAULT NULL::bigint)
+ RETURNS lead_attachments
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_result lead_attachments;
+BEGIN
+    INSERT INTO lead_attachments (
+        lead_id,
+        filename,
+        file_path,
+        file_type,
+        file_size,
+        created_by,
+        created_by_email
+    ) VALUES (
+        p_lead_id,
+        p_filename,
+        p_file_path,
+        p_file_type,
+        p_file_size,
+        '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid,
+        'arkansasdj@gmail.com'
+    )
+    RETURNING * INTO v_result;
+    
+    RETURN v_result;
+END;
+$function$
+","function"
+"public","create_lead_communication","CREATE OR REPLACE FUNCTION public.create_lead_communication(p_lead_id uuid, p_type text, p_content text, p_date timestamp with time zone DEFAULT now(), p_sentiment text DEFAULT NULL::text)
+ RETURNS communications
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_result communications;
+BEGIN
+  INSERT INTO communications (
+    lead_id,
+    type,
+    content,
+    date,
+    sentiment,
+    user_id
+  ) VALUES (
+    p_lead_id,
+    p_type,
+    p_content,
+    p_date,
+    p_sentiment,
+    '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid  -- Same user ID we verified works
+  )
+  RETURNING * INTO v_result;
+  
+  RETURN v_result;
+END;
+$function$
+","function"
+"public","create_lead_note","CREATE OR REPLACE FUNCTION public.create_lead_note(note_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    new_note_id UUID;
+BEGIN
+    INSERT INTO lead_notes (
+        lead_id,
+        content,
+        created_by,
+        created_by_email,
+        is_private
+    ) VALUES (
+        (note_data->>'lead_id')::UUID,
+        note_data->>'content',
+        auth.uid(),  -- No need to cast to text since the column is UUID
+        auth.jwt()->>'email',
+        coalesce((note_data->>'is_private')::boolean, false)
+    )
+    RETURNING id INTO new_note_id;
+
+    RETURN new_note_id;
+END;
+$function$
+","function"
+"public","create_lead_notes","CREATE OR REPLACE FUNCTION public.create_lead_notes(p_lead_id uuid, p_notes json)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  insert into lead_notes (
+    lead_id,
+    content,
+    is_private,
+    created_by
+  )
+  select 
+    p_lead_id,
+    (note->>'content')::text,
+    (note->>'is_private')::boolean,
+    auth.uid()
+  from json_array_elements(p_notes) as note;
+end;
+$function$
+","function"
+"public","create_lead_reminder","CREATE OR REPLACE FUNCTION public.create_lead_reminder(p_lead_id uuid, p_title text, p_description text, p_due_date timestamp with time zone, p_priority text DEFAULT 'medium'::text)
+ RETURNS reminders
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_result reminders;
+BEGIN
+  INSERT INTO reminders (
+    lead_id,
+    title,
+    description,
+    due_date,
+    priority,
+    created_by,
+    created_by_email
+  ) VALUES (
+    p_lead_id,
+    p_title,
+    p_description,
+    p_due_date,
+    p_priority,
+    '8d7a73c6-b048-44e5-a298-717676d538bf'::uuid,  -- Same user ID we verified works
+    'arkansasdj@gmail.com'
+  )
+  RETURNING * INTO v_result;
+  
+  RETURN v_result;
+END;
+$function$
+","function"
+"public","create_lead_reminders","CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders jsonb)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    reminder_record JSONB;
+BEGIN    
+    -- Insert each reminder
+    FOR reminder_record IN SELECT * FROM jsonb_array_elements(p_reminders)
+    LOOP
+        INSERT INTO reminders (
+            lead_id,
+            title,
+            description,
+            due_date,
+            priority,
+            created_by,
+            created_by_email,
+            created_at
+        ) VALUES (
+            p_lead_id,
+            reminder_record->>'title',
+            reminder_record->>'description',
+            (reminder_record->>'due_date')::timestamptz,
+            reminder_record->>'priority',
+            auth.uid(),
+            (auth.jwt() ->> 'email')::TEXT,
+            now()
+        );
+    END LOOP;
+END;
+$function$
+","function"
+"public","create_lead_reminders","CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders jsonb[])
+ RETURNS SETOF reminders
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+  v_reminder JSONB;
+  v_result reminders;
+BEGIN
+  FOR v_reminder IN SELECT * FROM jsonb_array_elements(p_reminders::jsonb)
+  LOOP
+    INSERT INTO reminders (
+      lead_id,
+      title,
+      description,
+      due_date,
+      priority,
+      status,
+      created_by_email
+    ) VALUES (
+      p_lead_id,
+      v_reminder->>'title',
+      v_reminder->>'description',
+      (v_reminder->>'due_date')::timestamp with time zone,
+      COALESCE(v_reminder->>'priority', 'medium'),
+      'pending',
+      'arkansasdj@gmail.com'  -- Using the lead owner's email
+    )
+    RETURNING * INTO v_result;
+
+    RETURN NEXT v_result;
+  END LOOP;
+END;
+$function$
+","function"
+"public","create_lead_reminders","CREATE OR REPLACE FUNCTION public.create_lead_reminders(p_lead_id uuid, p_reminders json)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  insert into reminders (
+    lead_id,
+    title,
+    description,
+    due_date,
+    priority,
+    status,
+    created_by,
+    assigned_to
+  )
+  select 
+    p_lead_id,
+    (reminder->>'title')::text,
+    (reminder->>'description')::text,
+    (reminder->>'due_date')::timestamp,
+    (reminder->>'priority')::text,
+    (reminder->>'status')::text,
+    auth.uid(),
+    auth.uid()
+  from json_array_elements(p_reminders) as reminder;
+end;
+$function$
+","function"
+"public","create_reminder","CREATE OR REPLACE FUNCTION public.create_reminder(reminder_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_reminder_id UUID;
+BEGIN
+    INSERT INTO reminders (
+        lead_id,
+        title,
+        description,
+        due_date,
+        completed,
+        created_by,
+        created_by_email
+    ) VALUES (
+        (reminder_data->>'lead_id')::UUID,
+        reminder_data->>'title',
+        reminder_data->>'description',
+        (reminder_data->>'due_date')::timestamptz,
+        COALESCE((reminder_data->>'completed')::boolean, false),
+        auth.uid(),
+        auth.jwt()->>'email'
+    )
+    RETURNING id INTO new_reminder_id;
+
+    RETURN new_reminder_id;
+END;
+$function$
+","function"
+"public","create_setlist","CREATE OR REPLACE FUNCTION public.create_setlist(p_user_id uuid, p_title text, p_songs jsonb DEFAULT '[]'::jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_setlist_id UUID;
+    v_song JSONB;
+BEGIN
+    -- Insert the setlist
+    INSERT INTO setlists (user_id, title)
+    VALUES (p_user_id, p_title)
+    RETURNING id INTO v_setlist_id;
+
+    -- Insert songs if provided
+    IF jsonb_array_length(p_songs) > 0 THEN
+        FOR v_song IN SELECT * FROM jsonb_array_elements(p_songs)
+        LOOP
+            INSERT INTO setlist_songs (
+                setlist_id,
+                title,
+                duration,
+                key,
+                notes,
+                sort_order
+            ) VALUES (
+                v_setlist_id,
+                v_song->>'title',
+                (v_song->>'duration')::interval,
+                v_song->>'key',
+                v_song->>'notes',
+                (v_song->>'sort_order')::integer
+            );
+        END LOOP;
+    END IF;
+
+    RETURN v_setlist_id;
+END;
+$function$
+","function"
+"public","create_tour","CREATE OR REPLACE FUNCTION public.create_tour(tour_data jsonb)
+ RETURNS tours
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  new_tour tours;
+begin
+  insert into tours (
+    user_id,
+    title,
+    description,
+    departure_date,
+    return_date,
+    status
+  )
+  values (
+    auth.uid(),
+    tour_data->>'title',
+    tour_data->>'description',
+    (tour_data->>'departure_date')::date,
+    (tour_data->>'return_date')::date,
+    (tour_data->>'status')::tour_status
+  )
+  returning * into new_tour;
+
+  return new_tour;
+end;
+$function$
+","function"
+"public","debug_lead_data","CREATE OR REPLACE FUNCTION public.debug_lead_data(p_lead_id uuid)
+ RETURNS TABLE(raw_lead jsonb, processed_lead json)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    WITH raw_data AS (
+        SELECT jsonb_build_object(
+            'id', l.id,
+            'title', l.title,
+            'type', l.type,
+            'status', l.status,
+            'priority', l.priority,
+            'company', l.company,
+            'description', l.description,
+            'venue_id', l.venue_id,
+            'contact_info', l.contact_info,
+            'tags', l.tags,
+            'next_follow_up', l.next_follow_up,
+            'expected_value', l.expected_value,
+            'created_by', l.created_by,
+            'created_by_email', l.created_by_email,
+            'assigned_to', l.assigned_to,
+            'created_at', l.created_at,
+            'updated_at', l.updated_at
+        ) as lead_data
+        FROM leads l
+        WHERE l.id = p_lead_id
+    ),
+    -- Get the processed data directly without auth check
+    processed_data AS (
+        SELECT 
+            json_build_object(
+                'id', l.id,
+                'title', l.title,
+                'type', l.type,
+                'status', l.status,
+                'priority', l.priority,
+                'company', COALESCE(l.company, ''),
+                'description', COALESCE(l.description, ''),
+                'venue_id', l.venue_id,
+                'contact_info', COALESCE(l.contact_info, '{}'::jsonb),
+                'tags', COALESCE(l.tags, ARRAY[]::text[]),
+                'next_follow_up', l.next_follow_up,
+                'expected_value', l.expected_value,
+                'created_by', l.created_by,
+                'created_by_email', l.created_by_email,
+                'assigned_to', l.assigned_to,
+                'created_at', l.created_at,
+                'updated_at', l.updated_at,
+                'lead_notes', COALESCE(json_agg(ln.*) FILTER (WHERE ln.id IS NOT NULL), '[]'::json),
+                'reminders', COALESCE(json_agg(r.*) FILTER (WHERE r.id IS NOT NULL), '[]'::json),
+                'communications', COALESCE(json_agg(c.*) FILTER (WHERE c.id IS NOT NULL), '[]'::json),
+                'attachments', COALESCE(json_agg(a.*) FILTER (WHERE a.id IS NOT NULL), '[]'::json)
+            ) as lead_data
+        FROM leads l
+        LEFT JOIN lead_notes ln ON l.id = ln.lead_id
+        LEFT JOIN reminders r ON l.id = r.lead_id
+        LEFT JOIN communications c ON l.id = c.lead_id
+        LEFT JOIN attachments a ON l.id = a.lead_id
+        WHERE l.id = p_lead_id
+        GROUP BY l.id
+    )
+    SELECT 
+        r.lead_data as raw_lead,
+        p.lead_data as processed_lead
+    FROM raw_data r
+    CROSS JOIN processed_data p;
+END;
+$function$
+","function"
+"public","delete_attachment","CREATE OR REPLACE FUNCTION public.delete_attachment(p_attachment_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+BEGIN
+  DELETE FROM attachments
+  WHERE id = p_attachment_id
+  AND uploaded_by = auth.uid();
+
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Attachment not found or permission denied';
+  END IF;
+END;
+$function$
+","function"
+"public","delete_communication","CREATE OR REPLACE FUNCTION public.delete_communication(comm_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    DELETE FROM communications
+    WHERE id = comm_id
+    AND user_id = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","delete_lead","CREATE OR REPLACE FUNCTION public.delete_lead(p_lead_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_user_email text;
+BEGIN
+    -- Get the user's email from the JWT token
+    v_user_email := auth.jwt()->>'email';
+    
+    -- First verify if the lead exists and belongs to the user
+    IF NOT EXISTS (
+        SELECT 1 FROM leads 
+        WHERE id = p_lead_id 
+        AND created_by_email = v_user_email
+    ) THEN
+        RETURN false;
+    END IF;
+
+    -- Delete associated records first
+    DELETE FROM lead_notes WHERE lead_id = p_lead_id;
+    DELETE FROM reminders WHERE lead_id = p_lead_id;
+    DELETE FROM communications WHERE lead_id = p_lead_id;
+    DELETE FROM attachments WHERE lead_id = p_lead_id;
+    
+    -- Delete the lead itself
+    DELETE FROM leads WHERE id = p_lead_id AND created_by_email = v_user_email;
+    
+    RETURN true;
+END;
+$function$
+","function"
+"public","delete_lead_note","CREATE OR REPLACE FUNCTION public.delete_lead_note(note_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    DELETE FROM lead_notes
+    WHERE id = note_id
+    AND created_by = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","delete_reminder","CREATE OR REPLACE FUNCTION public.delete_reminder(reminder_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    DELETE FROM reminders
+    WHERE id = reminder_id
+    AND created_by = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","delete_setlist","CREATE OR REPLACE FUNCTION public.delete_setlist(p_setlist_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    DELETE FROM setlists WHERE id = p_setlist_id;
+END;
+$function$
+","function"
+"public","delete_song_from_setlist","CREATE OR REPLACE FUNCTION public.delete_song_from_setlist(p_song_id uuid)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_setlist_id UUID;
+    v_sort_order INTEGER;
+BEGIN
+    -- Get the song's setlist_id and sort_order
+    SELECT setlist_id, sort_order
+    INTO v_setlist_id, v_sort_order
+    FROM setlist_songs
+    WHERE id = p_song_id;
+
+    -- Delete the song
+    DELETE FROM setlist_songs WHERE id = p_song_id;
+
+    -- Reorder remaining songs
+    UPDATE setlist_songs
+    SET sort_order = sort_order - 1
+    WHERE setlist_id = v_setlist_id
+    AND sort_order > v_sort_order;
+
+    -- Update setlist updated_at
+    UPDATE setlists
+    SET updated_at = NOW()
+    WHERE id = v_setlist_id;
+END;
+$function$
+","function"
+"public","delete_tour","CREATE OR REPLACE FUNCTION public.delete_tour(tour_id bigint)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  delete from tours
+  where id = tour_id
+    and user_id = auth.uid();
+
+  if not found then
+    raise exception 'Tour not found or you do not have permission to delete it';
+  end if;
+end;
+$function$
+","function"
+"public","fetch_setlist_songs","CREATE OR REPLACE FUNCTION public.fetch_setlist_songs(p_setlist_id uuid)
+ RETURNS TABLE(id uuid, title text, duration interval, key text, notes text, sort_order integer, created_at timestamp with time zone)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        ss.id,
+        ss.title,
+        ss.duration,
+        ss.key,
+        ss.notes,
+        ss.sort_order,
+        ss.created_at
+    FROM setlist_songs ss
+    WHERE ss.setlist_id = p_setlist_id
+    ORDER BY ss.sort_order;
+END;
+$function$
+","function"
+"public","fetch_setlists","CREATE OR REPLACE FUNCTION public.fetch_setlists(p_user_id uuid)
+ RETURNS TABLE(id uuid, title text, created_at timestamp with time zone, updated_at timestamp with time zone, song_count bigint)
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    RETURN QUERY
+    SELECT 
+        s.id,
+        s.title,
+        s.created_at,
+        s.updated_at,
+        COUNT(ss.id) as song_count
+    FROM setlists s
+    LEFT JOIN setlist_songs ss ON s.id = ss.setlist_id
+    WHERE s.user_id = p_user_id
+    GROUP BY s.id, s.title, s.created_at, s.updated_at
+    ORDER BY s.created_at DESC;
+END;
+$function$
+","function"
+"public","get_default_tour","CREATE OR REPLACE FUNCTION public.get_default_tour()
+ RETURNS tours
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  default_tour tours;
+begin
+  select *
+  into default_tour
+  from tours
+  where user_id = auth.uid()
+    and is_default = true
+  limit 1;
+  
+  return default_tour;
+end;
+$function$
+","function"
+"public","get_lead_by_id","CREATE OR REPLACE FUNCTION public.get_lead_by_id(p_lead_id uuid)
+ RETURNS leads
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_user_id uuid;
+  v_user_email text;
+  v_lead leads;
+BEGIN
+  -- Get the authenticated user's ID and email
+  v_user_id := auth.uid();
+  v_user_email := auth.jwt()->>'email';
+  
+  -- Get the lead if the user has access to it
+  SELECT *
+  INTO v_lead
+  FROM leads
+  WHERE id = p_lead_id
+    AND (created_by = v_user_id OR assigned_to = v_user_id);
+    
+  RETURN v_lead;
+END;
+$function$
+","function"
+"public","get_lead_details","CREATE OR REPLACE FUNCTION public.get_lead_details(p_lead_id uuid)
+ RETURNS json
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+declare
+  result json;
+begin
+  select json_build_object(
+    'lead', row_to_json(l),
+    'communications', (
+      select json_agg(row_to_json(c))
+      from communications c
+      where c.lead_id = l.id
+      order by c.date desc
+    ),
+    'reminders', (
+      select json_agg(row_to_json(r))
+      from reminders r
+      where r.lead_id = l.id
+      order by r.due_date
+    ),
+    'notes', (
+      select json_agg(row_to_json(n))
+      from lead_notes n
+      where n.lead_id = l.id
+      and (not n.is_private or n.created_by = auth.uid())
+      order by n.created_at desc
+    ),
+    'attachments', (
+      select json_agg(row_to_json(a))
+      from attachments a
+      where a.lead_id = l.id
+      order by a.uploaded_at desc
+    )
+  ) into result
+  from leads l
+  where l.id = p_lead_id;
+  
+  return result;
+end;
+$function$
+","function"
+"public","get_lead_with_details","CREATE OR REPLACE FUNCTION public.get_lead_with_details(p_lead_id uuid)
+ RETURNS json
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_user_id uuid;
+  v_user_email text;
+  v_result json;
+  v_lead leads;
+  v_venue json;
+  v_venue_types text[];
+  v_hashtags text[];
+BEGIN
+  -- Get the authenticated user's ID and email
+  v_user_id := auth.uid();
+  v_user_email := auth.jwt()->>'email';
+  
+  -- First get the lead record directly to preserve empty strings
+  SELECT *
+  INTO v_lead
+  FROM leads
+  WHERE id = p_lead_id
+    AND (created_by = v_user_id OR assigned_to = v_user_id);
+
+  -- Get venue data if venue_id exists
+  IF v_lead.venue_id IS NOT NULL THEN
+    -- Split venue types into array and convert to hashtags
+    WITH venue_data AS (
+      SELECT 
+        title,
+        NULLIF(NULLIF(address, ''), 'null') as address,
+        NULLIF(NULLIF(address2, ''), 'null') as address2,
+        NULLIF(NULLIF(city, ''), 'null') as city,
+        NULLIF(NULLIF(state, ''), 'null') as state,
+        NULLIF(NULLIF(zip, ''), 'null') as zip,
+        NULLIF(NULLIF(phone, ''), 'null') as phone,
+        NULLIF(NULLIF(website, ''), 'null') as website,
+        capacity,
+        string_to_array(COALESCE(venuetype, ''), ',') as venue_types
+      FROM venues 
+      WHERE id::text = v_lead.venue_id
+    )
+    SELECT 
+      json_build_object(
+        'title', title,
+        'address', address,
+        'address2', address2,
+        'city', city,
+        'state', state,
+        'zip', zip,
+        'phone', phone,
+        'website', website,
+        'capacity', capacity,
+        'venue_types', (
+          SELECT array_agg('#' || trim(type))
+          FROM unnest(venue_types) as type
+          WHERE trim(type) != ''
+        )
+      )
+    INTO v_venue
+    FROM venue_data;
+  END IF;
+  
+  -- Then get related records
+  WITH related_data AS (
+    SELECT 
+      COALESCE(json_agg(ln.*) FILTER (WHERE ln.id IS NOT NULL), '[]'::json) AS lead_notes,
+      COALESCE(json_agg(r.*) FILTER (WHERE r.id IS NOT NULL), '[]'::json) AS reminders,
+      COALESCE(json_agg(c.*) FILTER (WHERE c.id IS NOT NULL), '[]'::json) AS communications,
+      COALESCE(json_agg(a.*) FILTER (WHERE a.id IS NOT NULL), '[]'::json) AS attachments
+    FROM leads l
+    LEFT JOIN lead_notes ln ON l.id = ln.lead_id
+    LEFT JOIN reminders r ON l.id = r.lead_id
+    LEFT JOIN communications c ON l.id = c.lead_id
+    LEFT JOIN attachments a ON l.id = a.lead_id
+    WHERE l.id = p_lead_id
+  )
+  SELECT json_build_object(
+    'id', v_lead.id,
+    'title', v_lead.title,
+    'type', v_lead.type,
+    'status', v_lead.status,
+    'priority', v_lead.priority,
+    'company', COALESCE(v_lead.company, ''),
+    'description', COALESCE(v_lead.description, ''),
+    'venue_id', v_lead.venue_id,
+    'venue', COALESCE(v_venue, null),
+    'contact_info', COALESCE(v_lead.contact_info, '{}'::jsonb),
+    'tags', COALESCE(v_lead.tags, ARRAY[]::text[]),
+    'next_follow_up', v_lead.next_follow_up,
+    'expected_value', v_lead.expected_value,
+    'last_contact_date', v_lead.last_contact_date,
+    'created_by', v_lead.created_by,
+    'created_by_email', v_lead.created_by_email,
+    'assigned_to', v_lead.assigned_to,
+    'created_at', v_lead.created_at,
+    'updated_at', v_lead.updated_at,
+    'lead_notes', rd.lead_notes,
+    'reminders', rd.reminders,
+    'communications', rd.communications,
+    'attachments', rd.attachments
+  )
+  INTO v_result
+  FROM related_data rd;
+  
+  RETURN v_result;
+END;
+$function$
+","function"
+"public","get_leads","CREATE OR REPLACE FUNCTION public.get_leads()
+ RETURNS SETOF leads
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_user_id uuid;
+  v_user_email text;
+BEGIN
+  -- Get the authenticated user's ID and email
+  v_user_id := auth.uid();
+  v_user_email := auth.jwt()->>'email';
+  
+  -- Return leads that the user created or is assigned to
+  RETURN QUERY
+  SELECT *
+  FROM leads
+  WHERE created_by = v_user_id
+     OR assigned_to = v_user_id
+  ORDER BY updated_at DESC;
+END;
+$function$
+","function"
+"public","get_page_parents","CREATE OR REPLACE FUNCTION public.get_page_parents(page_id integer)
+ RETURNS TABLE(id integer, parent_page_id integer, path character varying, meta jsonb)
+ LANGUAGE sql
+AS $function$
+    SELECT id, parent_page_id, path, meta
+    FROM nods_page
+    WHERE id = page_id;
+$function$
+","function"
+"public","get_user_tours","CREATE OR REPLACE FUNCTION public.get_user_tours()
+ RETURNS SETOF tours
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+begin
+  return query
+  select *
+  from tours
+  where user_id = auth.uid()
+  order by departure_date desc nulls last;
+end;
+$function$
+","function"
+"public","gin_extract_query_trgm","CREATE OR REPLACE FUNCTION public.gin_extract_query_trgm(text, internal, smallint, internal, internal, internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_extract_query_trgm$function$
+","function"
+"public","gin_extract_value_trgm","CREATE OR REPLACE FUNCTION public.gin_extract_value_trgm(text, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_extract_value_trgm$function$
+","function"
+"public","gin_trgm_consistent","CREATE OR REPLACE FUNCTION public.gin_trgm_consistent(internal, smallint, text, integer, internal, internal, internal, internal)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_trgm_consistent$function$
+","function"
+"public","gin_trgm_triconsistent","CREATE OR REPLACE FUNCTION public.gin_trgm_triconsistent(internal, smallint, text, integer, internal, internal, internal)
+ RETURNS "char"
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gin_trgm_triconsistent$function$
+","function"
+"public","gtrgm_compress","CREATE OR REPLACE FUNCTION public.gtrgm_compress(internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_compress$function$
+","function"
+"public","gtrgm_consistent","CREATE OR REPLACE FUNCTION public.gtrgm_consistent(internal, text, smallint, oid, internal)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_consistent$function$
+","function"
+"public","gtrgm_decompress","CREATE OR REPLACE FUNCTION public.gtrgm_decompress(internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_decompress$function$
+","function"
+"public","gtrgm_distance","CREATE OR REPLACE FUNCTION public.gtrgm_distance(internal, text, smallint, oid, internal)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_distance$function$
+","function"
+"public","gtrgm_in","CREATE OR REPLACE FUNCTION public.gtrgm_in(cstring)
+ RETURNS gtrgm
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_in$function$
+","function"
+"public","gtrgm_options","CREATE OR REPLACE FUNCTION public.gtrgm_options(internal)
+ RETURNS void
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE
+AS '$libdir/pg_trgm', $function$gtrgm_options$function$
+","function"
+"public","gtrgm_out","CREATE OR REPLACE FUNCTION public.gtrgm_out(gtrgm)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_out$function$
+","function"
+"public","gtrgm_penalty","CREATE OR REPLACE FUNCTION public.gtrgm_penalty(internal, internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_penalty$function$
+","function"
+"public","gtrgm_picksplit","CREATE OR REPLACE FUNCTION public.gtrgm_picksplit(internal, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_picksplit$function$
+","function"
+"public","gtrgm_same","CREATE OR REPLACE FUNCTION public.gtrgm_same(gtrgm, gtrgm, internal)
+ RETURNS internal
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_same$function$
+","function"
+"public","gtrgm_union","CREATE OR REPLACE FUNCTION public.gtrgm_union(internal, internal)
+ RETURNS gtrgm
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$gtrgm_union$function$
+","function"
+"public","halfvec","CREATE OR REPLACE FUNCTION public.halfvec(halfvec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec$function$
+","function"
+"public","halfvec_accum","CREATE OR REPLACE FUNCTION public.halfvec_accum(double precision[], halfvec)
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_accum$function$
+","function"
+"public","halfvec_add","CREATE OR REPLACE FUNCTION public.halfvec_add(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_add$function$
+","function"
+"public","halfvec_avg","CREATE OR REPLACE FUNCTION public.halfvec_avg(double precision[])
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_avg$function$
+","function"
+"public","halfvec_cmp","CREATE OR REPLACE FUNCTION public.halfvec_cmp(halfvec, halfvec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_cmp$function$
+","function"
+"public","halfvec_combine","CREATE OR REPLACE FUNCTION public.halfvec_combine(double precision[], double precision[])
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_combine$function$
+","function"
+"public","halfvec_concat","CREATE OR REPLACE FUNCTION public.halfvec_concat(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_concat$function$
+","function"
+"public","halfvec_eq","CREATE OR REPLACE FUNCTION public.halfvec_eq(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_eq$function$
+","function"
+"public","halfvec_ge","CREATE OR REPLACE FUNCTION public.halfvec_ge(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ge$function$
+","function"
+"public","halfvec_gt","CREATE OR REPLACE FUNCTION public.halfvec_gt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_gt$function$
+","function"
+"public","halfvec_in","CREATE OR REPLACE FUNCTION public.halfvec_in(cstring, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_in$function$
+","function"
+"public","halfvec_l2_squared_distance","CREATE OR REPLACE FUNCTION public.halfvec_l2_squared_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_squared_distance$function$
+","function"
+"public","halfvec_le","CREATE OR REPLACE FUNCTION public.halfvec_le(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_le$function$
+","function"
+"public","halfvec_lt","CREATE OR REPLACE FUNCTION public.halfvec_lt(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_lt$function$
+","function"
+"public","halfvec_mul","CREATE OR REPLACE FUNCTION public.halfvec_mul(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_mul$function$
+","function"
+"public","halfvec_ne","CREATE OR REPLACE FUNCTION public.halfvec_ne(halfvec, halfvec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_ne$function$
+","function"
+"public","halfvec_negative_inner_product","CREATE OR REPLACE FUNCTION public.halfvec_negative_inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_negative_inner_product$function$
+","function"
+"public","halfvec_out","CREATE OR REPLACE FUNCTION public.halfvec_out(halfvec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_out$function$
+","function"
+"public","halfvec_recv","CREATE OR REPLACE FUNCTION public.halfvec_recv(internal, oid, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_recv$function$
+","function"
+"public","halfvec_send","CREATE OR REPLACE FUNCTION public.halfvec_send(halfvec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_send$function$
+","function"
+"public","halfvec_spherical_distance","CREATE OR REPLACE FUNCTION public.halfvec_spherical_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_spherical_distance$function$
+","function"
+"public","halfvec_sub","CREATE OR REPLACE FUNCTION public.halfvec_sub(halfvec, halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_sub$function$
+","function"
+"public","halfvec_to_float4","CREATE OR REPLACE FUNCTION public.halfvec_to_float4(halfvec, integer, boolean)
+ RETURNS real[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_float4$function$
+","function"
+"public","halfvec_to_sparsevec","CREATE OR REPLACE FUNCTION public.halfvec_to_sparsevec(halfvec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_sparsevec$function$
+","function"
+"public","halfvec_to_vector","CREATE OR REPLACE FUNCTION public.halfvec_to_vector(halfvec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_to_vector$function$
+","function"
+"public","halfvec_typmod_in","CREATE OR REPLACE FUNCTION public.halfvec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_typmod_in$function$
+","function"
+"public","hamming_distance","CREATE OR REPLACE FUNCTION public.hamming_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$hamming_distance$function$
+","function"
+"public","handle_new_tour","CREATE OR REPLACE FUNCTION public.handle_new_tour()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+begin
+  new.user_id := auth.uid();
+  return new;
+end;
+$function$
+","function"
+"public","handle_new_user","CREATE OR REPLACE FUNCTION public.handle_new_user()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+  INSERT INTO public.profiles (
+    id,
+    email,
+    full_name,
+    stripe_customer_id
+  )
+  VALUES (
+    new.id,
+    new.email,
+    new.raw_user_meta_data->>'full_name',
+    new.raw_user_meta_data->>'stripe_customer_id'
+  );
+  RETURN new;
+END;
+$function$
+","function"
+"public","handle_subscription_update","CREATE OR REPLACE FUNCTION public.handle_subscription_update(user_id uuid, customer_id text, subscription_id text, status subscription_status_type, price_id text)
+ RETURNS TABLE(updated_id uuid, updated_status text, updated_at timestamp with time zone)
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    RETURN QUERY
+    UPDATE profiles
+    SET 
+        stripe_customer_id = customer_id,
+        subscription_id = subscription_id,
+        subscription_status = status::TEXT,
+        subscription_price_id = price_id,
+        updated_at = NOW()
+    WHERE id = user_id
+    RETURNING 
+        profiles.id as updated_id, 
+        profiles.subscription_status as updated_status, 
+        profiles.updated_at as updated_at;
+END;
+$function$
+","function"
+"public","handle_updated_at","CREATE OR REPLACE FUNCTION public.handle_updated_at()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  new.updated_at = now();
+  return new;
+end;
+$function$
+","function"
+"public","hnsw_bit_support","CREATE OR REPLACE FUNCTION public.hnsw_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_bit_support$function$
+","function"
+"public","hnsw_halfvec_support","CREATE OR REPLACE FUNCTION public.hnsw_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_halfvec_support$function$
+","function"
+"public","hnsw_sparsevec_support","CREATE OR REPLACE FUNCTION public.hnsw_sparsevec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$hnsw_sparsevec_support$function$
+","function"
+"public","hnswhandler","CREATE OR REPLACE FUNCTION public.hnswhandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$hnswhandler$function$
+","function"
+"public","inner_product","CREATE OR REPLACE FUNCTION public.inner_product(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$inner_product$function$
+","function"
+"public","inner_product","CREATE OR REPLACE FUNCTION public.inner_product(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_inner_product$function$
+","function"
+"public","inner_product","CREATE OR REPLACE FUNCTION public.inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_inner_product$function$
+","function"
+"public","ivfflat_bit_support","CREATE OR REPLACE FUNCTION public.ivfflat_bit_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_bit_support$function$
+","function"
+"public","ivfflat_halfvec_support","CREATE OR REPLACE FUNCTION public.ivfflat_halfvec_support(internal)
+ RETURNS internal
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflat_halfvec_support$function$
+","function"
+"public","ivfflathandler","CREATE OR REPLACE FUNCTION public.ivfflathandler(internal)
+ RETURNS index_am_handler
+ LANGUAGE c
+AS '$libdir/vector', $function$ivfflathandler$function$
+","function"
+"public","jaccard_distance","CREATE OR REPLACE FUNCTION public.jaccard_distance(bit, bit)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$jaccard_distance$function$
+","function"
+"public","l1_distance","CREATE OR REPLACE FUNCTION public.l1_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l1_distance$function$
+","function"
+"public","l1_distance","CREATE OR REPLACE FUNCTION public.l1_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l1_distance$function$
+","function"
+"public","l1_distance","CREATE OR REPLACE FUNCTION public.l1_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l1_distance$function$
+","function"
+"public","l2_distance","CREATE OR REPLACE FUNCTION public.l2_distance(halfvec, halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_distance$function$
+","function"
+"public","l2_distance","CREATE OR REPLACE FUNCTION public.l2_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_distance$function$
+","function"
+"public","l2_distance","CREATE OR REPLACE FUNCTION public.l2_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_distance$function$
+","function"
+"public","l2_norm","CREATE OR REPLACE FUNCTION public.l2_norm(sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_norm$function$
+","function"
+"public","l2_norm","CREATE OR REPLACE FUNCTION public.l2_norm(halfvec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_norm$function$
+","function"
+"public","l2_normalize","CREATE OR REPLACE FUNCTION public.l2_normalize(halfvec)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_l2_normalize$function$
+","function"
+"public","l2_normalize","CREATE OR REPLACE FUNCTION public.l2_normalize(vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$l2_normalize$function$
+","function"
+"public","l2_normalize","CREATE OR REPLACE FUNCTION public.l2_normalize(sparsevec)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_normalize$function$
+","function"
+"public","match_page_sections","CREATE OR REPLACE FUNCTION public.match_page_sections(embedding vector, match_threshold double precision, match_count integer, min_content_length integer)
+ RETURNS TABLE(id integer, page_id integer, slug character varying, heading character varying, content text, similarity double precision)
+ LANGUAGE sql
+AS $function$
+    SELECT id, page_id, slug, heading, content, 1.0 AS similarity
+    FROM nods_page_section
+    WHERE token_count >= min_content_length
+    ORDER BY similarity DESC
+    LIMIT match_count;
+$function$
+","function"
+"public","set_default_tour","CREATE OR REPLACE FUNCTION public.set_default_tour(p_tour_id integer)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+declare
+  v_user_id uuid;
+begin
+  -- Get the user_id from the tour
+  select user_id into v_user_id
+  from public.tours
+  where id = p_tour_id;
+
+  -- First, unset default for all other tours of this user
+  update public.tours
+  set is_default = false
+  where user_id = v_user_id
+  and id != p_tour_id;
+
+  -- Then set this tour as default
+  update public.tours
+  set is_default = true
+  where id = p_tour_id;
+end;
+$function$
+","function"
+"public","set_limit","CREATE OR REPLACE FUNCTION public.set_limit(real)
+ RETURNS real
+ LANGUAGE c
+ STRICT
+AS '$libdir/pg_trgm', $function$set_limit$function$
+","function"
+"public","show_limit","CREATE OR REPLACE FUNCTION public.show_limit()
+ RETURNS real
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$show_limit$function$
+","function"
+"public","show_trgm","CREATE OR REPLACE FUNCTION public.show_trgm(text)
+ RETURNS text[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$show_trgm$function$
+","function"
+"public","similarity","CREATE OR REPLACE FUNCTION public.similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity$function$
+","function"
+"public","similarity_dist","CREATE OR REPLACE FUNCTION public.similarity_dist(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity_dist$function$
+","function"
+"public","similarity_op","CREATE OR REPLACE FUNCTION public.similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$similarity_op$function$
+","function"
+"public","sparsevec","CREATE OR REPLACE FUNCTION public.sparsevec(sparsevec, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec$function$
+","function"
+"public","sparsevec_cmp","CREATE OR REPLACE FUNCTION public.sparsevec_cmp(sparsevec, sparsevec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_cmp$function$
+","function"
+"public","sparsevec_eq","CREATE OR REPLACE FUNCTION public.sparsevec_eq(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_eq$function$
+","function"
+"public","sparsevec_ge","CREATE OR REPLACE FUNCTION public.sparsevec_ge(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ge$function$
+","function"
+"public","sparsevec_gt","CREATE OR REPLACE FUNCTION public.sparsevec_gt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_gt$function$
+","function"
+"public","sparsevec_in","CREATE OR REPLACE FUNCTION public.sparsevec_in(cstring, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_in$function$
+","function"
+"public","sparsevec_l2_squared_distance","CREATE OR REPLACE FUNCTION public.sparsevec_l2_squared_distance(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_l2_squared_distance$function$
+","function"
+"public","sparsevec_le","CREATE OR REPLACE FUNCTION public.sparsevec_le(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_le$function$
+","function"
+"public","sparsevec_lt","CREATE OR REPLACE FUNCTION public.sparsevec_lt(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_lt$function$
+","function"
+"public","sparsevec_ne","CREATE OR REPLACE FUNCTION public.sparsevec_ne(sparsevec, sparsevec)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_ne$function$
+","function"
+"public","sparsevec_negative_inner_product","CREATE OR REPLACE FUNCTION public.sparsevec_negative_inner_product(sparsevec, sparsevec)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_negative_inner_product$function$
+","function"
+"public","sparsevec_out","CREATE OR REPLACE FUNCTION public.sparsevec_out(sparsevec)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_out$function$
+","function"
+"public","sparsevec_recv","CREATE OR REPLACE FUNCTION public.sparsevec_recv(internal, oid, integer)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_recv$function$
+","function"
+"public","sparsevec_send","CREATE OR REPLACE FUNCTION public.sparsevec_send(sparsevec)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_send$function$
+","function"
+"public","sparsevec_to_halfvec","CREATE OR REPLACE FUNCTION public.sparsevec_to_halfvec(sparsevec, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_halfvec$function$
+","function"
+"public","sparsevec_to_vector","CREATE OR REPLACE FUNCTION public.sparsevec_to_vector(sparsevec, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_to_vector$function$
+","function"
+"public","sparsevec_typmod_in","CREATE OR REPLACE FUNCTION public.sparsevec_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$sparsevec_typmod_in$function$
+","function"
+"public","strict_word_similarity","CREATE OR REPLACE FUNCTION public.strict_word_similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity$function$
+","function"
+"public","strict_word_similarity_commutator_op","CREATE OR REPLACE FUNCTION public.strict_word_similarity_commutator_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_commutator_op$function$
+","function"
+"public","strict_word_similarity_dist_commutator_op","CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_commutator_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_dist_commutator_op$function$
+","function"
+"public","strict_word_similarity_dist_op","CREATE OR REPLACE FUNCTION public.strict_word_similarity_dist_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_dist_op$function$
+","function"
+"public","strict_word_similarity_op","CREATE OR REPLACE FUNCTION public.strict_word_similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$strict_word_similarity_op$function$
+","function"
+"public","subvector","CREATE OR REPLACE FUNCTION public.subvector(vector, integer, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$subvector$function$
+","function"
+"public","subvector","CREATE OR REPLACE FUNCTION public.subvector(halfvec, integer, integer)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_subvector$function$
+","function"
+"public","test_create_communication","CREATE OR REPLACE FUNCTION public.test_create_communication(auth_uid uuid, auth_email text, comm_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_comm_id UUID;
+BEGIN
+    INSERT INTO communications (
+        lead_id,
+        type,
+        content,
+        date,
+        sentiment,
+        user_id,
+        created_at
+    ) VALUES (
+        (comm_data->>'lead_id')::UUID,
+        comm_data->>'type',
+        comm_data->>'content',
+        COALESCE((comm_data->>'date')::timestamptz, now()),
+        comm_data->>'sentiment',
+        auth_uid,
+        now()
+    )
+    RETURNING id INTO new_comm_id;
+
+    RETURN new_comm_id;
+END;
+$function$
+","function"
+"public","test_create_lead","CREATE OR REPLACE FUNCTION public.test_create_lead(auth_uid uuid, auth_email text, lead_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_lead_id UUID;
+BEGIN
+    INSERT INTO leads (
+        title,
+        type,
+        status,
+        priority,
+        company,
+        description,
+        venue_id,
+        contact_info,
+        tags,
+        next_follow_up,
+        expected_value,
+        created_by,
+        created_by_email,
+        assigned_to
+    ) VALUES (
+        lead_data->>'title',
+        (lead_data->>'type')::lead_type,
+        COALESCE((lead_data->>'status')::lead_status, 'new'),
+        COALESCE((lead_data->>'priority')::lead_priority, 'medium'),
+        lead_data->>'company',
+        lead_data->>'description',
+        lead_data->>'venue_id',
+        COALESCE(lead_data->'contact_info', '{}'::jsonb),
+        COALESCE(
+            (SELECT array_agg(x::text) FROM jsonb_array_elements_text(lead_data->'tags') x),
+            ARRAY[]::text[]
+        ),
+        (lead_data->>'next_follow_up')::timestamptz,
+        (lead_data->>'expected_value')::decimal,
+        auth_uid,
+        auth_email,
+        (lead_data->>'assigned_to')::UUID
+    )
+    RETURNING id INTO new_lead_id;
+
+    RETURN new_lead_id;
+END;
+$function$
+","function"
+"public","test_create_lead_note","CREATE OR REPLACE FUNCTION public.test_create_lead_note(auth_uid uuid, auth_email text, note_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_note_id UUID;
+BEGIN
+    INSERT INTO lead_notes (
+        lead_id,
+        content,
+        created_by,
+        created_by_email
+    ) VALUES (
+        (note_data->>'lead_id')::UUID,
+        note_data->>'content',
+        auth_uid,
+        auth_email
+    )
+    RETURNING id INTO new_note_id;
+
+    RETURN new_note_id;
+END;
+$function$
+","function"
+"public","test_create_lead_notes","CREATE OR REPLACE FUNCTION public.test_create_lead_notes(p_lead_id uuid, p_notes jsonb, p_user_id uuid, p_user_email text)
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    note_record JSONB;
+BEGIN    
+    -- Insert each note
+    FOR note_record IN SELECT * FROM jsonb_array_elements(p_notes)
+    LOOP
+        INSERT INTO lead_notes (
+            lead_id,
+            content,
+            created_by,
+            created_by_email,
+            created_at
+        ) VALUES (
+            p_lead_id,
+            note_record->>'content',
+            p_user_id,
+            p_user_email,
+            now()
+        );
+    END LOOP;
+END;
+$function$
+","function"
+"public","test_create_lead_notes","CREATE OR REPLACE FUNCTION public.test_create_lead_notes(p_lead_id uuid, p_user_id uuid, p_user_email text, p_notes jsonb[])
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    note_data JSONB;
+BEGIN
+    -- Insert each note
+    FOREACH note_data IN ARRAY p_notes
+    LOOP
+        INSERT INTO lead_notes (
+            lead_id,
+            content,
+            created_by,
+            created_by_email,
+            created_at
+        ) VALUES (
+            p_lead_id,
+            note_data->>'content',
+            p_user_id,
+            p_user_email,
+            now()
+        );
+    END LOOP;
+END;
+$function$
+","function"
+"public","test_create_lead_reminders","CREATE OR REPLACE FUNCTION public.test_create_lead_reminders(p_lead_id uuid, p_user_id uuid, p_user_email text, p_reminders jsonb[])
+ RETURNS void
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    reminder_data JSONB;
+BEGIN
+    -- Insert each reminder
+    FOREACH reminder_data IN ARRAY p_reminders
+    LOOP
+        INSERT INTO reminders (
+            lead_id,
+            title,
+            description,
+            due_date,
+            priority,
+            created_by,
+            created_by_email,
+            created_at
+        ) VALUES (
+            p_lead_id,
+            reminder_data->>'title',
+            reminder_data->>'description',
+            (reminder_data->>'due_date')::timestamptz,
+            reminder_data->>'priority',
+            p_user_id,
+            p_user_email,
+            now()
+        );
+    END LOOP;
+END;
+$function$
+","function"
+"public","test_create_reminder","CREATE OR REPLACE FUNCTION public.test_create_reminder(auth_uid uuid, auth_email text, reminder_data jsonb)
+ RETURNS uuid
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+    new_reminder_id UUID;
+BEGIN
+    INSERT INTO reminders (
+        lead_id,
+        title,
+        description,
+        due_date,
+        completed,
+        created_by,
+        created_by_email,
+        created_at
+    ) VALUES (
+        (reminder_data->>'lead_id')::UUID,
+        reminder_data->>'title',
+        reminder_data->>'description',
+        (reminder_data->>'due_date')::timestamptz,
+        COALESCE((reminder_data->>'completed')::boolean, false),
+        auth_uid,
+        auth_email,
+        now()
+    )
+    RETURNING id INTO new_reminder_id;
+
+    RETURN new_reminder_id;
+END;
+$function$
+","function"
+"public","test_delete_lead","CREATE OR REPLACE FUNCTION public.test_delete_lead(auth_uid uuid, lead_id uuid)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    DELETE FROM leads
+    WHERE id = lead_id
+    AND created_by = auth_uid;
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","update_communication","CREATE OR REPLACE FUNCTION public.update_communication(comm_id uuid, comm_data jsonb)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    UPDATE communications
+    SET
+        type = COALESCE(comm_data->>'type', type),
+        content = COALESCE(comm_data->>'content', content),
+        date = COALESCE((comm_data->>'date')::timestamptz, date),
+        sentiment = COALESCE(comm_data->>'sentiment', sentiment)
+    WHERE id = comm_id
+    AND user_id = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","update_last_updated_column","CREATE OR REPLACE FUNCTION public.update_last_updated_column()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  new.last_updated = timezone('utc'::text, now());
+  return new;
+end;
+$function$
+","function"
+"public","update_lead","CREATE OR REPLACE FUNCTION public.update_lead(p_lead_id uuid, p_lead_data jsonb)
+ RETURNS leads
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+DECLARE
+  v_user_id uuid;
+  v_user_email text;
+  v_lead leads;
+BEGIN
+  -- Get the authenticated user's ID and email
+  v_user_id := auth.uid();
+  v_user_email := auth.jwt()->>'email';
+  
+  -- Update the lead if the user has access to it
+  UPDATE leads
+  SET
+    title = COALESCE((p_lead_data->>'title')::text, title),
+    type = COALESCE((p_lead_data->>'type')::lead_type, type),
+    status = COALESCE((p_lead_data->>'status')::lead_status, status),
+    priority = COALESCE((p_lead_data->>'priority')::lead_priority, priority),
+    company = COALESCE((p_lead_data->>'company')::text, company),
+    description = COALESCE((p_lead_data->>'description')::text, description),
+    venue_id = COALESCE(p_lead_data->>'venue_id', venue_id),
+    contact_info = COALESCE((p_lead_data->>'contact_info')::jsonb, contact_info),
+    tags = COALESCE(array(SELECT jsonb_array_elements_text(CASE WHEN p_lead_data ? 'tags' THEN p_lead_data->'tags' ELSE '[]'::jsonb END)), tags),
+    next_follow_up = COALESCE((p_lead_data->>'next_follow_up')::timestamptz, next_follow_up),
+    expected_value = COALESCE((p_lead_data->>'expected_value')::numeric, expected_value),
+    assigned_to = CASE 
+        WHEN p_lead_data->>'assigned_to' = '' THEN NULL 
+        WHEN p_lead_data->>'assigned_to' IS NULL THEN assigned_to
+        ELSE (p_lead_data->>'assigned_to')::uuid 
+    END,
+    updated_at = now()
+  WHERE id = p_lead_id
+    AND (created_by = v_user_id OR assigned_to = v_user_id)
+  RETURNING * INTO v_lead;
+  
+  RETURN v_lead;
+END;
+$function$
+","function"
+"public","update_lead_note","CREATE OR REPLACE FUNCTION public.update_lead_note(note_id uuid, note_data jsonb)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    UPDATE lead_notes
+    SET
+        content = COALESCE(note_data->>'content', content)
+    WHERE id = note_id
+    AND created_by = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","update_lead_status","CREATE OR REPLACE FUNCTION public.update_lead_status(p_lead_id uuid, p_status text)
+ RETURNS leads
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+DECLARE
+    v_user_id uuid;
+    v_lead leads;
+BEGIN
+    -- Get the authenticated user's ID
+    v_user_id := auth.uid();
+    IF v_user_id IS NULL THEN
+        RAISE EXCEPTION 'Not authenticated';
+    END IF;
+
+    -- Update the lead status if the user has access to it
+    UPDATE leads
+    SET 
+        status = p_status::lead_status,
+        updated_at = NOW()
+    WHERE id = p_lead_id
+    AND (
+        created_by = v_user_id 
+        OR assigned_to = v_user_id
+        OR EXISTS (
+            SELECT 1 
+            FROM auth.users 
+            WHERE id = v_user_id 
+            AND (raw_user_meta_data->>'role') = 'admin'
+        )
+    )
+    RETURNING * INTO v_lead;
+
+    -- Verify the update was successful
+    IF NOT FOUND THEN
+        RAISE EXCEPTION 'Lead not found or permission denied';
+    END IF;
+
+    RETURN v_lead;
+END;
+$function$
+","function"
+"public","update_reminder","CREATE OR REPLACE FUNCTION public.update_reminder(reminder_id uuid, reminder_data jsonb)
+ RETURNS boolean
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+AS $function$
+BEGIN
+    UPDATE reminders
+    SET
+        title = COALESCE(reminder_data->>'title', title),
+        description = COALESCE(reminder_data->>'description', description),
+        due_date = COALESCE((reminder_data->>'due_date')::timestamptz, due_date),
+        completed = COALESCE((reminder_data->>'completed')::boolean, completed)
+    WHERE id = reminder_id
+    AND created_by = auth.uid();
+
+    RETURN FOUND;
+END;
+$function$
+","function"
+"public","update_saved_venues_last_updated","CREATE OR REPLACE FUNCTION public.update_saved_venues_last_updated()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.last_updated = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$function$
+","function"
+"public","update_setlist","CREATE OR REPLACE FUNCTION public.update_setlist(p_setlist_id uuid, p_title text)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    UPDATE setlists
+    SET 
+        title = p_title,
+        updated_at = NOW()
+    WHERE id = p_setlist_id;
+END;
+$function$
+","function"
+"public","update_song_positions","CREATE OR REPLACE FUNCTION public.update_song_positions(p_songs jsonb)
+ RETURNS void
+ LANGUAGE plpgsql
+AS $function$
+DECLARE
+    v_song JSONB;
+BEGIN
+    FOR v_song IN SELECT * FROM jsonb_array_elements(p_songs)
+    LOOP
+        UPDATE setlist_songs
+        SET sort_order = (v_song->>'sort_order')::integer
+        WHERE id = (v_song->>'id')::uuid;
+    END LOOP;
+END;
+$function$
+","function"
+"public","update_tour","CREATE OR REPLACE FUNCTION public.update_tour(tour_id bigint, tour_data jsonb)
+ RETURNS tours
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'public'
+AS $function$
+declare
+  updated_tour tours;
+begin
+  update tours
+  set
+    title = tour_data->>'title',
+    description = tour_data->>'description',
+    departure_date = (tour_data->>'departure_date')::date,
+    return_date = (tour_data->>'return_date')::date,
+    status = (tour_data->>'status')::tour_status
+  where id = tour_id
+    and user_id = auth.uid()
+  returning * into updated_tour;
+
+  if updated_tour is null then
+    raise exception 'Tour not found or you do not have permission to update it';
+  end if;
+
+  return updated_tour;
+end;
+$function$
+","function"
+"public","update_tours_last_updated","CREATE OR REPLACE FUNCTION public.update_tours_last_updated()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+begin
+  new.last_updated = now();
+  return new;
+end;
+$function$
+","function"
+"public","update_updated_at_column","CREATE OR REPLACE FUNCTION public.update_updated_at_column()
+ RETURNS trigger
+ LANGUAGE plpgsql
+AS $function$
+BEGIN
+    NEW.updated_At = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$function$
+","function"
+"public","vector","CREATE OR REPLACE FUNCTION public.vector(vector, integer, boolean)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector$function$
+","function"
+"public","vector_accum","CREATE OR REPLACE FUNCTION public.vector_accum(double precision[], vector)
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_accum$function$
+","function"
+"public","vector_add","CREATE OR REPLACE FUNCTION public.vector_add(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_add$function$
+","function"
+"public","vector_avg","CREATE OR REPLACE FUNCTION public.vector_avg(double precision[])
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_avg$function$
+","function"
+"public","vector_cmp","CREATE OR REPLACE FUNCTION public.vector_cmp(vector, vector)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_cmp$function$
+","function"
+"public","vector_combine","CREATE OR REPLACE FUNCTION public.vector_combine(double precision[], double precision[])
+ RETURNS double precision[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_combine$function$
+","function"
+"public","vector_concat","CREATE OR REPLACE FUNCTION public.vector_concat(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_concat$function$
+","function"
+"public","vector_dims","CREATE OR REPLACE FUNCTION public.vector_dims(halfvec)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$halfvec_vector_dims$function$
+","function"
+"public","vector_dims","CREATE OR REPLACE FUNCTION public.vector_dims(vector)
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_dims$function$
+","function"
+"public","vector_eq","CREATE OR REPLACE FUNCTION public.vector_eq(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_eq$function$
+","function"
+"public","vector_ge","CREATE OR REPLACE FUNCTION public.vector_ge(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_ge$function$
+","function"
+"public","vector_gt","CREATE OR REPLACE FUNCTION public.vector_gt(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_gt$function$
+","function"
+"public","vector_in","CREATE OR REPLACE FUNCTION public.vector_in(cstring, oid, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_in$function$
+","function"
+"public","vector_l2_squared_distance","CREATE OR REPLACE FUNCTION public.vector_l2_squared_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_l2_squared_distance$function$
+","function"
+"public","vector_le","CREATE OR REPLACE FUNCTION public.vector_le(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_le$function$
+","function"
+"public","vector_lt","CREATE OR REPLACE FUNCTION public.vector_lt(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_lt$function$
+","function"
+"public","vector_mul","CREATE OR REPLACE FUNCTION public.vector_mul(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_mul$function$
+","function"
+"public","vector_ne","CREATE OR REPLACE FUNCTION public.vector_ne(vector, vector)
+ RETURNS boolean
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_ne$function$
+","function"
+"public","vector_negative_inner_product","CREATE OR REPLACE FUNCTION public.vector_negative_inner_product(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_negative_inner_product$function$
+","function"
+"public","vector_norm","CREATE OR REPLACE FUNCTION public.vector_norm(vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_norm$function$
+","function"
+"public","vector_out","CREATE OR REPLACE FUNCTION public.vector_out(vector)
+ RETURNS cstring
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_out$function$
+","function"
+"public","vector_recv","CREATE OR REPLACE FUNCTION public.vector_recv(internal, oid, integer)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_recv$function$
+","function"
+"public","vector_send","CREATE OR REPLACE FUNCTION public.vector_send(vector)
+ RETURNS bytea
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_send$function$
+","function"
+"public","vector_spherical_distance","CREATE OR REPLACE FUNCTION public.vector_spherical_distance(vector, vector)
+ RETURNS double precision
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_spherical_distance$function$
+","function"
+"public","vector_sub","CREATE OR REPLACE FUNCTION public.vector_sub(vector, vector)
+ RETURNS vector
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_sub$function$
+","function"
+"public","vector_to_float4","CREATE OR REPLACE FUNCTION public.vector_to_float4(vector, integer, boolean)
+ RETURNS real[]
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_float4$function$
+","function"
+"public","vector_to_halfvec","CREATE OR REPLACE FUNCTION public.vector_to_halfvec(vector, integer, boolean)
+ RETURNS halfvec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_halfvec$function$
+","function"
+"public","vector_to_sparsevec","CREATE OR REPLACE FUNCTION public.vector_to_sparsevec(vector, integer, boolean)
+ RETURNS sparsevec
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_to_sparsevec$function$
+","function"
+"public","vector_typmod_in","CREATE OR REPLACE FUNCTION public.vector_typmod_in(cstring[])
+ RETURNS integer
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/vector', $function$vector_typmod_in$function$
+","function"
+"public","word_similarity","CREATE OR REPLACE FUNCTION public.word_similarity(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity$function$
+","function"
+"public","word_similarity_commutator_op","CREATE OR REPLACE FUNCTION public.word_similarity_commutator_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_commutator_op$function$
+","function"
+"public","word_similarity_dist_commutator_op","CREATE OR REPLACE FUNCTION public.word_similarity_dist_commutator_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_dist_commutator_op$function$
+","function"
+"public","word_similarity_dist_op","CREATE OR REPLACE FUNCTION public.word_similarity_dist_op(text, text)
+ RETURNS real
+ LANGUAGE c
+ IMMUTABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_dist_op$function$
+","function"
+"public","word_similarity_op","CREATE OR REPLACE FUNCTION public.word_similarity_op(text, text)
+ RETURNS boolean
+ LANGUAGE c
+ STABLE PARALLEL SAFE STRICT
+AS '$libdir/pg_trgm', $function$word_similarity_op$function$
+","function"

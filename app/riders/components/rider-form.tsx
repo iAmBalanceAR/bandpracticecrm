@@ -365,14 +365,16 @@ export function RiderForm({
       setIsSaving(true)
 
       // Prepare section contents for submission
-      const sectionData = Array.from(selectedSections).map(sectionId => {
-        const isCustom = sectionId.startsWith('custom-')
+      const sectionData = Array.from(selectedSections).map((sectionId, index) => {
+        const isCustom = sectionId === '00000000-0000-0000-0000-000000000000' || sections.find(s => s.id === sectionId)?.is_custom
         const content = sectionContents.get(sectionId)
+        const customName = customSections.get(sectionId) ?? null
+        
         return {
           section_id: isCustom ? '00000000-0000-0000-0000-000000000000' : sectionId,
-          custom_section_name: isCustom ? customSections.get(sectionId) ?? null : null,
-          content: content,
-          sort_order: Array.from(selectedSections).indexOf(sectionId)
+          custom_section_name: isCustom ? customName : null,
+          content: content || {},
+          sort_order: index
         }
       })
 
