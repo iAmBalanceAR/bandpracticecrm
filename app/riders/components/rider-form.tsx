@@ -366,7 +366,13 @@ export function RiderForm({
 
       // Prepare section contents for submission
       const sectionData = Array.from(selectedSections).map((sectionId, index) => {
-        const isCustom = sectionId === '00000000-0000-0000-0000-000000000000' || sections.find(s => s.id === sectionId)?.is_custom
+        // Check if this is a custom section by:
+        // 1. Looking for the zero UUID
+        // 2. Checking if it's marked as custom in sections array
+        // 3. Checking if it has a custom prefix (for newly created sections)
+        const isCustom = sectionId === '00000000-0000-0000-0000-000000000000' || 
+                        sections.find(s => s.id === sectionId)?.is_custom ||
+                        sectionId.startsWith('custom-')
         const content = sectionContents.get(sectionId)
         const customName = customSections.get(sectionId) ?? null
         
