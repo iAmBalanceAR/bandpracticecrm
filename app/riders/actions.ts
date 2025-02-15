@@ -3,7 +3,16 @@
 import { createClient } from '@/utils/supabase/server'
 import { cookies } from 'next/headers'
 import { revalidatePath } from 'next/cache'
-import { Rider, TechnicalRiderDetails, HospitalityRiderDetails, RiderType, InputListRow } from './types'
+import { Rider, TechnicalRiderDetails, HospitalityRiderDetails, RiderType, InputListRow, RiderSectionContent } from './types'
+
+interface TransformedSection {
+  id: string
+  name: string
+  content: string
+  sort_order: number
+  is_custom: boolean
+  is_default: boolean
+}
 
 export async function getRiders(userId: string) {
   const cookieStore = cookies()
@@ -289,4 +298,15 @@ export async function getSetlists(userId: string) {
   }
 
   return setlists
-} 
+}
+
+interface PDFGenerators {
+  generateStagePlotPDF?: (plot: any, items: any[], options: any) => Promise<Uint8Array>
+  generateSetlistPDF?: (title: string, songs: any[], options: any) => Promise<Uint8Array>
+}
+
+export async function generateRiderPDF(riderId: string, pdfGenerators?: PDFGenerators) {
+  const cookieStore = cookies()
+  const supabase = createClient()
+
+}

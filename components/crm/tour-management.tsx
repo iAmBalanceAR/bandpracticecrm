@@ -416,9 +416,13 @@ export default function TourManagement() {
 
   const handleAddStop = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault()
-    console.log('Adding stop with form data:', formData)
+    console.log('=== Add Stop Debug ===');
+    console.log('1. Button clicked with form data:', formData);
+    console.log('2. Selected venue:', selectedVenue);
+
     const { city, state } = formData
     if (!city || !state) {
+      console.log('3. Validation failed: Missing city or state');
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
@@ -437,9 +441,11 @@ export default function TourManagement() {
       .filter(Boolean)
       .join(', ')
 
+    console.log('4. Searching location:', searchLocation);
     const coordinates = await getCoordinates(searchLocation)
-    console.log('Got coordinates:', coordinates)
+    console.log('5. Got coordinates:', coordinates)
     if (coordinates[0] === 0 && coordinates[1] === 0) {
+      console.log('6. Invalid coordinates, stopping');
       return
     }
 
@@ -455,6 +461,7 @@ export default function TourManagement() {
       savedToGigs: false,
       gig_date: undefined 
     }
+    console.log('7. Created new stop:', newStop);
 
     // Show info modal about dates
     setFeedbackModal({
@@ -464,83 +471,101 @@ export default function TourManagement() {
       type: 'success'
     })
 
+    console.log('8. Adding stop to tour');
     addStopToTour(newStop)
+    console.log('9. Add stop process completed');
   }
 
   const addStopToTour = (stop: TourStop) => {
+    console.log('=== Add Stop To Tour Debug ===');
+    console.log('1. Starting addStopToTour with stop:', stop);
+    
     setTourStops(prevStops => {
+      console.log('2. Previous stops:', prevStops);
       // Get all stops
-      const allStops = [...prevStops, stop]
+      const allStops = [...prevStops, stop];
+      console.log('3. All stops after adding new one:', allStops);
       
       // Sort all stops by date
       const sortedStops = allStops.sort((a, b) => {
-        const dateA = new Date(a.gig_date || '').getTime()
-        const dateB = new Date(b.gig_date || '').getTime()
-        return dateA - dateB
-      })
+        const dateA = new Date(a.gig_date || '').getTime();
+        const dateB = new Date(b.gig_date || '').getTime();
+        return dateA - dateB;
+      });
+      console.log('4. Sorted stops:', sortedStops);
       
-      return sortedStops
-    })
+      return sortedStops;
+    });
     
-    setSearchValue('')
-    setSelectedVenue(null)
+    console.log('5. Resetting form state');
+    setSearchValue('');
+    setSelectedVenue(null);
     setFormData({
       address: '',
       city: '',
       state: '',
       zip: ''
-    })
-    setPendingStop(null)
+    });
+    setPendingStop(null);
+    console.log('6. Form state reset complete');
   }
 
   const handleAddToCalendar = async (stop: TourStop) => {
-    if (!stop) return
-    setSavingStop(stop.id)
+    console.log('handleAddToCalendar called with stop:', stop);
+    if (!stop) return;
+    setSavingStop(stop.id);
 
     try {
+      console.log('Calculating suggested date...');
       // Calculate suggested date based on position
-      const suggestedDate = calculateSuggestedDate(stop, tourStops)
+      const suggestedDate = calculateSuggestedDate(stop, tourStops);
+      console.log('Suggested date:', suggestedDate);
 
       // Check if the suggested date would create a tight schedule
-      const stopIndex = tourStops.findIndex(s => s.id === stop.id)
+      const stopIndex = tourStops.findIndex(s => s.id === stop.id);
       const savedStops = tourStops
         .filter(s => s.savedToGigs && s.gig_date)
-        .sort((a, b) => new Date(a.gig_date!).getTime() - new Date(b.gig_date!).getTime())
+        .sort((a, b) => new Date(a.gig_date!).getTime() - new Date(b.gig_date!).getTime());
 
-      const prevSavedStop = savedStops.findLast(s => tourStops.findIndex(as => as.id === s.id) < stopIndex)
-      const nextSavedStop = savedStops.find(s => tourStops.findIndex(as => as.id === s.id) > stopIndex)
+      const prevSavedStop = savedStops.findLast(s => tourStops.findIndex(as => as.id === s.id) < stopIndex);
+      const nextSavedStop = savedStops.find(s => tourStops.findIndex(as => as.id === s.id) > stopIndex);
 
+      console.log('Checking for tight schedule...');
       if ((prevSavedStop && areDatesTooClose(new Date(prevSavedStop.gig_date!), new Date(suggestedDate))) ||
           (nextSavedStop && areDatesTooClose(new Date(suggestedDate), new Date(nextSavedStop.gig_date!)))) {
         
+        console.log('Tight schedule detected, showing warning modal');
         setFeedbackModal({
           isOpen: true,
           title: 'Warning: Tight Schedule',
           message: 'This stop would be added between events that are only 1 day apart. Would you like to proceed?',
           type: 'warning',
           onConfirm: () => {
+            console.log('User confirmed tight schedule, proceeding with calendar addition');
             // Proceed with adding to calendar
-            addToCalendarWithDate(stop, suggestedDate)
+            addToCalendarWithDate(stop, suggestedDate);
           }
-        })
-        setSavingStop(null)
-        return
+        });
+        setSavingStop(null);
+        return;
       }
 
+      console.log('No tight schedule detected, proceeding with calendar addition');
       // If dates aren't too close, proceed normally
-      await addToCalendarWithDate(stop, suggestedDate)
+      await addToCalendarWithDate(stop, suggestedDate);
 
     } catch (error) {
-      console.error('Error saving gig:', error)
+      console.error('Error in handleAddToCalendar:', error);
       setFeedbackModal({
         isOpen: true,
         title: 'Error',
         message: 'Failed to add stop to calendar',
         type: 'error'
-      })
-      setSavingStop(null)
+      });
+    } finally {
+      setSavingStop(null);
     }
-  }
+  };
 
   // Helper function to handle the actual calendar addition
   const addToCalendarWithDate = async (stop: TourStop, date: string) => {

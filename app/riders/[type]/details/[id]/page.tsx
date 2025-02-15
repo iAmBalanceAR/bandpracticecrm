@@ -10,6 +10,8 @@ import { Setlist, SetlistItem, InputListRow } from '@/app/riders/types'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { ArrowLeft } from 'lucide-react'
+// import { ExportRiderButton } from '@/app/riders/components/export-rider-button'
+import { TestPDFButton } from '@/app/riders/components/test-pdf-button'
 
 interface Props {
   params: {
@@ -224,23 +226,29 @@ export default async function RiderDetailsPage({ params }: Props) {
     <CustomSectionHeader title={`${params.type.charAt(0).toUpperCase() + params.type.slice(1)} Rider Details`} underlineColor="#D83B34">
       <Card className="bg-[#111C44] min-h-[500px] border-none">
         <CardHeader className="pb-0 mb-0">
-          <Link href="/riders" className="inline-block">
-            <Button
-              variant="ghost"
-              className="flex text-right float-right gap-2 text-white hover:text-white bg-blue-600 hover:bg-blue-700 border-black border z-[100] mt-[4px]"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Riders
-            </Button>
-          </Link>
-          <CardTitle>
-          <h3 className="text-3xl mb-0 font-normal font-mono p-0 -mt-[60px] z-[2] mr-[165px]">
-            <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
-              {rider.title}
-            </span>
-            <div className="border-[#ff9920] border-b-2 -mt-2 mb-4 w-[100%] h-2 z-[3] mr-[165px]"></div>
-          </h3>            
-          </CardTitle>
+          <div className="flex justify-between items-center w-full">
+            <Link href="/riders">
+              <Button
+                variant="ghost"
+                className="flex gap-2 text-white hover:text-white bg-blue-600 hover:bg-blue-700 border-black border"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back to Riders
+              </Button>
+            </Link>
+            <div className="flex gap-2">
+              <TestPDFButton riderId={params.id} title={rider.title} />
+              {/* <ExportRiderButton riderId={params.id} title={rider.title} /> */}
+            </div>
+          </div>
+          <div className="mt-4">
+            <CardTitle className="text-3xl font-normal font-mono">
+              <span className="text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+                {rider.title}
+              </span>
+              <div className="border-[#ff9920] border-b-2 mt-2 w-full h-2" />
+            </CardTitle>
+          </div>
         </CardHeader>
         <CardContent className="px-6 pt-2 pb-6">
           <RiderDetails 

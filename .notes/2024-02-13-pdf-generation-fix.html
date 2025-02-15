@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Generation Process Analysis</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --text-color: #c9d1d9;
+            --heading-color: #58a6ff;
+            --border-color: #30363d;
+            --code-bg: #161b22;
+            --link-color: #58a6ff;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1, h2, h3 {
+            color: var(--heading-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+
+        code {
+            background-color: var(--code-bg);
+            padding: 0.2em 0.4em;
+            border-radius: 6px;
+            font-family: ui-monospace, SFMono-Regular, SF Mono, Menlo, Consolas, Liberation Mono, monospace;
+        }
+
+        pre {
+            background-color: var(--code-bg);
+            padding: 1em;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .warning {
+            background-color: #3b2300;
+            border-left: 4px solid #9a6700;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .error {
+            background-color: #3b1213;
+            border-left: 4px solid #f85149;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        .success {
+            background-color: #1f2a1f;
+            border-left: 4px solid #238636;
+            padding: 1em;
+            margin: 1em 0;
+            border-radius: 0 6px 6px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>PDF Generation Process Analysis</h1>
+    <p>Date: 2024-02-13</p>
+
+    <h2>Overview</h2>
+    <p>The PDF generation process involves multiple components working together to create a complete rider document. This analysis identifies the current issues and proposes solutions.</p>
+
+    <h2>Process Flow</h2>
+    <ol>
+        <li>User initiates export from rider details page</li>
+        <li>ExportRiderButton component handles the export process</li>
+        <li>Multiple PDFs are generated:
+            <ul>
+                <li>Main rider PDF</li>
+                <li>Stage plot PDF (if exists)</li>
+                <li>Setlist PDF (if exists)</li>
+                <li>Input list PDF (for technical riders)</li>
+            </ul>
+        </li>
+        <li>PDFs are combined into a ZIP file</li>
+        <li>ZIP file is uploaded to temporary storage</li>
+    </ol>
+
+    <h2>Identified Issues</h2>
+
+    <div class="error">
+        <h3>1. Section Name Handling</h3>
+        <p>The section names are not being properly preserved through the PDF generation process. This occurs in multiple places:</p>
+        <ul>
+            <li>processContent function in export-rider-button.tsx returns both text and name, but the name is not being used consistently</li>
+            <li>RiderPDFTemplate component doesn't properly handle the section name hierarchy</li>
+            <li>Inconsistent section name fallback logic</li>
+        </ul>
+    </div>
+
+    <div class="error">
+        <h3>2. Content Processing</h3>
+        <p>Content processing is inconsistent between components:</p>
+        <ul>
+            <li>pdf-generator.tsx and export-rider-button.tsx have different processContent implementations</li>
+            <li>HTML content is not being properly cleaned in all cases</li>
+            <li>Some content types are not being handled correctly</li>
+        </ul>
+    </div>
+
+    <div class="warning">
+        <h3>3. Font Loading</h3>
+        <p>Font registration is happening in multiple places with different sources:</p>
+        <ul>
+            <li>pdf-generator.tsx uses local font files</li>
+            <li>export-rider-button.tsx uses web fonts</li>
+            <li>Potential race conditions in font loading</li>
+        </ul>
+    </div>
+
+    <h2>Root Causes</h2>
+    <ol>
+        <li>Duplicate Code:
+            <ul>
+                <li>Multiple implementations of PDF generation logic</li>
+                <li>Inconsistent handling of section processing</li>
+                <li>Different approaches to font loading</li>
+            </ul>
+        </li>
+        <li>Type Safety Issues:
+            <ul>
+                <li>Inconsistent interfaces for processed content</li>
+                <li>Missing type checks in critical paths</li>
+                <li>Implicit any types in some functions</li>
+            </ul>
+        </li>
+        <li>State Management:
+            <ul>
+                <li>Section state is transformed multiple times</li>
+                <li>Inconsistent state shape between components</li>
+                <li>Redundant state transformations</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>Required Fixes</h2>
+
+    <div class="success">
+        <h3>1. Consolidate PDF Generation Logic</h3>
+        <pre><code>// Move all PDF generation to pdf-generator.tsx
+// Remove duplicate logic from export-rider-button.tsx
+// Create single source of truth for section processing</code></pre>
+    </div>
+
+    <div class="success">
+        <h3>2. Standardize Interfaces</h3>
+        <pre><code>interface ProcessedSection {
+  id: string;
+  name: string;
+  content: {
+    text: string;
+    name: string;
+  };
+  sort_order: number;
+}</code></pre>
+    </div>
+
+    <div class="success">
+        <h3>3. Implement Consistent Font Loading</h3>
+        <pre><code>// In pdf-generator.tsx
+Font.register({
+  family: 'Inter',
+  src: '/fonts/Inter-Regular.ttf',
+  fonts: [
+    { src: '/fonts/Inter-Bold.ttf', fontWeight: 'bold' }
+  ]
+});</code></pre>
+    </div>
+
+    <h2>Implementation Plan</h2>
+    <ol>
+        <li>Phase 1: Consolidation
+            <ul>
+                <li>Move all PDF generation logic to pdf-generator.tsx</li>
+                <li>Create unified interfaces for section data</li>
+                <li>Implement consistent font loading strategy</li>
+            </ul>
+        </li>
+        <li>Phase 2: Type Safety
+            <ul>
+                <li>Add strict type checking throughout the PDF generation process</li>
+                <li>Create type guards for content processing</li>
+                <li>Implement error boundaries for PDF generation</li>
+            </ul>
+        </li>
+        <li>Phase 3: Testing
+            <ul>
+                <li>Add unit tests for content processing</li>
+                <li>Implement integration tests for PDF generation</li>
+                <li>Add error handling tests</li>
+            </ul>
+        </li>
+    </ol>
+
+    <h2>Monitoring and Validation</h2>
+    <ul>
+        <li>Add detailed logging throughout the PDF generation process</li>
+        <li>Implement validation checks for generated PDFs</li>
+        <li>Add telemetry for PDF generation success/failure rates</li>
+        <li>Monitor PDF file sizes and generation times</li>
+    </ul>
+
+</body>
+</html> 
