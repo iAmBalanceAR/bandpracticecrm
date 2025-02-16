@@ -20,6 +20,7 @@ interface TourStop {
   name: string
   lat: number
   lng: number
+  gig_date?: string
 }
 
 interface RouteInfo {
@@ -32,11 +33,23 @@ interface MapComponentProps {
   tourStops: TourStop[]
   route: [number, number][]
   routeInfo: RouteInfo
+  showFutureOnly?: boolean
 }
 
-const MapComponent = ({ tourStops, route, routeInfo }: MapComponentProps) => {
+const MapComponent = ({ tourStops, route, routeInfo, showFutureOnly = false }: MapComponentProps) => {
+  // Filter out past dates if showFutureOnly is true
+  const filteredStops = showFutureOnly
+    ? tourStops.filter(stop => {
+        if (!stop.gig_date) return false;
+        const gigDate = new Date(stop.gig_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return gigDate >= today;
+      })
+    : tourStops;
+
   // Validate tour stops before rendering
-  const validTourStops = tourStops.filter(stop => 
+  const validTourStops = filteredStops.filter(stop => 
     stop && 
     !isNaN(stop.lat) && 
     !isNaN(stop.lng) &&

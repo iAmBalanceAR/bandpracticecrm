@@ -28,10 +28,11 @@ L.Icon.Default.mergeOptions({
 
 interface MapWrapperProps {
   isPdfExport?: boolean;
-  mode?: 'simple' | 'detailed';
+  showFutureOnly?: boolean;
+  mode?: 'simple' | 'full';
 }
 
-function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
+function MapWrapper({ isPdfExport = false, showFutureOnly = false, mode = 'full' }: MapWrapperProps) {
   const [map, setMap] = useState<L.Map | null>(null)
   const mapRef = useRef<L.Map | null>(null)
   const [route, setRoute] = useState<[number, number][]>([])
@@ -49,7 +50,19 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
     const loadGigData = async () => {
       if (currentTour?.id) {
         const { tourStops } = await gigHelpers.getGigsWithCoordinates(currentTour.id)
-        setTourStops(tourStops)
+        
+        // Filter out past dates if showFutureOnly is true
+        const filteredStops = showFutureOnly 
+          ? tourStops.filter(stop => {
+              if (!stop.gig_date) return false;
+              const gigDate = new Date(stop.gig_date);
+              const today = new Date();
+              today.setHours(0, 0, 0, 0);
+              return gigDate >= today;
+            })
+          : tourStops;
+          
+        setTourStops(filteredStops)
       }
     }
 
@@ -87,7 +100,7 @@ function MapWrapper({ isPdfExport = false }: MapWrapperProps) {
       }
       styleElement.remove()
     }
-  }, [currentTour?.id, isPdfExport])
+  }, [currentTour?.id, isPdfExport, showFutureOnly])
 
   // Update markers and route when tour stops change
   useEffect(() => {
@@ -202,10 +215,10 @@ async function fetchSequentialRoute(stops: TourStop[]): Promise<[number, number]
   return fullRoute
 }
 
-export default function TourMap({ isPdfExport = false }: MapWrapperProps) {
+export default function TourMap({ isPdfExport = false, showFutureOnly = false, mode = 'full' }: MapWrapperProps) {
   return (
     <div className="h-full">
-      <MapWrapper isPdfExport={isPdfExport} />
+      <MapWrapper isPdfExport={isPdfExport} showFutureOnly={showFutureOnly} mode={mode} />
     </div>
   )
 }

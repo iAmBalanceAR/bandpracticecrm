@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Bell, X } from 'lucide-react'
+import { Bell, X, Loader2 } from 'lucide-react'
 import { format } from 'date-fns'
 import { cn } from "@/lib/utils"
 import { useSupabase } from '../providers/supabase-client-provider'
@@ -25,10 +25,15 @@ interface RemindersAlertProps {
   sidebarOpen: boolean
   reminders?: Reminder[]
   onUpdate: (id: string) => Promise<void>
+  updatingId?: string | null
 }
 
-export const RemindersAlert: React.FC<RemindersAlertProps> = ({ sidebarOpen, reminders = [], onUpdate }) => {
-  const [deletingIds, setDeletingIds] = React.useState<string[]>([])
+export const RemindersAlert: React.FC<RemindersAlertProps> = ({ 
+  sidebarOpen, 
+  reminders = [], 
+  onUpdate,
+  updatingId 
+}) => {
   const { supabase } = useSupabase()
   
   if (!Array.isArray(reminders)) return null
@@ -36,32 +41,6 @@ export const RemindersAlert: React.FC<RemindersAlertProps> = ({ sidebarOpen, rem
   const overdueReminders = reminders.filter(r => !r.completed && new Date(r.due_date) <= new Date())
   
   if (overdueReminders.length === 0) return null
-
-  const handleDelete = async (id: string) => {
-    try {
-      setDeletingIds(prev => [...prev, id])
-      
-      const { error } = await supabase
-        .rpc('delete_reminder', {
-          reminder_id: id
-        })
-      
-      if (error) throw error
-
-      // Remove from local state immediately
-      await onUpdate(id)
-      
-      // Keep the ID in deletingIds permanently for this session
-      // This way it won't reappear even if polling catches it
-      setTimeout(() => {
-        // Visual transition only - actual state is managed by parent
-        setDeletingIds(prev => [...prev])
-      }, 500) // Match this with CSS transition duration
-    } catch (error) {
-      console.error('Failed to delete reminder:', error)
-      setDeletingIds(prev => prev.filter(x => x !== id))
-    }
-  }
 
   return (
     <div className={cn(
@@ -86,7 +65,7 @@ export const RemindersAlert: React.FC<RemindersAlertProps> = ({ sidebarOpen, rem
                 key={reminder.id} 
                 className={cn(
                   "text-sm p-2 bg-[#242f6a] rounded-md relative group transition-all duration-500",
-                  deletingIds.includes(reminder.id) && "opacity-0 transform translate-x-full"
+                  updatingId === reminder.id && "opacity-50"
                 )}
               >
                 <div className="font-medium text-white flex justify-between items-start">
@@ -94,10 +73,15 @@ export const RemindersAlert: React.FC<RemindersAlertProps> = ({ sidebarOpen, rem
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="opacity-0 group-hover:opacity-100 transition-opacity -mt-1 -mr-1 h-6 w-6 p-0 hover:bg-red-500/20 text-red-400"
-                    onClick={() => handleDelete(reminder.id)}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity -mt-1 -mr-1 h-6 w-6 p-0 hover:bg-green-500/20 text-green-400"
+                    onClick={() => onUpdate(reminder.id)}
+                    disabled={updatingId === reminder.id}
                   >
-                    <X className="h-4 w-4" />
+                    {updatingId === reminder.id ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <X className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
                 <div className="text-blue-400 text-xs">

@@ -1,5 +1,5 @@
 import * as React from "react"
-import { BarChart3, Calendar, Upload, ChevronLeft, ShipWheel, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, Sun, Moon, Laptop, Guitar, CreditCard, BookOpen, ListVideo, LogIn} from 'lucide-react'
+import { BarChart3, Calendar, Upload, ChevronLeft, ShipWheel, ChevronRight, ClipboardList, LayoutDashboard, MapPin, MessageSquare, Music, Users, LogOut, Route, BookOpen, ListVideo, LogIn, Guitar, CreditCard } from 'lucide-react'
 import { Button } from "@/components/ui/button"
 import { usePathname } from 'next/navigation'
 import Link from 'next/link'
@@ -7,7 +7,6 @@ import Image from 'next/image'
 import { useSupabase } from '../providers/supabase-client-provider'
 import { useRouter } from 'next/navigation'
 import { ProfileAvatar } from '@/components/account/profile-avatar'
-import { RemindersAlert } from './reminders-alert'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +14,6 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/ui/dropdown-menu'
-import { useTheme } from '@/lib/providers/theme-provider'
-import type { Reminder } from './reminders-alert'
 
 interface SideMenuProps {
   sidebarOpen: boolean
@@ -28,10 +25,8 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   const router = useRouter()
   const pathname = usePathname()
   const [isDropdownOpen, setIsDropdownOpen] = React.useState(false)
-  const { theme, setTheme } = useTheme()
   const [profile, setProfile] = React.useState<any>(null)
   const [loading, setLoading] = React.useState(true)
-  const [reminders, setReminders] = React.useState<Reminder[]>([])
 
   React.useEffect(() => {
     async function getProfile() {
@@ -54,39 +49,9 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
     getProfile()
   }, [user, supabase])
 
-  React.useEffect(() => {
-    async function getReminders() {
-      if (!user) return
-      
-      const { data, error } = await supabase
-        .from('reminders')
-        .select()
-        .eq('created_by', user.id)
-      
-      if (!error && data) {
-        setReminders(data)
-      }
-    }
-    getReminders()
-
-    // Poll for updates every minute since reminders are minute-based
-    const interval = setInterval(() => {
-      getReminders()
-    }, 60000) // Changed from 10000 to 60000 (1 minute)
-
-    return () => {
-      clearInterval(interval)
-    }
-  }, [user, supabase])
-
   const handleSignOut = async () => {
     await supabase.auth.signOut()
     router.push('/auth/signin')
-  }
-
-  const handleDelete = async (id: string) => {
-    // Remove from local state immediately
-    setReminders((prev: Reminder[]) => prev.filter((r: Reminder) => r.id !== id))
   }
 
   // Check if user has active subscription
@@ -208,37 +173,6 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
                       >
                         Billing
                       </DropdownMenuItem>
-                      <div className="px-2 py-1.5">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={() => setTheme('light')}
-                            className={`flex items-center justify-center rounded-md p-2 hover:bg-[#242f6a] ${
-                              theme === 'light' ? 'bg-[#242f6a] text-white' : 'text-gray-400'
-                            }`}
-                            aria-label="Light mode"
-                          >
-                            <Sun className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setTheme('dark')}
-                            className={`flex items-center justify-center rounded-md p-2 hover:bg-[#242f6a] ${
-                              theme === 'dark' ? 'bg-[#242f6a] text-white' : 'text-gray-400'
-                            }`}
-                            aria-label="Dark mode"
-                          >
-                            <Moon className="h-4 w-4" />
-                          </button>
-                          <button
-                            onClick={() => setTheme('system')}
-                            className={`flex items-center justify-center rounded-md p-2 hover:bg-[#242f6a] ${
-                              theme === 'system' ? 'bg-[#242f6a] text-white' : 'text-gray-400'
-                            }`}
-                            aria-label="System theme"
-                          >
-                            <Laptop className="h-4 w-4" />
-                          </button>
-                        </div>
-                      </div>
                       <DropdownMenuSeparator className="bg-green-600 my-2" />
                       <DropdownMenuItem 
                         className="cursor-pointer hover:bg-[#242f6a] text-red-400 hover:text-red-300 rounded-md"
@@ -272,9 +206,6 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
               </Link>
             ))}
           </nav>
-
-          {/* Add Reminders Alert */}
-          {hasSubscription && <RemindersAlert sidebarOpen={sidebarOpen} reminders={reminders} onUpdate={handleDelete} />}
         </div>
 
         {/* Only show sign out in footer if user is logged in */}

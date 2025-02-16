@@ -10,6 +10,7 @@ import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/toaster'
+import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -80,6 +81,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   <main className="flex-1">{children}</main>
                 </div>
                 <SpeedInsights />
+                <RemindersAlertSystem />
               </ThemeProvider>
             </MobileProvider>
           </SupabaseClientProvider>

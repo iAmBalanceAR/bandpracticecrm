@@ -1,5 +1,6 @@
 "use client"
 
+import * as React from "react"
 import dynamic from 'next/dynamic'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import CustomCard from "@/components/common/CustomCard"
@@ -16,12 +17,11 @@ const TourMap = dynamic(() => import('./tour-map'), {
 export default function TourMapCard() {
   return (
     <CustomCard 
-    title="Tour Route Map"
-    cardColor="[#ff9920]"
-    addclassName="md:col-span-2"
-  >
-        <TourMap mode="simple" />
-        
+      title="Tour Route Map"
+      cardColor="[#ff9920]"
+      addclassName="md:col-span-2"
+    >
+      <TourMap mode="simple" showFutureOnly={true} />
     </CustomCard>
   )
 }
