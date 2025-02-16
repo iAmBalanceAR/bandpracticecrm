@@ -19,6 +19,7 @@ export default function DraggableItem({
   const [dragStart, setDragStart] = useState<Position | null>(null)
   const [initialPosition, setInitialPosition] = useState<Position>(position)
   const [initialSize, setInitialSize] = useState<Size>(size)
+  const [aspectRatio, setAspectRatio] = useState<number>(size.width / size.height)
 
   useEffect(() => {
     if (!isDragging && !isResizing) return
@@ -38,11 +39,41 @@ export default function DraggableItem({
         
         onPositionChange(id, { x: newX, y: newY })
       } else if (isResizing) {
-        const dx = ((e.clientX - dragStart.x) / parentRect.width) * 50
-        const dy = ((e.clientY - dragStart.y) / parentRect.height) * 50
+        const dx = ((e.clientX - dragStart.x) / parentRect.width) * 100
+        const dy = ((e.clientY - dragStart.y) / parentRect.height) * 100
         
-        const newWidth = Math.max(5, Math.min(100 - position.x, initialSize.width + dx))
-        const newHeight = Math.max(5, Math.min(100 - position.y, initialSize.height + dy))
+        // Calculate new dimensions while preserving aspect ratio
+        let newWidth: number
+        let newHeight: number
+        
+        // Use the larger change (dx or dy) to determine the new size
+        if (Math.abs(dx) > Math.abs(dy)) {
+          newWidth = Math.max(5, Math.min(100 - position.x, initialSize.width + dx))
+          newHeight = newWidth / aspectRatio
+        } else {
+          newHeight = Math.max(5, Math.min(100 - position.y, initialSize.height + dy))
+          newWidth = newHeight * aspectRatio
+        }
+        
+        // Ensure we don't exceed stage boundaries
+        if (newWidth > (100 - position.x)) {
+          newWidth = 100 - position.x
+          newHeight = newWidth / aspectRatio
+        }
+        if (newHeight > (100 - position.y)) {
+          newHeight = 100 - position.y
+          newWidth = newHeight * aspectRatio
+        }
+        
+        // Ensure minimum size
+        if (newWidth < 5) {
+          newWidth = 5
+          newHeight = newWidth / aspectRatio
+        }
+        if (newHeight < 5) {
+          newHeight = 5
+          newWidth = newHeight * aspectRatio
+        }
         
         onSizeChange(id, { width: newWidth, height: newHeight })
       }
@@ -66,7 +97,7 @@ export default function DraggableItem({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [id, isDragging, isResizing, dragStart, initialPosition, initialSize, position, size, onPositionChange, onSizeChange])
+  }, [id, isDragging, isResizing, dragStart, initialPosition, initialSize, position, size, onPositionChange, onSizeChange, aspectRatio])
 
   const handleMouseDown = (e: React.MouseEvent, type: 'drag' | 'resize') => {
     if (readOnly) return
@@ -77,6 +108,7 @@ export default function DraggableItem({
     } else {
       setIsResizing(true)
       setInitialSize(size)
+      setAspectRatio(size.width / size.height)
     }
     setDragStart({ x: e.clientX, y: e.clientY })
   }

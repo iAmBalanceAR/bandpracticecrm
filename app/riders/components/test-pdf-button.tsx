@@ -136,13 +136,6 @@ const InputListTable = ({ rows }: { rows?: any[] }) => {
 // Helper function to format duration
 const formatDuration = (duration: string) => {
   if (!duration) return '--:--'
-  // Duration comes as PostgreSQL interval, format it as mm:ss
-  const match = duration.match(/(\d+):(\d+):(\d+)/)
-  if (match) {
-    const [_, hours, minutes, seconds] = match
-    const totalMinutes = parseInt(hours) * 60 + parseInt(minutes)
-    return `${totalMinutes}:${seconds.padStart(2, '0')}`
-  }
   return duration
 }
 
@@ -207,7 +200,7 @@ const SetlistPage = ({ setlist, songs }: { setlist: any, songs: any[] }) => (
         <View key={song.id} style={styles.tableRow}>
           <Text style={[styles.tableCell, { width: '10%' }]}>{index + 1}</Text>
           <Text style={[styles.tableCell, { width: '50%' }]}>{song.title}</Text>
-          <Text style={[styles.tableCell, { width: '20%' }]}>{formatDuration(song.duration)}</Text>
+          <Text style={[styles.tableCell, { width: '20%' }]}>{song.duration || '--:--'}</Text>
           <Text style={[styles.tableCell, { width: '20%' }]}>{song.key}</Text>
         </View>
       ))}

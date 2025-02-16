@@ -30,6 +30,55 @@ interface SetlistEditorProps {
   onCancel: () => void;
 }
 
+// Add duration formatting utilities
+function formatDurationInput(value: string): string {
+  // Remove any non-digit characters except colon
+  const cleaned = value.replace(/[^\d:]/g, '');
+  
+  // Handle empty input
+  if (!cleaned) return '';
+  
+  const parts = cleaned.split(':');
+  
+  // If single number entered, treat as seconds
+  if (parts.length === 1) {
+    const seconds = parseInt(parts[0]);
+    if (seconds >= 60) {
+      const minutes = Math.floor(seconds / 60);
+      const remainingSeconds = seconds % 60;
+      return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+    return `0:${parts[0].padStart(2, '0')}`;
+  }
+  
+  // Handle MM:SS format
+  if (parts.length === 2) {
+    const [minutes, seconds] = parts;
+    const mins = parseInt(minutes);
+    const secs = parseInt(seconds);
+    
+    if (secs >= 60) {
+      const totalMinutes = mins + Math.floor(secs / 60);
+      const remainingSeconds = secs % 60;
+      return `${totalMinutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    }
+    
+    return `${mins}:${seconds.padStart(2, '0')}`;
+  }
+  
+  return cleaned;
+}
+
+function durationToInterval(duration: string): string {
+  if (!duration) return '0 seconds';
+  
+  const parts = duration.split(':');
+  if (parts.length !== 2) return '0 seconds';
+  
+  const [minutes, seconds] = parts.map(Number);
+  return `${minutes} minutes ${seconds} seconds`;
+}
+
 export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEditorProps) {
   const [title, setTitle] = useState('');
   const [songs, setSongs] = useState<Song[]>([]);
@@ -94,14 +143,22 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
   };
 
   const handleAddSong = async () => {
-    if (!newSong.title) return;
+    if (!newSong.title) {
+      setFeedback({
+        open: true,
+        title: 'Validation Error',
+        message: 'Please enter at least a song title before adding.',
+        type: 'error'
+      });
+      return;
+    }
 
     try {
       if (setlistId) {
         const { data: songData, error } = await supabase.rpc('add_song_to_setlist', {
           p_setlist_id: setlistId,
           p_title: newSong.title,
-          p_duration: newSong.duration,
+          p_duration: durationToInterval(newSong.duration),
           p_key: newSong.key,
           p_notes: newSong.notes,
           p_sort_order: songs.length
@@ -111,7 +168,6 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
 
         setSongs([...songs, { ...newSong, id: songData, sort_order: songs.length }]);
       } else {
-        // For new setlists, just add to local state
         setSongs([...songs, { ...newSong, id: Date.now().toString(), sort_order: songs.length }]);
       }
 
@@ -303,10 +359,11 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
                 className="text-white bg-transparent "
               />
               <Input
-                placeholder="Duration"
+                placeholder="MM:SS"
                 value={newSong.duration}
-                onChange={(e) => setNewSong({ ...newSong, duration: e.target.value })}
-                className="text-white bg-transparent "
+                onChange={(e) => setNewSong({ ...newSong, duration: formatDurationInput(e.target.value) })}
+                className="text-white bg-transparent"
+                title="Enter duration in MM:SS format (e.g., 3:45)"
               />
               <Input
                 placeholder="Key"
@@ -326,8 +383,7 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
                 size="icon"
                 className="text-white hover:font-bold bg-blue-700 border-green-400 hover:bg-green-600 border"
               >
-               <Plus className="h-[45px] w-[45px]" />
-
+                <Plus className="h-[45px] w-[45px]" />
               </Button>
             </div>
 
