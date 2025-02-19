@@ -85,7 +85,6 @@ export interface SetlistItem {
   setlist_id: string
   title: string
   duration: string
-  key: string
   notes?: string
   sort_order: number
 }

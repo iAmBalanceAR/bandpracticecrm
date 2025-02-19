@@ -12,19 +12,25 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import {
+  Dialog,
+  DialogContent,
+} from "@/components/ui/dialog";
 import { formatDistanceToNow } from 'date-fns';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { useAuth } from '@/components/providers/auth-provider';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 import {
   UploadCloud,
   File,
-  Image,
+  Image as ImageIcon,
   FileText,
   FileSpreadsheet,
   Download,
   Trash2,
   Loader2,
+  X,
 } from 'lucide-react';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
 
@@ -56,11 +62,11 @@ type FeedbackModalState = {
 };
 
 const fileTypeIcons: Record<string, React.ReactNode> = {
-  'image': <Image className="h-4 w-4" />,
-  'pdf': <FileText className="h-4 w-4" />,
-  'document': <FileText className="h-4 w-4" />,
-  'spreadsheet': <FileSpreadsheet className="h-4 w-4" />,
-  'default': <File className="h-4 w-4" />,
+  'image': <ImageIcon className="h-6 w-6 text-green-500" />,
+  'pdf': <FileText className="h-6 w-6 text-blue-500" />,
+  'document': <FileText className="h-6 w-6 text-blue-500" />,
+  'spreadsheet': <FileSpreadsheet className="h-6 w-6 text-emerald-500" />,
+  'default': <File className="h-6 w-6 text-gray-500" />,
 };
 
 export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps) {
@@ -68,6 +74,7 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
   const { isAuthenticated, loading: authLoading } = useAuth();
   const [isUploading, setIsUploading] = useState(false);
   const [uploadType, setUploadType] = useState<Attachment['type']>('document');
+  const [selectedImage, setSelectedImage] = useState<Attachment | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
   const [feedbackModal, setFeedbackModal] = useState<FeedbackModalState>({
@@ -217,6 +224,14 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
     });
   };
 
+  const handleFileClick = (attachment: Attachment) => {
+    if (attachment.file_type.startsWith('image/')) {
+      setSelectedImage(attachment);
+    } else {
+      window.open(attachment.file_url, '_blank');
+    }
+  };
+
   if (authLoading) {
     return (
       <div className="flex justify-center items-center min-h-[200px]">
@@ -237,6 +252,7 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
     <>
       <CardHeader>
         <CardTitle>Attachments</CardTitle>
+        <p className="text-sm text-gray-400">Choose the file type from the dropdown menu, the clickk "Upload File" to select the file. Uploads limited to standard image formats as well as .pdf, .doc, .docx, .xls and .xlsx file types. Limit upload size to 2mb or smaller.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <div className="space-y-4">
@@ -271,7 +287,7 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
                 type="button"
                 onClick={() => fileInputRef.current?.click()}
                 disabled={isUploading}
-                className="flex items-center gap-2"
+                className="flex items-center ap-2 bg-blue-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
               >
                 <UploadCloud className="h-4 w-4" />
                 {isUploading ? 'Uploading...' : 'Upload File'}
@@ -294,28 +310,23 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
                 .map((attachment) => (
                   <div
                     key={attachment.id}
-                    className="flex items-center justify-between p-4 border rounded-lg"
+                    className="flex items-center gap-2 p-3 bg-[#0A1129] border border-white/40 rounded-lg"
                   >
-                    <div className="flex items-center gap-4">
-                      <div className="text-muted-foreground">
-                        {fileTypeIcons[attachment.type] || fileTypeIcons.default}
-                      </div>
-                      <div>
-                        <Button
-                          variant="link"
-                          className="p-0 h-auto font-medium hover:text-blue-500"
-                          onClick={() => window.open(attachment.file_url, '_blank')}
-                        >
-                          {attachment.file_name}
-                        </Button>
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{formatBytes(attachment.file_size)}</span>
-                          <span>•</span>
-                          <span>
-                            {formatDistanceToNow(new Date(attachment.uploaded_at), {
-                              addSuffix: true,
-                            })}
-                          </span>
+                    <div className="flex-shrink-0 mt-[2px]">
+                      {fileTypeIcons[attachment.type] || fileTypeIcons.default}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3">
+                        <div className="border-r pr-4 border-blue-500 font-medium text-lg capitalize whitespace-nowrap">
+                          {attachment.type}
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="text-muted-foreground truncate">
+                            {attachment.file_name}
+                          </div>
+                          <div className="text-sm text-muted-foreground">
+                            {formatBytes(attachment.file_size)} • {formatDistanceToNow(new Date(attachment.uploaded_at), { addSuffix: true })}
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -323,18 +334,18 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => window.open(attachment.file_url, '_blank')}
-                        className="text-muted-foreground hover:text-blue-500"
+                        onClick={() => handleFileClick(attachment)}
+                        className="hover:bg-[#2D3748] hover:text-blue-500 hover:shadow-blue-500 hover:shadow-sm hover:font-semibold text-blue-500"
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-5 w-5" />
                       </Button>
                       <Button
                         variant="ghost"
                         size="icon"
                         onClick={() => handleDelete(attachment)}
-                        className="text-muted-foreground hover:text-red-500"
+                        className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                       >
-                        <Trash2 className="h-4 w-4" />
+                        <Trash2 className="h-5 w-5" />
                       </Button>
                     </div>
                   </div>
@@ -352,6 +363,37 @@ export default function LeadAttachments({ lead, onUpdate }: LeadAttachmentsProps
         type={feedbackModal.type}
         onConfirm={feedbackModal.onConfirm}
       />
+
+      <Dialog open={!!selectedImage} onOpenChange={() => setSelectedImage(null)}>
+        <DialogContent className="max-w-4xl bg-[#1B2559] border-blue-500 p-0">
+          <div className="relative w-full h-full max-h-[80vh] overflow-hidden rounded-lg">
+            {selectedImage && (
+              <>
+                <div className="absolute top-6 right-6 z-10">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setSelectedImage(null)}
+                    className="bg-black/70 border-gray-500/50 border hover:border-red-700/50 hover:bg-white hover:text-black text-white rounded-sm"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                <div className="relative w-full h-full flex items-center justify-center bg-black/50 p-4">
+                  <img
+                    src={selectedImage.file_url}
+                    alt={selectedImage.file_name}
+                    className="max-w-full max-h-[70vh] object-contain"
+                  />
+                </div>
+                <div className="absolute bottom-0 left-0 right-0 bg-black/80 p-2 text-white text-sm">
+                  {selectedImage.file_name}
+                </div>
+              </>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 } 

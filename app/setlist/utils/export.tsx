@@ -7,14 +7,12 @@ import PDFGrid from '../components/pdf-grid'
 interface Song {
   title: string
   duration: string
-  key: string
   notes: string
   sort_order: number
 }
 
 interface ExportOptions {
   includeNotes?: boolean
-  includeKey?: boolean
 }
 
 export async function generateSetlistPDF(
@@ -51,7 +49,6 @@ export async function generateSetlistPDF(
       title={title}
       songs={songs}
       includeNotes={options.includeNotes}
-      includeKey={options.includeKey}
     />
   )
 

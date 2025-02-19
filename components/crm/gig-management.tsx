@@ -669,7 +669,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
               </div>
               <Button 
                 onClick={handleAddNew}
-                className="bg-green-700 text-white hover:bg-green-600"
+                className="bg-green-700 text-white hover:bg-green-600 border border-black"
               >
                 <Plus className="mr-2 h-4 w-4" /> Add New Gig
               </Button>
@@ -708,8 +708,8 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Venue</TableHead>
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Date</TableHead>
-                              <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Tour</TableHead>
-                              <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 text-right pr-9">Actions</TableHead>
+                              <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb- ">Tour</TableHead>
+                              <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4 text-center pr-9">Actions</TableHead>
                             </TableRow>
                           </TableHeader>
                           <TableBody>
@@ -736,12 +736,12 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                   <TableCell className="font-medium text-gray-400 pt-4 pb-4">
                                     <div className="flex items-center">
                                       <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                                      <span>{gig.title}</span>
+                                      <span className="line-clamp-1">{gig.title}</span>
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-gray-400 pt-4 pb-4">
                                     <div className="flex flex-col">
-                                      <span>{gig.venue}</span>
+                                    <span className="whitespace-nowrap">{gig.venue}</span>
                                       {(gig.venue_city || gig.venue_state) && (
                                         <span className="text-xs text-gray-500">
                                           {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
@@ -750,12 +750,12 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                     </div>
                                   </TableCell>
                                   <TableCell className="text-gray-400 pt-4 pb-4">
-                                    {formatDateSafely(gig.gig_date)}
+                                    <span className="whitespace-nowrap">{formatDateSafely(gig.gig_date)}</span>
                                   </TableCell>
                                   <TableCell className="text-gray-400 pt-4 pb-4">
                                     {gig.tourInfo ? (
                                       <div className="flex space-x-1">
-                                        <span>{gig.tourInfo.title}</span>
+                                        <span className="whitespace-nowrap">{gig.tourInfo.title}</span>
                                         {gig.tourInfo.is_default && (
                                           <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
                                         )}
@@ -765,10 +765,11 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                     )}
                                   </TableCell>
                                   <TableCell className="pt-4 pb-4">
-                                    <div className="flex space-x-2 justify-center">
+                                    <div className="flex space-x-2 w-full mx-auto">
                                       <Button 
                                         variant="ghost" 
                                         size="sm" 
+                                        title="Click to Edit Gig"
                                         onClick={() => handleEdit(gig)}
                                         className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
                                       >
@@ -778,6 +779,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                         variant="ghost" 
                                         size="sm" 
                                         onClick={() => handleDeleteClick(gig.id)}
+                                        title="Click to Delete Gig"
                                         className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                                       >
                                         {deletingGigId === gig.id ? (
@@ -865,6 +867,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                       <Button 
                                         variant="ghost" 
                                         size="sm" 
+                                        title="Edit this Gig"
                                         onClick={() => handleEdit(gig)}
                                         className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
                                       >
@@ -873,6 +876,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                       <Button 
                                         variant="ghost" 
                                         size="sm" 
+                                        title="Delete this gig."
                                         onClick={() => handleDeleteClick(gig.id)}
                                         className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                                       >
@@ -969,7 +973,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                           ))}
                         </div>
                       )}
-                      {searchValue.length > 2 && venues.length === 0 && !selectedVenue && (
+                      {searchValue.length > 2 && venues.length === 0 && !selectedVenue && !currentGig && (
                         <div className="absolute w-full z-50 top-full mt-1 bg-[#1B2559] rounded-md shadow-lg p-2">
                           No venues found
                         </div>
@@ -1022,7 +1026,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                       id="contactName" 
                       name="contactName"
                       defaultValue={getInputValue(currentGig?.contact_name)}
-                      required 
                       className="bg-[#1B2559]" 
                     />
                   </div>
@@ -1033,7 +1036,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                       name="contactEmail"
                       type="email"
                       defaultValue={getInputValue(currentGig?.contact_email)}
-                      required 
                       className="bg-[#1B2559]" 
                     />
                   </div>
@@ -1044,7 +1046,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                       name="contactPhone"
                       type="tel"
                       defaultValue={getInputValue(currentGig?.contact_phone)}
-                      required 
                       className="bg-[#1B2559]" 
                     />
                   </div>
@@ -1092,6 +1093,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                               <Button
                                 variant="outline"
                                 size="sm"
+                                type="button"
                                 onClick={() => handleAMPMToggle(loadInTime, setLoadInTime)}
                                 className="w-20 bg-[#1B2559]"
                               >
@@ -1167,6 +1169,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  type="button"
                                   onClick={() => {
                                     const newTime = new Date(setTime)
                                     const hours = newTime.getHours()
@@ -1188,7 +1191,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                           id="setLength" 
                           name="setLength"
                           defaultValue={getInputValue(currentGig?.set_length)}
-                          required 
                           className="bg-[#1B2559]" 
                         />
                       </div>
@@ -1221,7 +1223,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                         type="number" 
                         value={contractTotal}
                         onChange={(e) => setContractTotal(Number(e.target.value))}
-                        required 
                         className="bg-[#1B2559]" 
                       />
                     </div>
@@ -1234,7 +1235,6 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                         type="number" 
                         value={depositAmount}
                         onChange={(e) => setDepositAmount(Number(e.target.value))}
-                        required 
                       />
                     </div>
                     <div className="mt-2 mb-4">
@@ -1270,10 +1270,9 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                         type="number" 
                         value={openBalance}
                         disabled
-                        required 
                         className="bg-[#1B2559] opacity-50" 
                       />
-                    </div>                  
+                    </div>
                     <div className="mb-3">
                       <Label htmlFor="gigDetails">Gig Details</Label>
                       <Textarea 

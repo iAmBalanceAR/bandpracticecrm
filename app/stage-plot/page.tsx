@@ -213,17 +213,10 @@ export default function StagePlotPage() {
                     <div className="text-center text-lg text-gray-400">
                       <Guitar className="h-24 w-24 text-[#ff9920] mb-4 mx-auto" />
                       <p className="text-lg mb-4">No stage plots found in the database. <br />Click the "Create New Plot" button above to create one.</p>
-                      {/* <Button 
-                        onClick={() => setIsCreating(true)}
-                        className="gap-2"
-                      >
-                        <Plus size={16} />
-                        Create your first stage plot
-                      </Button> */}
                     </div>
                   ) : (
                     <>
-                    <div className="border-gray-500 border-2  rounded-lg">
+                    <div className="border-gray-500 border-2 rounded-lg">
                     <Table className="">
                       <TableHeader className="" >
                         <TableRow className=" text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1  ">
@@ -244,6 +237,7 @@ export default function StagePlotPage() {
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="ap-2 hover:bg-[#2D3748] text-white hover:text-blue-400 hover:shadow-blue-400 hover:shadow-sm hover:font-semibold"
                                   onClick={() => {
                                     if (!isAuthenticated) {
                                       setFeedbackModal({
@@ -265,7 +259,7 @@ export default function StagePlotPage() {
                                         })
                                       })
                                   }}
-                                  title="Export PDF"
+                                  title="Export Stage Plot to PDF"
                                 >
                                   <FileDown size={18} className="text-blue-400" />
                                 </Button>
@@ -273,15 +267,17 @@ export default function StagePlotPage() {
                                   size="icon"
                                   variant="ghost"
                                   onClick={() => setSelectedPlot(plot.id)}
-                                  title="Edit"
+                                  className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                                  title="Edit Stage Plot"
                                 >
                                   <Edit size={18} className="text-lime-400" />
                                 </Button>
                                 <Button
                                   size="icon"
                                   variant="ghost"
+                                  className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                                   onClick={() => handleDelete(plot.id)}
-                                  title="Delete"
+                                  title="Delete Stage Plot"
                                 >
                                   <Trash size={18} className="text-red-400" />
                                 </Button>

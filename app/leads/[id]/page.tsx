@@ -45,11 +45,34 @@ export default function LeadPage({ params }: LeadPageProps) {
       
       if (data) {
         setLead(prev => {
-          // Only update if data has changed
-          if (JSON.stringify(prev) !== JSON.stringify(data)) {
-            return data;
+          if (!prev) return data;
+
+          // Create a helper function to deduplicate arrays by ID
+          const dedupeById = (arr: any[]) => {
+            const seen = new Set();
+            return arr.filter(item => {
+              if (!item.id) return true;
+              const duplicate = seen.has(item.id);
+              seen.add(item.id);
+              return !duplicate;
+            });
+          };
+
+          // Create new lead object with deduplicated arrays
+          const newLead = {
+            ...data,
+            communications: dedupeById(data.communications || []),
+            reminders: dedupeById(data.reminders || []),
+            lead_notes: dedupeById(data.lead_notes || []),
+            attachments: dedupeById(data.attachments || [])
+          };
+
+          // Only update if there are actual changes
+          if (JSON.stringify(prev) === JSON.stringify(newLead)) {
+            return prev;
           }
-          return prev;
+
+          return newLead;
         });
       }
     } catch (err) {
@@ -121,9 +144,9 @@ export default function LeadPage({ params }: LeadPageProps) {
         <CardContent className="p-6">
           <Link 
             href="/leads" 
-            className="inline-flex items-center text-md text-slate-300 hover:text-white mb-4"
+            className="inline-flex border-black border hover:bg-blue-800 bg-blue-600 text-white p-[6px] rounded-sm mb-4"
           >
-            <ArrowLeft className="h-4 w-4 mr-1" />
+            <ArrowLeft className="h-4 w-4 mr-1 mt-1" />
             Back to Leads
           </Link>
 

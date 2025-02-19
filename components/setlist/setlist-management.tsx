@@ -255,6 +255,7 @@ export default function SetlistManagement() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleExport(setlist.id)}
+                        title="Export Setlist As PDF"
                         className="hover:bg-[#216930] text-green-400 border-0 hover:text-white hover:shadow-green-400 hover:shadow-sm hover:font-semibold"
                       >
                         <FileDown className="h-4 w-4" />
@@ -263,7 +264,8 @@ export default function SetlistManagement() {
                         variant="outline"
                         size="sm"
                         onClick={() => handleEdit(setlist.id)}
-                       className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white border-0"
+                        title="Edit Setlist"
+                        className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white border-0"
                       >
                         <Pencil className="h-4 w-4" />
                       </Button>
@@ -271,7 +273,8 @@ export default function SetlistManagement() {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleDelete(setlist.id)}
-                       className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                        title="Delete Setlist"
+                        className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

@@ -23,6 +23,7 @@ import { FeedbackModal } from '@/components/ui/feedback-modal';
 import { Trash2, CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { RichTextEditor } from '@/components/ui/rich-text-editor'
 
 interface LeadRemindersProps {
   lead: Lead & {
@@ -37,6 +38,12 @@ type FeedbackModalState = {
   message: string;
   type: 'success' | 'error' | 'warning' | 'delete';
   onConfirm?: () => Promise<void>;
+};
+
+const stripHtml = (html: string) => {
+  const tmp = document.createElement('DIV');
+  tmp.innerHTML = html;
+  return tmp.textContent || tmp.innerText || '';
 };
 
 export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
@@ -190,6 +197,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
     <>
       <CardHeader>
         <CardTitle>Reminders</CardTitle>
+        <p className="text-sm text-gray-400">Enter the details of your reminder using the form below.   When reminders come due, an alert will display within your session, regardless of what page you're on,to remind you. Closing the alert marks the remminder as complete in your lead.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -212,17 +220,18 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                   className="w-full bg-[#1B2559]"
                 />
               </div>
-              <div className="grid-col-1 flex gap-2">
+              <div className="grid-col-1 flex gap-2 text-white">
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button
                       variant="outline"
+                      type="button"
                       className={cn(
                         "flex-1 justify-start text-left font-normal",
                         !dueDate && "text-muted-foreground"
                       )}
                     >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      <CalendarIcon className="mr-2 h-4 w-4 text-white" />
                       {dueDate ? format(dueDate, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
@@ -239,7 +248,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                   type="time"
                   value={dueTime}
                   onChange={(e) => setDueTime(e.target.value)}
-                  className="w-32 bg-[#1B2559]"
+                  className="w-32 bg-[#1B2559] text-white [&::-webkit-calendar-picker-indicator]:invert [&::-webkit-time-picker-indicator]:invert"
                   required
                 />
               </div>
@@ -248,18 +257,30 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              name="description"
+            <RichTextEditor
+              content=""
+              onChange={(content: string) => {
+                const contentInput = document.createElement('input')
+                contentInput.type = 'hidden'
+                contentInput.name = 'description'
+                contentInput.value = content
+                const form = document.querySelector('form')
+                const existingInput = form?.querySelector('input[name="description"]')
+                if (existingInput) {
+                  existingInput.remove()
+                }
+                form?.appendChild(contentInput)
+              }}
               placeholder="Add reminder details..."
-              required
-              className="min-h-[100px] bg-[#1B2559]"
+              minHeight="100px"
             />
           </div>
 
           <div className="flex justify-end">
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add Reminder'}
+            <Button type="submit" disabled={isLoading}
+            className="bg-green-700 text-white hover:bg-green-600 border border-black"
+            >
+              {isLoading ? 'Adding...' : '+ Add Reminder'}
             </Button>
           </div>
         </form>
@@ -279,7 +300,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
               .map((reminder) => (
                 <div
                   key={reminder.id}
-                  className="flex gap-4 p-4 border rounded-lg"
+                  className="flex gap-4 p-4 bg-[#0A1129] border border-white/40 rounded-lg"
                 >
                   <div className="flex-1">
                     <div className="flex items-center justify-between mb-2">
@@ -307,14 +328,14 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
                           variant="ghost"
                           size="icon"
                           onClick={() => reminder.id && handleDelete(reminder.id)}
-                          className="text-muted-foreground hover:text-red-500"
+                          className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>
                     </div>
                     <p className="text-muted-foreground whitespace-pre-wrap">
-                      {reminder.description}
+                      {reminder.description ? stripHtml(reminder.description) : ''}
                     </p>
                   </div>
                 </div>

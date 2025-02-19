@@ -6,12 +6,13 @@ import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { useRouter } from 'next/navigation';
 import { useSupabase } from '@/components/providers/supabase-client-provider';
 import { useAuth } from '@/components/providers/auth-provider';
-import { Trash2, Loader2 } from 'lucide-react';
+import { Trash2, Loader2, StickyNote } from 'lucide-react';
 import { FeedbackModal } from '@/components/ui/feedback-modal';
+import { RichTextEditor } from '@/components/ui/rich-text-editor';
 
 interface LeadNotesProps {
   lead: Lead & {
@@ -144,23 +145,36 @@ export default function LeadNotes({ lead, onUpdate }: LeadNotesProps) {
     <div className="relative">
       <CardHeader>
         <CardTitle>Notes</CardTitle>
+        <p className="text-sm text-gray-400">Enter a simmple note and save it.  Notes are intendedd to be small bits of informmation that you'd like to hold on to for later.</p>
       </CardHeader>
       <CardContent className="space-y-6">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="content">New Note</Label>
-            <Textarea
-              id="content"
-              name="content"
+            <RichTextEditor
+              content=""
+              onChange={(content) => {
+                const contentInput = document.createElement('input')
+                contentInput.type = 'hidden'
+                contentInput.name = 'content'
+                contentInput.value = content
+                const form = document.querySelector('form')
+                const existingInput = form?.querySelector('input[name="content"]')
+                if (existingInput) {
+                  existingInput.remove()
+                }
+                form?.appendChild(contentInput)
+              }}
               placeholder="Add a note..."
-              required
-              className="min-h-[100px]"
+              minHeight="100px"
             />
           </div>
 
           <div className="flex items-center justify-between">
             <div></div>
-            <Button type="submit" disabled={isLoading}>
+            <Button type="submit" disabled={isLoading}
+            className="bg-green-700 text-white hover:bg-green-600 border border-black"
+            >
               {isLoading ? 'Adding...' : 'Add Note'}
             </Button>
           </div>
@@ -181,26 +195,27 @@ export default function LeadNotes({ lead, onUpdate }: LeadNotesProps) {
               .map((note) => (
                 <div
                   key={note.id}
-                  className="p-4 border rounded-lg space-y-2"
+                  className="flex items-center justify-between px-4 py-3 bg-[#0A1129] border border-white/40 rounded-lg gap-4"
                 >
-                  <div className="flex items-start justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <span>
-                        {note.created_at && formatDistanceToNow(new Date(note.created_at), {
-                          addSuffix: true,
-                        })}
-                      </span>
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className="flex items-center gap-2 bg-[#111C44] px-2 py-1 rounded text-xs text-gray-400 whitespace-nowrap">
+                      <StickyNote className="h-3 w-3" />
+                      {note.created_at && format(new Date(note.created_at), "MMM d, yyyy 'at' h:mm a")}
                     </div>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => note.id && handleDelete(note.id)}
-                      className="text-muted-foreground hover:text-red-500"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                    <div 
+                      className="prose prose-invert max-w-none flex-1 min-w-0 text-gray-300"
+                      dangerouslySetInnerHTML={{ __html: note.content || '' }}
+                    />
                   </div>
-                  <p className="whitespace-pre-wrap">{note.content}</p>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    title="Delete Record"
+                    onClick={() => note.id && handleDelete(note.id)}
+                    className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
                 </div>
               ))
           )}

@@ -337,13 +337,6 @@ export default function TourList() {
               <div className="text-center text-lg py-12">
                 <Route className="h-24 w-24 mb-4 mx-auto text-[#d83b34]" />
                 <p className="text-gray-400 mb-4">No Tours in the database. <br />Click the "Add New Tour" button above to create one.</p>
-                {/* <Button 
-                  onClick={handleAddNew}
-
-                  className="bg-[#008ffb] hover:bg-[#0070cc]"
-                >
-                  Create your first tour
-                </Button> */}
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -382,6 +375,7 @@ export default function TourList() {
                               variant="ghost"
                               size="icon"
                               onClick={() => handleSetDefault(tour.id)}
+                              title="Clickk To Set Current Default Tour"
                               className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
                             >
                               <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
@@ -393,6 +387,7 @@ export default function TourList() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleEdit(tour)}
+                                title="Edit This Tour."
                                 className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
                               >
                                 <Pencil className="h-4 w-4" />
@@ -401,6 +396,7 @@ export default function TourList() {
                                 variant="ghost"
                                 size="sm"
                                 onClick={() => handleDeleteTour(tour.id)}
+                                title="Delete This Tour.."
                                 className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
                               >
                                 <Trash2 className="h-4 w-4" />

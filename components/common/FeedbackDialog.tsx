@@ -1,7 +1,7 @@
 'use client';
 
 import * as Dialog from '@radix-ui/react-dialog';
-import { CheckCircle, XCircle } from 'lucide-react';
+import { CheckCircle, XCircle, AlertTriangle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface FeedbackDialogProps {
@@ -9,7 +9,9 @@ interface FeedbackDialogProps {
   onOpenChange: (open: boolean) => void;
   title: string;
   message: string;
-  type: 'success' | 'error';
+  type: 'success' | 'error' | 'warning';
+  showCancel?: boolean;
+  onConfirm?: () => void;
 }
 
 export function FeedbackDialog({
@@ -18,7 +20,16 @@ export function FeedbackDialog({
   title,
   message,
   type,
+  showCancel = false,
+  onConfirm
 }: FeedbackDialogProps) {
+  const handleConfirm = () => {
+    if (onConfirm) {
+      onConfirm();
+    }
+    onOpenChange(false);
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
@@ -27,6 +38,8 @@ export function FeedbackDialog({
           <div className="flex items-center gap-3">
             {type === 'success' ? (
               <CheckCircle className="h-6 w-6 text-green-500" />
+            ) : type === 'warning' ? (
+              <AlertTriangle className="h-6 w-6 text-yellow-500" />
             ) : (
               <XCircle className="h-6 w-6 text-red-500" />
             )}
@@ -35,13 +48,24 @@ export function FeedbackDialog({
           <Dialog.Description className="mt-2 text-gray-400">
             {message}
           </Dialog.Description>
-          <div className="mt-6 flex justify-end">
+          <div className="mt-6 flex justify-end gap-2">
+            {showCancel && (
+              <Dialog.Close asChild>
+                <Button
+                  variant="outline"
+                  className="bg-transparent border-red-800 hover:bg-red-800/20 text-red-400"
+                >
+                  Cancel
+                </Button>
+              </Dialog.Close>
+            )}
             <Dialog.Close asChild>
               <Button
                 variant="outline"
                 className="bg-transparent border-blue-800 hover:bg-blue-800/20"
+                onClick={showCancel ? handleConfirm : undefined}
               >
-                Close
+                {showCancel ? 'Confirm' : 'Close'}
               </Button>
             </Dialog.Close>
           </div>

@@ -584,8 +584,7 @@ export function ExportRiderButton({ riderId, title }: ExportRiderButtonProps) {
               setlistResult.data.title,
               songsResult.data || [],
               {
-                includeNotes: true,
-                includeKey: true
+                includeNotes: true
               }
             );
             zip.file(`${sanitizedTitle}_setlist.pdf`, setlistPDF);

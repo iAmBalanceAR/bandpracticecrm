@@ -64,6 +64,17 @@ const nextConfig = {
       ...config.resolve.alias,
     }
     config.plugins.push(new CaseSensitivePathsPlugin())
+    // Suppress Supabase Auth warning
+    if (config.optimization && config.optimization.minimizer) {
+      config.optimization.minimizer.forEach((minimizer) => {
+        if (minimizer.constructor.name === 'TerserPlugin') {
+          minimizer.options.terserOptions = {
+            ...minimizer.options.terserOptions,
+            warnings: false,
+          }
+        }
+      })
+    }
     return config
   },
 }

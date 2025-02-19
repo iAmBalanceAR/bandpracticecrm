@@ -13,13 +13,13 @@ import { GripVertical, X, Plus, FileDown } from "lucide-react";
 import { createBrowserClient } from '@supabase/ssr';
 import { Database } from '@/types/supabase';
 import { FeedbackDialog } from '@/components/common/FeedbackDialog';
+import { FeedbackModal } from '../ui/feedback-modal';   
 import { generateSetlistPDF } from '@/app/setlist/utils/export';
 
 interface Song {
   id: string;
   title: string;
   duration: string;
-  key: string;
   notes: string;
   sort_order: number;
 }
@@ -85,20 +85,21 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
   const [newSong, setNewSong] = useState<Omit<Song, 'id' | 'sort_order'>>({
     title: '',
     duration: '',
-    key: '',
     notes: ''
   });
-  const [feedback, setFeedback] = useState<{
-    open: boolean;
-    title: string;
-    message: string;
-    type: 'success' | 'error';
+  const [feedbackModal, setFeedbackModal] = useState<{
+    isOpen: boolean
+    title: string
+    message: string
+    type: 'success' | 'error' | 'warning' | 'delete'
+    onConfirm?: () => void
   }>({
-    open: false,
+    isOpen: false,
     title: '',
     message: '',
     type: 'success'
-  });
+  })
+  const [showExportConfirm, setShowExportConfirm] = useState(false);
 
   const supabase = createBrowserClient<Database>(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -133,8 +134,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
       setSongs(songsData as Song[]);
     } catch (error) {
       console.error('Error fetching setlist:', error);
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Error',
         message: 'Failed to load setlist. Please try again.',
         type: 'error'
@@ -144,8 +145,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
 
   const handleAddSong = async () => {
     if (!newSong.title) {
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Validation Error',
         message: 'Please enter at least a song title before adding.',
         type: 'error'
@@ -158,9 +159,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
         const { data: songData, error } = await supabase.rpc('add_song_to_setlist', {
           p_setlist_id: setlistId,
           p_title: newSong.title,
-          p_duration: durationToInterval(newSong.duration),
-          p_key: newSong.key,
-          p_notes: newSong.notes,
+          p_duration: durationToInterval(newSong.duration || '0:00'),
+          p_notes: newSong.notes || '',
           p_sort_order: songs.length
         });
 
@@ -171,11 +171,11 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
         setSongs([...songs, { ...newSong, id: Date.now().toString(), sort_order: songs.length }]);
       }
 
-      setNewSong({ title: '', duration: '', key: '', notes: '' });
+      setNewSong({ title: '', duration: '', notes: '' });
     } catch (error) {
       console.error('Error adding song:', error);
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Error',
         message: 'Failed to add song. Please try again.',
         type: 'error'
@@ -212,8 +212,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
       }
     } catch (error) {
       console.error('Error updating song positions:', error);
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Error',
         message: 'Failed to update song order. Please try again.',
         type: 'error'
@@ -235,8 +235,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
       setSongs(updatedSongs);
     } catch (error) {
       console.error('Error removing song:', error);
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Error',
         message: 'Failed to remove song. Please try again.',
         type: 'error'
@@ -245,7 +245,15 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
   };
 
   const handleSave = async () => {
-    if (!title) return;
+    if (!title) {
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Validation Error',
+        message: 'Please enter a setlist title.',
+        type: 'error'
+      });
+      return;
+    }
 
     try {
       if (setlistId) {
@@ -267,7 +275,6 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
           p_songs: songs.map(song => ({
             title: song.title,
             duration: song.duration,
-            key: song.key,
             notes: song.notes,
             sort_order: song.sort_order
           }))
@@ -276,8 +283,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
         if (createError) throw createError;
       }
 
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Success',
         message: `Setlist ${setlistId ? 'updated' : 'created'} successfully`,
         type: 'success'
@@ -289,8 +296,8 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
       }, 1500);
     } catch (error) {
       console.error('Error saving setlist:', error);
-      setFeedback({
-        open: true,
+      setFeedbackModal({
+        isOpen: true,
         title: 'Error',
         message: `Failed to ${setlistId ? 'update' : 'create'} setlist. Please try again.`,
         type: 'error'
@@ -298,25 +305,36 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
     }
   };
 
-  const handleExport = async () => {
-    if (!title || songs.length === 0) {
-      setFeedback({
-        open: true,
-        title: 'Error',
-        message: 'Cannot export empty setlist. Please add songs first.',
-        type: 'error'
-      });
-      return;
-    }
+  const handleExportClick = () => {
+    setShowExportConfirm(true);
+  };
 
+  const handleExportConfirm = async () => {
+    setShowExportConfirm(false);
     try {
-      await generateSetlistPDF(title, songs);
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Generating PDF',
+        message: 'Please wait while we generate your PDF...',
+        type: 'warning'
+      });
+
+      await generateSetlistPDF(title, songs, {
+        includeNotes: true
+      });
+
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Success',
+        message: 'PDF has been generated and downloaded successfully.',
+        type: 'success'
+      });
     } catch (error) {
       console.error('Error exporting setlist:', error);
-      setFeedback({
-        open: true,
-        title: 'Error',
-        message: 'Failed to export setlist. Please try again.',
+      setFeedbackModal({
+        isOpen: true,
+        title: 'Export Failed',
+        message: 'There was an error generating the PDF. Please try again.',
         type: 'error'
       });
     }
@@ -324,12 +342,22 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
 
   return (
     <div className="space-y-4">
-      <FeedbackDialog
-        open={feedback.open}
-        onOpenChange={(open) => setFeedback(prev => ({ ...prev, open }))}
-        title={feedback.title}
-        message={feedback.message}
-        type={feedback.type}
+      <FeedbackModal
+        isOpen={feedbackModal.isOpen}
+        onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
+        title={feedbackModal.title}
+        message={feedbackModal.message}
+        type={feedbackModal.type}
+        onConfirm={feedbackModal.onConfirm}
+      />
+
+      <FeedbackModal
+        isOpen={showExportConfirm}
+        onClose={() => setShowExportConfirm(false)}
+        title="Export Setlist"
+        message={`Are you sure you want to export "${title}" as a PDF?`}
+        type="warning"
+        onConfirm={handleExportConfirm}
       />
 
       <div className="flex justify-between items-center mb-6">
@@ -337,26 +365,37 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
           {setlistId ? 'Edit Setlist' : 'Create New Setlist'}
       </h1>
       </div>
-
-      <Input
-        placeholder="Setlist Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-        className="text-white bg-transparent "
-      />
-
-      <Card className="bg-[#1B254B] border-none">
+      <Card className="bg-[#1B254B] border-blue-500/50 border">
+        <CardHeader>
+          <CardTitle>Setlist Title:</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Input
+            placeholder="Setlist Title"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            className="text-white bg-transparent "
+            title="Enter a Title fro this Setlist."
+          />
+        </CardContent>
+      </Card>
+      <Card className="bg-[#1B254B]  border-blue-500/50 border">
         <CardHeader>
           <CardTitle className="text-white">Songs</CardTitle>
+
+          <p className="text-sm text-gray-400">
+            Enter song informmation and click "+" to add song to the setlist.  Songs can be dragged and dropped once added to reorder.
+          </p>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="grid grid-cols-[1fr,100px,100px,1fr,40px] gap-2">
+            <div className="grid grid-cols-[1fr,100px,1fr,40px] gap-2">
               <Input
                 placeholder="Song Title"
                 value={newSong.title}
                 onChange={(e) => setNewSong({ ...newSong, title: e.target.value })}
                 className="text-white bg-transparent "
+                title="Enter Song Title"
               />
               <Input
                 placeholder="MM:SS"
@@ -366,21 +405,17 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
                 title="Enter duration in MM:SS format (e.g., 3:45)"
               />
               <Input
-                placeholder="Key"
-                value={newSong.key}
-                onChange={(e) => setNewSong({ ...newSong, key: e.target.value })}
-                className="text-white bg-transparent "
-              />
-              <Input
                 placeholder="Notes"
                 value={newSong.notes}
                 onChange={(e) => setNewSong({ ...newSong, notes: e.target.value })}
                 className="text-white bg-transparent"
+                title="Add a note for this song"
               />
               <Button
                 onClick={handleAddSong}
                 variant="ghost"
                 size="icon"
+                title="Click + to addd to Setlist"
                 className="text-white hover:font-bold bg-blue-700 border-green-400 hover:bg-green-600 border"
               >
                 <Plus className="h-[45px] w-[45px]" />
@@ -397,7 +432,7 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
                           <div
                             ref={provided.innerRef}
                             {...provided.draggableProps}
-                            className="grid grid-cols-[1fr,100px,100px,1fr,40px] gap-2 items-center bg-[#111C44] p-2 mb-2 rounded-md"
+                            className="grid grid-cols-[1fr,100px,1fr,40px] gap-2 items-center bg-[#111C44] p-2 mb-2 rounded-md  border-blue-500/50 border"
                           >
                             <div className="flex items-center gap-2">
                               <span {...provided.dragHandleProps}>
@@ -406,15 +441,14 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
                               <span className="text-white">{song.title}</span>
                             </div>
                             <span className="text-white">{song.duration}</span>
-                            <span className="text-white">{song.key}</span>
                             <span className="text-white truncate">{song.notes}</span>
                             <Button
                               onClick={() => handleRemoveSong(song.id, index)}
                               variant="ghost"
                               size="icon"
-                              className="text-white hover:text-red-500"
+                              className="text-white hover:bg-red-600 hover:text-black h-[17px] w-[17px] p-4 bg-red-800 border-white/40 border rounded-sm"
                             >
-                              <X className="h-4 w-4" />
+                              <X className="" />
                             </Button>
                           </div>
                         )}
@@ -439,19 +473,18 @@ export default function SetlistEditor({ setlistId, onSave, onCancel }: SetlistEd
         </Button>
         <div className="flex gap-2">
           <Button
-            onClick={handleExport}
+            onClick={handleExportClick}
             variant="outline"
-            className="gap-2  text-slate-700 hover:text-slate-800 bg-neutral-300 hover:bg-neutral-400"
+            className="ap-2 bg-blue-700 text-white text-shadow-x-2 text-shadow-y-2 text-shadow-black  border-black border cursor-pointer"
             disabled={!title || songs.length === 0}
           >
-            <FileDown className="h-4 w-4 text-red-700 hover:text-red-800 "/>
+            <FileDown className="h-4 w-4 text-white"/>
             Export PDF
           </Button>
           <Button
             onClick={handleSave}
             variant="default"
             className="bg-green-800 hover:bg-green-700 text-white"
-            disabled={!title}
           >
             {setlistId ? 'Update' : 'Create'} Setlist
           </Button>
