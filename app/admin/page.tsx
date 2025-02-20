@@ -1,6 +1,12 @@
 import { ResendVerification } from '@/components/admin/resend-verification'
 import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
+import dynamic from 'next/dynamic'
+
+const SyncStripeProducts = dynamic(
+  () => import('@/components/admin/sync-stripe-products'),
+  { ssr: false }
+)
 
 export default async function AdminPage() {
   const supabase = createClient()
@@ -21,6 +27,7 @@ export default async function AdminPage() {
       
       <div className="grid gap-8">
         <ResendVerification />
+        <SyncStripeProducts />
         {/* Add more admin tools here */}
       </div>
     </div>

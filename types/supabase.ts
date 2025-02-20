@@ -391,4 +391,20 @@ export interface Database {
       [_ in never]: never
     }
   }
+  Users: {
+    Row: {
+      id: string
+      // ...
+    }
+    Insert: {
+      // ...
+    }
+    Update: {
+      // ...
+    }
+  }
+}
+
+interface UserMetadata {
+  is_admin?: boolean
 } 

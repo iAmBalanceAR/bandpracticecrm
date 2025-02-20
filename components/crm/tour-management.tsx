@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic'
 import { Button } from "../ui/button"
 import { Input } from "@/components/ui/input"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Plus, GripVertical, Calendar, Loader2, FileDown } from 'lucide-react'
+import { Plus, GripVertical, Calendar, Loader2, FileDown, Inbox } from 'lucide-react'
 import { gigHelpers } from '@/utils/db/gigs'
 import { Label } from "@/components/ui/label"
 import { useSupabase } from '@/components/providers/supabase-client-provider'
@@ -877,7 +877,7 @@ export default function TourManagement() {
               <div>
                 <h3 className="text-2xl mb-6">
                   <span className="text-white text-shadow-sm font-mono -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
-                    Tour Stopss
+                    Tour Stops
                   </span>
                   <div className="border-[#ff9920] border-b-2 -mt-2 mb-4 w-[100%] h-2"></div>
                 </h3>
@@ -897,19 +897,28 @@ export default function TourManagement() {
                         items={tourStops}
                         strategy={verticalListSortingStrategy}
                       >
-                        <ul className="space-y-2">
-                          {tourStops.map((stop, index) => (
-                            <SortableStopItem
-                              key={stop.id}
-                              stop={stop}
-                              index={index}
-                              distance={index > 0 ? routeInfo.distances[index - 1] : undefined}
-                              onAddToCalendar={handleAddToCalendar}
-                              onDelete={handleDeleteStop}
-                              savingStop={savingStop}
-                            />
-                          ))}
-                        </ul>
+                        {tourStops.length === 0 ? (
+                          <div className="text-center p-8 bg-[#111C44]/50 rounded-lg">
+                            <Calendar className="h-12 w-12 mx-auto text-gray-500 mb-4" />
+                            <p className="text-gray-400 font-medium">
+                              <span className="text-lg">No upcoming tour stops found.</span><br />You can add stops by venue using the search above<br />or add a gig in the Tour Calendar section.
+                            </p>
+                          </div>
+                        ) : (
+                          <ul className="space-y-2">
+                            {tourStops.map((stop, index) => (
+                              <SortableStopItem
+                                key={stop.id}
+                                stop={stop}
+                                index={index}
+                                distance={index > 0 ? routeInfo.distances[index - 1] : undefined}
+                                onAddToCalendar={handleAddToCalendar}
+                                onDelete={handleDeleteStop}
+                                savingStop={savingStop}
+                              />
+                            ))}
+                          </ul>
+                        )}
                       </SortableContext>
                     </DndContext>
                   )}

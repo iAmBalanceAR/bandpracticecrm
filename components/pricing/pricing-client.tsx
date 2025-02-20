@@ -72,11 +72,9 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
             onCheckedChange={setIsAnnual}
             className="data-[state=checked]:bg-green-500"
           />
-          <div className="flex flex-col items-start">
-            <Label className="text-lg">Annual</Label>
-            {isAnnual && (
-              <span className="text-xs text-green-400">Save 25%</span>
-            )}
+          <div className="flex flex-row items-start">
+            <Label className="flex-row text-lg">Annual</Label>
+            <span className="pl-2 mt-1 flex-row text-sm text-green-400"> (Save 25%) </span>
           </div>
         </div>
 
@@ -136,20 +134,20 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
                     {product.description}
                   </p>
                   {/* Marketing Features */}
-                  {product.marketing_features && product.marketing_features.length > 0 && (
+                  {product.metadata?.['feature-list'] && (
                     <div className="mb-6">
-                      <h4 className="text-lg font-semibold text-white pt-0 mt-0 mb-3 text-shadow-blur-4 text-shadow-blue-900 text-shadow-smm">
+                      <h4 className="text-lg font-semibold text-white pt-0 mt-0 mb-3">
                         Features
                       </h4>
                       <ul className="space-y-4">
-                        {product.marketing_features.map((feature: string, i: number) => (
-                          <li key={i} className="flex items-start text-gray-300">
-                            <Check className="h-5 w-5 mr-3 text-[#00e396] mt-1 flex-shrink-0" />
-                            <span className="text-shadow-blur-4 text-shadow-black text-shadow-sm text-sm">
-                              {feature}
-                            </span>
-                          </li>
-                        ))}
+                        {product.metadata['feature-list']
+                          .split(', ')
+                          .map((feature: string, i: number) => (
+                            <li key={i} className="flex items-start text-gray-300">
+                              <Check className="h-5 w-5 mr-3 text-[#00e396] mt-1 flex-shrink-0" />
+                              <span className="text-sm">{feature}</span>
+                            </li>
+                          ))}
                       </ul>
                     </div>
                   )}

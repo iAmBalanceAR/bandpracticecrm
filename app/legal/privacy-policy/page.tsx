@@ -119,7 +119,7 @@ export default function PrivacyPolicy() {
 
             <section className="mb-8">
               <h3 className="text-xl font-semibold mb-3 text-white">11. Contact Us</h3>
-              <p className="text-gray-300">If you have any questions about this Privacy Policy, please contact us at <a href="mailto:info@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">info@bandpracticecrm.com</a></p>
+              <p className="text-gray-300">If you have any questions about this Privacy Policy, please contact us at <a href="mailto:jason@bandpracticecrm.com" className="text-blue-400 hover:text-blue-300">jason@bandpracticecrm.com</a></p>
             </section>
           </div>
           </div>
