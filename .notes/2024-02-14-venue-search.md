@@ -1,19 +1,23 @@
 # Venue Search Documentation
 
 ## Overview
+
 The venue search functionality allows users to search through approximately 48,000 venues with filtering, sorting, and completeness scoring capabilities.
 
 ## Database Function: search_venues_with_completeness
 
 ### Purpose
+
 This function handles venue searching with:
+
 - Text-based search
-- Multiple filter criteria
+  Multiple filter criteria
 - Completeness scoring
 - Sorting by various fields
 - Pagination
 
 ### Parameters
+
 ```sql
 p_query TEXT                  -- Search text for venue title
 p_city TEXT                  -- City filter
@@ -35,6 +39,7 @@ p_offset INTEGER           -- Page offset
 ```
 
 ### Return Fields
+
 ```sql
 id text
 created_at timestamptz
@@ -61,26 +66,32 @@ total_count bigint
 ```
 
 ### Important Notes
+
 1. All venue fields (except timestamps) are stored as TEXT in the database
 2. The completeness_score is calculated using the venue_completeness_score function
 3. Results are sorted by completeness_score DESC first, then by user-selected criteria
 4. Total count is included in each row for pagination
 
 ## Current Issues/Bugs
+
 1. Total count not displaying correctly (showing 0 instead of ~48,000)
 2. Completeness sorting may not be working as expected
 
 ## Required Fixes
+
 1. Fix total_count calculation in the SQL function
 2. Verify completeness score calculation and sorting
 
 ## SQL Function History
+
 Keep track of working versions here for reference.
 
 ### Version 2024-02-14 (Current)
+
 - Added total_count to return fields
 - Modified ORDER BY clause for completeness sorting
 - Issues with count calculation
 
 ### Previous Working Version
-[Insert previous working SQL here when recovered] 
+
+[Insert previous working SQL here when recovered]

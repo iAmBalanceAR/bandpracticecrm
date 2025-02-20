@@ -227,6 +227,9 @@ importers:
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
+      posthog-js:
+        specifier: ^1.219.6
+        version: 1.219.6
       react:
         specifier: 18.2.0
         version: 18.2.0
@@ -4152,6 +4155,9 @@ packages:
   fastq@1.17.1:
     resolution: {integrity: sha512-sRVD3lWVIXWg6By68ZN7vho9a1pQcN/WBFaAAsDDFzlJjvoGx0P8z7V1t72grFJfJhu3YPZBuu25f7Kaw2jN1w==, tarball: https://registry.npmjs.org/fastq/-/fastq-1.17.1.tgz}
 
+  fflate@0.4.8:
+    resolution: {integrity: sha512-FJqqoDBR00Mdj9ppamLa/Y7vxm+PRmNWA67N846RvsoYVMKB4q3y/de5PA7gUmRMYK/8CMz2GDZQmCRN1wBcWA==, tarball: https://registry.npmjs.org/fflate/-/fflate-0.4.8.tgz}
+
   fflate@0.8.1:
     resolution: {integrity: sha512-/exOvEuc+/iaUm105QIiOt4LpBdMTWsXxqR0HDF35vx3fmaKzw7354gTilCh5rkzEt8WYyG//ku3h3nRmd7CHQ==, tarball: https://registry.npmjs.org/fflate/-/fflate-0.8.1.tgz}
 
@@ -5437,9 +5443,15 @@ packages:
     resolution: {integrity: sha512-OCVPnIObs4N29kxTjzLfUryOkvZEq+pf8jTF0lg8E7uETuWHA+v7j3c/xJmiqpX450191LlmZfUKkXxkTry7nA==, tarball: https://registry.npmjs.org/postcss/-/postcss-8.4.49.tgz}
     engines: {node: ^10 || ^12 || >=14}
 
+  posthog-js@1.219.6:
+    resolution: {integrity: sha512-9ac1sjQGeKN/9cQz7ICY+hOIS+lTtslqnnBqTLejCfNt1ElGu4oq7rGHfXWeosER/rIvbICZxqWQkbvr+sYq6A==, tarball: https://registry.npmjs.org/posthog-js/-/posthog-js-1.219.6.tgz}
+
   posthog-node@4.4.1:
     resolution: {integrity: sha512-o9G9sSvwWITrfSJgIUrPLJd//AYPGJNu5D+pSLxqiBvhUeicc/i639FvU0DPr1OsHiLDE2zHNMmLpa0mw4kBCg==, tarball: https://registry.npmjs.org/posthog-node/-/posthog-node-4.4.1.tgz}
     engines: {node: '>=15.0.0'}
+
+  preact@10.26.2:
+    resolution: {integrity: sha512-0gNmv4qpS9HaN3+40CLBAnKe0ZfyE4ZWo5xKlC1rVrr0ckkEvJvAQqKaHANdFKsGstoxrY4AItZ7kZSGVoVjgg==, tarball: https://registry.npmjs.org/preact/-/preact-10.26.2.tgz}
 
   precinct@11.0.5:
     resolution: {integrity: sha512-oHSWLC8cL/0znFhvln26D14KfCQFFn4KOLSw6hmLhd+LQ2SKt9Ljm89but76Pc7flM9Ty1TnXyrA2u16MfRV3w==, tarball: https://registry.npmjs.org/precinct/-/precinct-11.0.5.tgz}
@@ -6544,6 +6556,9 @@ packages:
 
   wcwidth@1.0.1:
     resolution: {integrity: sha512-XHPEwS0q6TaxcvG85+8EYkbiCux2XtWG2mkc47Ng2A77BQu9+DqIOJldST4HgPkuea7dvKSj5VgX3P1d4rW8Tg==, tarball: https://registry.npmjs.org/wcwidth/-/wcwidth-1.0.1.tgz}
+
+  web-vitals@4.2.4:
+    resolution: {integrity: sha512-r4DIlprAGwJ7YM11VZp4R884m0Vmgr6EAKe3P+kO0PPj3Unqyvv59rczf6UiGcb9Z8QxZVcqKNwv/g0WNdWwsw==, tarball: https://registry.npmjs.org/web-vitals/-/web-vitals-4.2.4.tgz}
 
   webidl-conversions@3.0.1:
     resolution: {integrity: sha512-2JAn3z8AR6rjK8Sm8orRC0h/bcl/DqL7tRPdGZ4I1CjdF+EaMLmYxBHyXuKL849eucPFhvBoxMsflfOb8kxaeQ==, tarball: https://registry.npmjs.org/webidl-conversions/-/webidl-conversions-3.0.1.tgz}
@@ -10948,8 +10963,7 @@ snapshots:
 
   cookie@0.7.2: {}
 
-  core-js@3.39.0:
-    optional: true
+  core-js@3.39.0: {}
 
   core-util-is@1.0.3: {}
 
@@ -11439,6 +11453,8 @@ snapshots:
   fastq@1.17.1:
     dependencies:
       reusify: 1.0.4
+
+  fflate@0.4.8: {}
 
   fflate@0.8.1: {}
 
@@ -12800,11 +12816,20 @@ snapshots:
       picocolors: 1.1.1
       source-map-js: 1.2.1
 
+  posthog-js@1.219.6:
+    dependencies:
+      core-js: 3.39.0
+      fflate: 0.4.8
+      preact: 10.26.2
+      web-vitals: 4.2.4
+
   posthog-node@4.4.1(debug@4.4.0):
     dependencies:
       axios: 1.7.9(debug@4.4.0)
     transitivePeerDependencies:
       - debug
+
+  preact@10.26.2: {}
 
   precinct@11.0.5:
     dependencies:
@@ -14082,6 +14107,8 @@ snapshots:
   wcwidth@1.0.1:
     dependencies:
       defaults: 1.0.4
+
+  web-vitals@4.2.4: {}
 
   webidl-conversions@3.0.1: {}
 

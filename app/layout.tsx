@@ -11,6 +11,7 @@ import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/toaster'
 import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
+import { PostHogProvider } from './providers'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -77,9 +78,11 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 storageKey="ui-theme"
                 enableSystem
               >
-                <div className="flex min-h-screen">
-                  <main className="flex-1">{children}</main>
-                </div>
+                <PostHogProvider>
+                  <div className="flex min-h-screen">
+                    <main className="flex-1">{children}</main>
+                  </div>
+                </PostHogProvider>
                 <SpeedInsights />
                 <RemindersAlertSystem />
               </ThemeProvider>
