@@ -1,0 +1,220 @@
+Lead Management System Technical Report
+Date: December 25, 2023
+
+1. Current System State
+1.1 Database Structure
+Successfully implemented tables:
+leads - Core lead information
+lead_notes - Associated notes
+reminders - Lead-related reminders
+communications - Communication records
+attachments - File attachments
+Implemented RPC functions:
+create_lead
+update_lead
+delete_lead
+create_lead_notes
+create_lead_reminders
+1.2 Frontend Components
+LeadDialog - Combined create/edit form (recently refactored)
+LeadHeader - Lead details header with actions
+LeadsDataView - Main grid view for leads
+Supporting components:
+Note management interface
+Reminder management interface
+Venue search and selection
+2. Recent Changes (December 25)
+Refactored new-lead-dialog.tsx to lead-dialog.tsx
+Implemented edit mode in lead form
+Added data population for editing existing leads
+Fixed type conflicts between local and imported interfaces
+Updated form submission logic to handle both create and update operations
+Improved error handling and feedback mechanisms
+3. Current Issues
+Type conflict between LeadReminder interface and imported type
+Form validation needs enhancement
+Error handling for failed API calls could be more robust
+4. Next Steps
+4.1 Immediate Tasks
+In Progress Resolve type conflicts in lead dialog component
+Pending Implement proper error handling for all API calls
+Pending Add form validation with proper error messages
+4.2 Short-term Goals
+Enhance lead details view with:
+Communication history timeline
+Attachment management
+Activity log
+Implement bulk operations for leads
+Add filtering and sorting capabilities to the lead grid
+4.3 Long-term Goals
+Implement advanced search functionality
+Add reporting and analytics features
+Integrate with external CRM systems
+Implement automated lead scoring
+5. Today's Work Log
+9:00 AM - 10:30 AM: Database restructuring
+Created new RPC functions for lead management
+Implemented proper error handling in database functions
+10:30 AM - 12:00 PM: Frontend refactoring
+Renamed and restructured lead dialog component
+Implemented edit mode functionality
+12:00 PM - 1:30 PM: Bug fixes and improvements
+Fixed type conflicts
+Improved form data handling
+Enhanced error feedback
+6. Technical Debt
+Need to implement proper TypeScript interfaces for all components
+Improve code documentation
+Add comprehensive error handling
+Implement proper loading states
+Add unit tests for critical components
+
+Development Report - Band Practice Agent
+Today's Work Summary
+Primary focus: Navigation system improvements and bug fixes
+
+Key Changes Made
+Removed navigation hiding logic to ensure consistent visibility across all routes
+Fixed path handling for root ('/') path to properly show dashboard
+Simplified side menu component by removing unnecessary path checking logic
+Maintained existing functionality while removing potential sources of navigation flicker
+Technical Details
+Key component modifications:
+
+Removed shouldHideNavigation logic from SideMenu component
+Removed usePathname hook as it's no longer needed
+Maintained responsive design with sidebarOpen state
+Preserved all navigation links and their respective icons
+Current State Analysis
+Working Features
+Side navigation consistently visible across all routes
+Collapsible sidebar functionality
+Proper routing through Next.js Link components
+Responsive design for both expanded and collapsed states
+Pending Issues
+Metadata warnings in Next.js console for viewport and themeColor configurations
+Authentication state management needs review (getSession vs getUser)
+Calendar route typo: "calender" should be "calendar"
+Project Analysis
+The Band Practice Agent project shows strong potential with its comprehensive feature set. The current implementation follows modern web development practices with Next.js and maintains good separation of concerns.
+
+Architectural Observations
+Clean component structure with clear responsibility separation
+Consistent use of Tailwind CSS for styling
+Proper implementation of client-side navigation
+Good use of TypeScript for type safety
+Next Steps
+Immediate Priorities
+Fix calendar route spelling ("calender" → "calendar")
+Address metadata configuration warnings
+Update authentication to use getUser instead of getSession
+Short-term Improvements
+Add active state styling for current route in navigation
+Implement proper error boundaries for route handling
+Add loading states for route transitions
+Long-term Considerations
+Consider implementing route-based code splitting
+Add end-to-end testing for critical user paths
+Implement performance monitoring
+Technical Debt
+Authentication system needs updating to latest Supabase best practices
+Metadata configuration needs to be updated to Next.js 14 standards
+Some components could benefit from proper error boundaries
+
+Development Report - December 20, 2024
+Tour Management System Updates
+Venue Management Improvements
+Fixed venue data persistence issues in the gigs table
+Updated handleSubmit and handleEdit functions to properly include venue name
+Removed "Clean Up Venues" button and related functionality
+Tour Stop Management
+Implemented drag-and-drop functionality for tour stops
+Added ability to place unsaved stops anywhere in the sequence
+Improved color diversity in the tour stops list
+Removed fixed height constraints to allow natural page expansion
+UI/UX Improvements
+Added subheaders for venue search and tour route plan sections
+Updated delete confirmation modal behavior
+Fixed null value handling in address fields
+Removed unnecessary "Tour Stops" header while maintaining delete functionality
+Bug Fixes
+Resolved "Unhandled Runtime Error" related to undefined route in TourManagement component
+Fixed persistence issues with unsaved tour stops
+Corrected form handling to prevent null values from displaying
+Pending Tasks
+Implementation of signup form
+Creation of password reset functionality
+Integration with Supabase Auth for new authentication forms
+
+Tour Report Export Feature Status Report
+Date: January 17, 2024
+
+Feature Overview
+The Tour Report Export feature allows users to generate comprehensive PDF reports for tours, including gig details, maps, driving directions, and financial summaries. The feature is implemented in the /app/tour-route/exports directory.
+
+Core Components
+1. Report Generator Component (tour-report-generator.tsx)
+Main interface for report generation
+Handles user options selection (map, directions, financials, contact info)
+Two-step process: Generate Preview → Download PDF
+Uses Shadcn UI components for consistent styling
+2. Report Preview Component (report-preview.tsx)
+Live preview of report content
+Sections:
+Tour Information (title, dates, total mileage)
+Interactive Map (using Leaflet)
+Gig Schedule with venue details
+Driving Directions (when enabled)
+Financial Summary (when enabled)
+Uses Lucide icons for visual enhancement
+3. Report Generator Utility (report-generator.ts)
+Handles data collection and PDF generation
+Uses jsPDF for PDF creation
+Integrates with OSRM for route calculations
+Manages map image capture using html2canvas
+Technologies Used
+PDF Generation: jsPDF
+Map Rendering: Leaflet.js
+Route Calculation: OSRM (Open Source Routing Machine)
+Map Capture: html2canvas
+UI Components: Shadcn UI, Tailwind CSS
+Icons: Lucide Icons
+Data Management: Supabase integration
+Implementation Details
+Data Flow
+User selects report options
+System fetches tour data from Supabase
+Route calculations performed using OSRM API
+Preview generated and displayed
+On PDF download:
+Map captured as image
+PDF generated with all sections
+File downloaded with tour name
+Key Features
+Interactive preview before PDF generation
+Configurable report sections
+Automatic route calculation and mileage tracking
+Venue contact information integration
+Financial summary calculations
+Turn-by-turn directions with estimated times
+Known Issues and Future Improvements
+Critical Issues
+Map component interference with main dashboard map (needs investigation)
+Detailed street view not loading in PDF export
+Planned Improvements
+Enhanced PDF styling and layout
+Cover page addition
+Better page breaks and formatting
+Table of contents for longer reports
+Improved map styling and detail level
+Technical Debt
+Proper TypeScript definitions for jsPDF integration
+Optimization of route calculation requests
+Better error handling for API failures
+Component test coverage
+Usage Notes
+Feature accessible from tour route page
+Requires active tour selection
+PDF generation may take a few moments for tours with many stops
+Internet connection required for route calculations
+Map capture works best with stable internet connection

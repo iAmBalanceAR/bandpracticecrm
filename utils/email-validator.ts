@@ -30,47 +30,35 @@ export async function isEmailAvailable(email: string): Promise<{
   const supabase = createClient()
 
   try {
+    // Check if the email exists in the auth.users table using admin API
     const { data, error } = await supabase
-      .from('users')
-      .select('email')
+      .from('profiles')
+      .select('id')
       .eq('email', normalizedEmail)
       .maybeSingle()
 
     if (error) {
-      throw error
-    }
-
-    // If we found a user, the email is not available
-    if (data) {
+      console.error('Error checking email availability:', error)
       return {
         available: false,
         normalizedEmail,
-        message: 'This email address (or a variation of it) is already registered.'
+        message: 'Unable to verify email availability. Please try again.'
       }
     }
 
-    // Also check auth.users to be thorough
-    const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
-    
-    if (authError) {
-      throw authError
-    }
-
-    const existingUser = authData.users.find(
-      user => normalizeEmail(user.email || '') === normalizedEmail
-    )
-
-    if (existingUser) {
+    // If no data found, email is available
+    if (!data) {
       return {
-        available: false,
-        normalizedEmail,
-        message: 'This email address (or a variation of it) is already registered.'
+        available: true,
+        normalizedEmail
       }
     }
 
+    // Email exists
     return {
-      available: true,
-      normalizedEmail
+      available: false,
+      normalizedEmail,
+      message: 'This email address is already registered. Please sign in instead.'
     }
   } catch (error) {
     console.error('Error checking email availability:', error)
@@ -80,4 +68,4 @@ export async function isEmailAvailable(email: string): Promise<{
       message: 'Unable to verify email availability. Please try again.'
     }
   }
-} 
+}

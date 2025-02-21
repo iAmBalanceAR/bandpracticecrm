@@ -1,13 +1,14 @@
-# Band Practice - Reporting Feature Technical Specification
+# Band Practice - Reporting Feature Technical Specificatio
 
 ## Overview
+
 The reporting feature is a flexible, modular system designed to allow users to generate customized PDF reports by combining different types of content sections. It lives in the `/app/reporting` directory and follows a self-contained architecture pattern.
 
 ## Architecture
 
 ### Directory Structure
-```
-/app/reporting/
+
+```/app/reporting/
 ├── components/
 │   ├── report-builder.tsx       # Main report configuration UI
 │   ├── section-preview.tsx      # Preview components for each section type
@@ -22,6 +23,7 @@ The reporting feature is a flexible, modular system designed to allow users to g
 ### Core Components
 
 #### ReportBuilder (`components/report-builder.tsx`)
+
 - Primary component for report configuration
 - Manages state for selected sections and report options
 - Handles section addition/removal
@@ -32,6 +34,7 @@ The reporting feature is a flexible, modular system designed to allow users to g
   3. Export controls
 
 #### SectionPreview (`components/section-preview.tsx`)
+
 - Renders preview cards for each section type
 - Implements consistent styling:
   - Background: #192555
@@ -52,6 +55,7 @@ The reporting feature is a flexible, modular system designed to allow users to g
 ### Data Models
 
 #### Report Section Type (types/index.ts)
+
 ```typescript
 interface ReportSection {
   id: string;
@@ -71,6 +75,7 @@ interface ReportSectionOptions {
 ### UI/UX Considerations
 
 #### Layout & Styling
+
 - Uses dark theme with consistent colors:
   - Main background: #111C44
   - Section backgrounds: #192555
@@ -80,6 +85,7 @@ interface ReportSectionOptions {
 - Clear visual hierarchy with section headers and preview cards
 
 #### User Flow
+
 1. User lands on reporting page
 2. Selects sections from available options
 3. Previews section content in real-time
@@ -89,6 +95,7 @@ interface ReportSectionOptions {
 ### PDF Generation
 
 #### Process
+
 1. Collects selected sections and their configurations
 2. Fetches required data for each section
 3. Generates PDF using jsPDF
@@ -100,6 +107,7 @@ interface ReportSectionOptions {
    - Contact details in structured format
 
 #### PDF Styling
+
 - A4 format (210mm x 297mm)
 - Proper margin handling
 - Consistent typography
@@ -109,6 +117,7 @@ interface ReportSectionOptions {
 ### Data Integration
 
 #### Data Sources
+
 - Tour information from tour management system
 - Financial data from accounting system
 - Venue details from venue management
@@ -117,6 +126,7 @@ interface ReportSectionOptions {
 - Map data from routing system
 
 #### Data Flow
+
 1. Section selection triggers data prefetch
 2. Data is transformed into preview format
 3. Same data is used for PDF generation
@@ -125,6 +135,7 @@ interface ReportSectionOptions {
 ### Future Enhancements
 
 #### Planned Features
+
 1. Template saving and management
 2. Custom section builder
 3. Advanced filtering options
@@ -135,6 +146,7 @@ interface ReportSectionOptions {
 8. Section reordering via drag-and-drop
 
 #### Technical Debt & Improvements
+
 1. Implement error boundaries for each section
 2. Add loading states for data fetching
 3. Improve PDF generation performance
@@ -146,6 +158,7 @@ interface ReportSectionOptions {
 ### Integration Points
 
 #### Required APIs
+
 1. `/api/tours` - Tour data
 2. `/api/venues` - Venue information
 3. `/api/finances` - Financial data
@@ -154,6 +167,7 @@ interface ReportSectionOptions {
 6. `/api/contacts` - Contact details
 
 #### External Dependencies
+
 - jsPDF for PDF generation
 - React-Query for data fetching
 - Tailwind CSS for styling
@@ -163,18 +177,21 @@ interface ReportSectionOptions {
 ### Testing Strategy
 
 #### Unit Tests
+
 - Component rendering
 - Section type handling
 - Data transformation
 - PDF generation utilities
 
 #### Integration Tests
+
 - Section selection flow
 - Data fetching integration
 - PDF generation process
 - Error handling
 
 #### E2E Tests
+
 - Complete report generation flow
 - PDF output validation
 - UI interaction testing
@@ -182,6 +199,7 @@ interface ReportSectionOptions {
 ### Performance Considerations
 
 #### Optimizations
+
 1. Lazy loading of preview components
 2. Data caching strategy
 3. PDF generation optimization
@@ -189,6 +207,7 @@ interface ReportSectionOptions {
 5. Debounced preview updates
 
 #### Monitoring
+
 - PDF generation time
 - Data fetch latency
 - Component render performance
@@ -197,12 +216,14 @@ interface ReportSectionOptions {
 ### Security Considerations
 
 #### Data Access
+
 - Proper authentication checks
 - Role-based access control
 - Data sanitization
 - PDF content security
 
 #### Input Validation
+
 - Section configuration validation
 - Data input sanitization
 - File upload restrictions
@@ -211,12 +232,14 @@ interface ReportSectionOptions {
 ### Deployment Considerations
 
 #### Requirements
+
 - Node.js 18+
 - PDF generation dependencies
 - Memory requirements for PDF processing
 - Storage for temporary files
 
 #### Configuration
+
 - Environment variables for API endpoints
 - PDF generation settings
 - Cache configuration
@@ -225,12 +248,14 @@ interface ReportSectionOptions {
 ### Documentation
 
 #### Developer Documentation
+
 - Component API documentation
 - Type definitions
 - Integration guides
 - Testing procedures
 
 #### User Documentation
+
 - Section type descriptions
 - Configuration options
 - Best practices
@@ -239,6 +264,7 @@ interface ReportSectionOptions {
 ## Recent Updates and Current State
 
 ### UI Components Current Implementation
+
 - Report Builder (`app/reporting/components/report-builder.tsx`)
   - Main grid layout with Report Name, Total Sections, and Generate Report button
   - Available Sections grid (3 columns on large screens)
@@ -250,6 +276,7 @@ interface ReportSectionOptions {
   - Report Preview section showing selected sections in order
 
 ### Section Preview Component (`app/reporting/components/section-preview.tsx`)
+
 - Renders different preview layouts based on section type:
   - Financial: Grid layout with revenue/expenses and chart placeholder
   - Schedule: List of venues and dates
@@ -262,6 +289,7 @@ interface ReportSectionOptions {
   - Custom: Generic content placeholder
 
 ### Visual States
+
 - Card Selection:
   - Normal: Blue border (`border-blue-500`)
   - Selected: Green border (`border-green-500`), light green background (`bg-green-500/5`)
@@ -272,8 +300,8 @@ interface ReportSectionOptions {
   - Border colors match card state
 
 ### Current Layout Structure
-```
-ReportBuilder
+
+```ReportBuilder
 ├── Header Metrics
 │   ├── Report Name Input
 │   ├── Total Sections Counter
@@ -291,6 +319,7 @@ ReportBuilder
 ```
 
 ### Pending Improvements
+
 - Layout refinements for checkmark positioning
 - Data integration for preview content
 - PDF generation implementation
@@ -298,6 +327,7 @@ ReportBuilder
 - Section-specific options and configurations
 
 ### Next Steps
+
 - Implement data fetching for each section type
 - Add section configuration options
 - Build PDF generation with proper styling
@@ -305,4 +335,5 @@ ReportBuilder
 - Implement section-specific filtering
 
 ## Conclusion
-The reporting feature provides a flexible and extensible system for generating customized reports. Its modular architecture allows for easy additions and modifications while maintaining consistency in design and functionality. The system is designed to scale with additional section types and export options while maintaining performance and reliability. 
+
+The reporting feature provides a flexible and extensible system for generating customized reports. Its modular architecture allows for easy additions and modifications while maintaining consistency in design and functionality. The system is designed to scale with additional section types and export options while maintaining performance and reliability.
