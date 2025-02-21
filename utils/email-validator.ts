@@ -3,7 +3,7 @@ import { createClient } from '@/utils/supabase/client'
 export function normalizeEmail(email: string): string {
   // Convert to lowercase
   email = email.toLowerCase()
-  
+   
   // Check if it's a Gmail address
   if (email.endsWith('@gmail.com')) {
     // Get the part before @gmail.com
