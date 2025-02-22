@@ -3,8 +3,14 @@ import { createClient } from '@/utils/supabase/server'
 import { redirect } from 'next/navigation'
 import dynamic from 'next/dynamic'
 
+
 const SyncStripeProducts = dynamic(
   () => import('@/components/admin/sync-stripe-products'),
+  { ssr: false }
+)
+
+const SyncStripeSubscriptions = dynamic(
+  () => import('@/components/admin/sync-stripe-subscriptions'),
   { ssr: false }
 )
 
@@ -28,8 +34,9 @@ export default async function AdminPage() {
       <div className="grid gap-8">
         <ResendVerification />
         <SyncStripeProducts />
+        <SyncStripeSubscriptions />
         {/* Add more admin tools here */}
       </div>
     </div>
   )
-} 
+}

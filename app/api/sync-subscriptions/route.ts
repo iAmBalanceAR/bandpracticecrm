@@ -99,6 +99,7 @@ export async function POST(request: Request) {
           .from('profiles')
           .update(profileUpdate)
           .eq('id', supabaseUserId)
+          .single()
 
         if (profileError) {
           console.error('Error updating profile:', profileError)
@@ -126,4 +127,4 @@ export async function POST(request: Request) {
     console.error('Sync error:', error)
     return NextResponse.json({ error: error.message }, { status: 500 })
   }
-} 
+}

@@ -61,7 +61,7 @@ export async function POST(request: Request) {
       ? siteUrl 
       : `https://${siteUrl.replace(/^\/+/, '')}`
 
-    // Create a checkout session
+    // Create a checkout session with the latest Stripe best practices
     const session = await stripe.checkout.sessions.create({
       customer: customerId,
       line_items: [
@@ -74,20 +74,27 @@ export async function POST(request: Request) {
       success_url: `${baseUrl}/pricing/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${baseUrl}/pricing/cancelled`,
       subscription_data: {
+        trial_settings: {
+          end_behavior: {
+            missing_payment_method: 'cancel'
+          }
+        },
         trial_period_days: 7,
         metadata: {
           supabase_user_id: user.id,
         },
       },
+      payment_method_collection: 'if_required',
       metadata: {
         supabase_user_id: user.id
       },
       custom_text: {
         submit: {
-          message: "Your subscription will start with a 7-day free trial. You won't be charged until the trial ends."
+          message: "Start your 7-day free trial - no credit card required. You'll only be asked for payment details when your trial ends."
         }
       },
-      allow_promotion_codes: true
+      allow_promotion_codes: true,
+      //automatic_tax: { enabled: true }
     })
 
     if (!session?.url) {
@@ -117,4 +124,4 @@ export async function POST(request: Request) {
     
     return new NextResponse(error instanceof Error ? error.message : 'Internal Error', { status: 500 })
   }
-} 
+}

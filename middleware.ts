@@ -40,8 +40,11 @@ const publicPaths = [
   '/pricing/cancelled',  // Add cancelled page
   '/about',
   '/contact',
-  '/privacy',
-  '/terms',
+  '/legal/privacy-policy',  // Legal pages
+  '/legal/terms-of-service',
+  '/legal/cookie-policy',
+  '/support/contact',  // Support pages
+  '/status',  // System status page
   '/help',
   '/faq',
   '/favicon.ico',
@@ -218,4 +221,4 @@ export const config = {
      */
     '/((?!_next/static|_next/image|favicon.ico|api/.*|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
   ],
-} 
+}

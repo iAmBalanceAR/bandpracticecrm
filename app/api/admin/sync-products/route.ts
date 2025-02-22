@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/utils/supabase/server'
 import { stripe } from '@/utils/stripe'
-import type { Database } from '@/types/supabase'
 
 export async function POST() {
   const supabase = createClient()
@@ -20,15 +19,22 @@ export async function POST() {
   }
 
   try {
-    // Your existing sync logic here
-    const products = await stripe.products.list({ active: true })
-    const prices = await stripe.prices.list({ active: true })
-    
-    // ... rest of your sync script code ...
+    // Get the most recent subscription with trial info
+    const { data: subscriptionData, error: subscriptionError } = await supabase
+      .from('subscriptions')
+      .select('trial_start, trial_end')
+      .order('created', { ascending: false })
+      .limit(1)
+      .single()
 
-    return NextResponse.json({
-      message: `Synced ${products.data.length} products and ${prices.data.length} prices`
-    })
+    if (subscriptionError) {
+      return NextResponse.json(
+        { error: 'Failed to fetch subscription data' },
+        { status: 500 }
+      )
+    }
+
+    return NextResponse.json(subscriptionData)
   } catch (error) {
     return NextResponse.json(
       { error: 'Sync failed' },

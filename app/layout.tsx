@@ -12,6 +12,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/toaster'
 import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
 import { PostHogProvider } from './providers'
+import { TrialCountdown } from '@/components/ui/trial-countdown'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -82,6 +83,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                   <div className="flex min-h-screen">
                     <main className="flex-1">{children}</main>
                   </div>
+                  <TrialCountdown />
                 </PostHogProvider>
                 <SpeedInsights />
                 <RemindersAlertSystem />
@@ -93,4 +95,4 @@ export default async function RootLayout({ children }: RootLayoutProps) {
       </body>
     </html>
   )
-} 
+}

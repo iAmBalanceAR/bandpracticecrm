@@ -112,7 +112,38 @@ export async function POST(req: Request) {
             metadata: subscription.metadata
           })
 
-          // Then update subscription details
+          // First create/update the subscription record
+          const subscriptionData = {
+            id: subscription.id,
+            user_id: userId,
+            status: subscription.status,
+            price_id: subscription.items.data[0]?.price.id,
+            quantity: subscription.items.data[0]?.quantity,
+            cancel_at_period_end: subscription.cancel_at_period_end,
+            cancel_at: subscription.cancel_at ? new Date(subscription.cancel_at * 1000).toISOString() : null,
+            canceled_at: subscription.canceled_at ? new Date(subscription.canceled_at * 1000).toISOString() : null,
+            current_period_start: new Date(subscription.current_period_start * 1000).toISOString(),
+            current_period_end: new Date(subscription.current_period_end * 1000).toISOString(),
+            created: new Date(subscription.created * 1000).toISOString(),
+            ended_at: subscription.ended_at ? new Date(subscription.ended_at * 1000).toISOString() : null,
+            trial_start: subscription.trial_start ? new Date(subscription.trial_start * 1000).toISOString() : null,
+            trial_end: subscription.trial_end ? new Date(subscription.trial_end * 1000).toISOString() : null,
+            metadata: subscription.metadata,
+            is_trial: subscription.trial_start !== null && subscription.status === 'trialing'
+          }
+
+          const { error: subscriptionError } = await supabase
+            .from('subscriptions')
+            .upsert(subscriptionData)
+
+          if (subscriptionError) {
+            console.error('Error upserting subscription:', subscriptionError)
+            return
+          }
+
+          console.log('Subscription record created/updated:', subscription.id)
+
+          // Then update profile details
           const { error: updateError } = await supabase
             .from('profiles')
             .update({
@@ -133,7 +164,8 @@ export async function POST(req: Request) {
         case 'customer.subscription.created':
         case 'customer.subscription.updated': {
           const subscription = event.data.object as Stripe.Subscription
-          const userId = subscription.metadata?.supabase_user_id
+          // Get user ID from subscription metadata
+          const userId = subscription.metadata?.supabase_user_id || (subscription.customer as Stripe.Customer)?.metadata?.supabase_user_id
 
           console.log('Subscription event:', {
             type: event.type,
@@ -234,4 +266,4 @@ export async function POST(req: Request) {
   }
 
   return new Response(JSON.stringify({ received: true }))
-} 
+}
