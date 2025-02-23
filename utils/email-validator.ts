@@ -30,14 +30,15 @@ export async function isEmailAvailable(email: string): Promise<{
   const supabase = createClient()
 
   try {
-    // First check profiles table
-    const { data, error } = await supabase
+    // Check profiles table
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id')
       .eq('email', normalizedEmail)
       .maybeSingle()
 
-    if (error) {
+    if (profileError && profileError.code !== 'PGRST116') {
+      console.error('Error checking profiles:', profileError)
       return {
         available: false,
         normalizedEmail,
@@ -45,8 +46,8 @@ export async function isEmailAvailable(email: string): Promise<{
       }
     }
 
-    // If we found a user in profiles, the email is not available
-    if (data) {
+    // If we found a profile with this email, it's not available
+    if (profileData) {
       return {
         available: false,
         normalizedEmail,
@@ -54,26 +55,7 @@ export async function isEmailAvailable(email: string): Promise<{
       }
     }
 
-    // Also check auth.users to be thorough
-    const { data: authData, error: authError } = await supabase.auth.admin.listUsers()
-    
-    if (authError) {
-      throw authError
-    }
-
-    const existingUser = authData.users.find(
-      user => normalizeEmail(user.email || '') === normalizedEmail
-    )
-
-    if (existingUser) {
-      return {
-        available: false,
-        normalizedEmail,
-        message: 'This email address (or a variation of it) is already registered.'
-      }
-    }
-
-    // If we get here, the email is available
+    // If we get here, no matching profile was found, so the email is available
     return {
       available: true,
       normalizedEmail

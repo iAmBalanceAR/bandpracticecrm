@@ -51,13 +51,14 @@ export function TrialCountdown() {
           whileTap={{ scale: 0.95 }}
           className="relative group"
         >
-          <div className="absolute inset-0 bg-gradient-to-r from-blue-500 to-green-400 opacity-70 rounded-full blur-lg group-hover:opacity-75 transition-opacity" />
+          <div className="absolute inset-0 bg-gradient-to-r from-red-900 to-yellow-700   rounded-full blur-lg group-hover:opacity-95 transition-opacity" />
           <Badge 
             variant="secondary" 
-            className="bg-[#111C44]/30 relative text-lg font-semibold p-4 border-green-500/90 border text-white  shadow-lg hover:shadow-xl transition-shadow duration-200"
+            className="bg-[#111C44]/30 relative text-lg font-semibold px-[1.6em] pb-[1.6em] pt-[1.4em] border-orange-600 border text-white  shadow-lg hover:shadow-xl transition-shadow duration-200"
           >
-            <Link href="{/account/billing">
-            {daysRemaining} {daysRemaining === 1 ? 'Day' : 'Days'} Left in Trial
+            <Link href="/account/billing">
+            <div className=' text-shadow-md text-shadow-black'>{daysRemaining} {daysRemaining === 1 ? 'Day' : 'Days'} Left in Trial</div>
+            <div className='text-xs font-mono font-normal text-center  text-shadow-md text-shadow-black'>Go To Billing Page</div>
             </Link>
           </Badge>
         </motion.div>
