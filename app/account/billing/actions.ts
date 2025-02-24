@@ -1,61 +1,93 @@
 'use server'
 
-import { redirect } from 'next/navigation'
-import { createBillingPortalSession } from '@/utils/stripe'
+import { createClient } from '@/utils/supabase/server'
+import { stripe } from '@/utils/stripe'
+import { revalidatePath } from 'next/cache'
 
-export async function handleManageSubscription(formData: FormData) {
-  const customerStripeId = formData.get('customerStripeId') as string
-  console.log('Debug - Manage Subscription:', { customerStripeId })
-  
-  if (!customerStripeId) {
-    throw new Error('No Stripe customer ID found')
-  }
-
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  if (!siteUrl) {
-    throw new Error('Missing NEXT_PUBLIC_SITE_URL environment variable')
-  }
+export async function updateSubscription(formData: FormData) {
+  const supabase = createClient()
+  const priceId = formData.get('priceId') as string
+  const subscriptionId = formData.get('subscriptionId') as string
   
   try {
-    const session = await createBillingPortalSession(customerStripeId, siteUrl)
-    redirect(session.url)
-  } catch (error: any) {
-    console.error('Error creating billing portal session:', {
-      error: error.message,
-      type: error.type,
-      code: error.code,
-      customerStripeId
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId)
+    
+    await stripe.subscriptions.update(subscriptionId, {
+      items: [{
+        id: subscription.items.data[0].id,
+        price: priceId,
+      }],
+      proration_behavior: 'always_invoice',
     })
-    throw error
+
+    revalidatePath('/account/billing')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error updating subscription:', error)
+    return { error: error.message }
   }
 }
 
-export async function handleCancelSubscription(formData: FormData) {
-  const customerStripeId = formData.get('customerStripeId') as string
-  console.log('Debug - Cancel Subscription:', { customerStripeId })
+export async function cancelSubscription(formData: FormData) {
+  const subscriptionId = formData.get('subscriptionId') as string
   
-  if (!customerStripeId) {
-    throw new Error('No Stripe customer ID found')
-  }
+  try {
+    await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: true
+    })
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL
-  if (!siteUrl) {
-    throw new Error('Missing NEXT_PUBLIC_SITE_URL environment variable')
+    revalidatePath('/account/billing')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error canceling subscription:', error)
+    return { error: error.message }
   }
+}
+
+export async function resumeSubscription(formData: FormData) {
+  const subscriptionId = formData.get('subscriptionId') as string
+  
+  try {
+    await stripe.subscriptions.update(subscriptionId, {
+      cancel_at_period_end: false
+    })
+
+    revalidatePath('/account/billing')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error resuming subscription:', error)
+    return { error: error.message }
+  }
+}
+
+export async function updatePaymentMethod(formData: FormData) {
+  const paymentMethodId = formData.get('paymentMethodId') as string
+  const customerId = formData.get('customerId') as string
 
   try {
-    const session = await createBillingPortalSession(
-      customerStripeId,
-      `${siteUrl}/account/billing?action=cancel`
-    )
-    redirect(session.url)
-  } catch (error: any) {
-    console.error('Error creating billing portal session for cancellation:', {
-      error: error.message,
-      type: error.type,
-      code: error.code,
-      customerStripeId
+    await stripe.customers.update(customerId, {
+      invoice_settings: {
+        default_payment_method: paymentMethodId,
+      },
     })
-    throw error
+
+    revalidatePath('/account/billing')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error updating payment method:', error)
+    return { error: error.message }
+  }
+}
+
+export async function removePaymentMethod(formData: FormData) {
+  const paymentMethodId = formData.get('paymentMethodId') as string
+  
+  try {
+    await stripe.paymentMethods.detach(paymentMethodId)
+    revalidatePath('/account/billing')
+    return { success: true }
+  } catch (error: any) {
+    console.error('Error removing payment method:', error)
+    return { error: error.message }
   }
 } 

@@ -6,6 +6,7 @@ import { Card } from '@/components/ui/card'
 import { BarChart3, MapPin, Guitar, Users, Calendar } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { useRouter } from 'next/navigation'
+import { AccountNav } from '@/components/account/account-nav'
 
 interface UserStats {
   toursCreated: number
@@ -93,6 +94,8 @@ export default function UserStatsPage() {
         </span>
       </h1>
       <div className="border-[#ff9920] border-b-2 -mt-8 mb-4 w-[98.55%] h-4"></div>
+
+      <AccountNav />
       
       <div className="pr-6 pl-8 pb-4 pt-4 bg-[#131d43] text-white shadow-sm shadow-green-400 rounded-md border-blue-800 border mr-4 ">
         <Card className="border-0">

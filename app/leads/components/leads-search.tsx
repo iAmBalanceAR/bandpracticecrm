@@ -2,11 +2,10 @@
 
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, SlidersHorizontal } from "lucide-react";
-import { useState, useEffect } from "react";
-import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import { useState } from "react";
 import { DatePickerWithRange } from "@/components/ui/date-range-picker";
-import { addDays } from "date-fns";
+import { LeadType, LeadStatus, LeadPriority } from "@/app/types/lead";
 
 export interface LeadFilters {
   search: string;
@@ -14,7 +13,6 @@ export interface LeadFilters {
   type: string;
   priority: string;
   dateRange: { from: Date | undefined; to: Date | undefined } | undefined;
-  location: string;
   sort: string;
 }
 
@@ -28,18 +26,26 @@ const defaultFilters: LeadFilters = {
   type: "all",
   priority: "all",
   dateRange: undefined,
-  location: "all",
   sort: "newest"
 };
 
+const statusOptions: LeadStatus[] = ['new', 'contacted', 'in_progress', 'negotiating', 'won', 'lost', 'archived'];
+const priorityOptions: LeadPriority[] = ['low', 'medium', 'high'];
+const typeOptions: LeadType[] = ['venue', 'artist', 'promoter', 'sponsor', 'other'];
+
 export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
   const [filters, setFilters] = useState<LeadFilters>(defaultFilters);
-  const [showFilters, setShowFilters] = useState(true);
 
   const handleFilterChange = (key: keyof LeadFilters, value: any) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
     onFiltersChange(newFilters);
+  };
+
+  const formatLabel = (str: string) => {
+    return str.split('_')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ');
   };
 
   return (
@@ -56,7 +62,7 @@ export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
       </div>
 
       {/* Filter Section */}
-      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
         <Select
           value={filters.status}
           onValueChange={(value) => handleFilterChange('status', value)}
@@ -66,13 +72,11 @@ export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
           </SelectTrigger>
           <SelectContent className="bg-[#1B2559] rounded-lg text-white z-[10000]">
             <SelectItem value="all" className="cursor-pointer">All Status</SelectItem>
-            <SelectItem value="new" className="cursor-pointer">New</SelectItem>
-            <SelectItem value="contacted" className="cursor-pointer">Contacted</SelectItem>
-            <SelectItem value="in_progress" className="cursor-pointer">In Progress</SelectItem>
-            <SelectItem value="negotiating" className="cursor-pointer">Negotiating</SelectItem>
-            <SelectItem value="won" className="cursor-pointer">Won</SelectItem>
-            <SelectItem value="lost" className="cursor-pointer">Lost</SelectItem>
-            <SelectItem value="archived" className="cursor-pointer">Archived</SelectItem>
+            {statusOptions.map((status) => (
+              <SelectItem key={status} value={status} className="cursor-pointer">
+                {formatLabel(status)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -85,11 +89,11 @@ export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
           </SelectTrigger>
           <SelectContent className="bg-[#1B2559] rounded-lg text-white z-[10000]">
             <SelectItem value="all" className="cursor-pointer">All Types</SelectItem>
-            <SelectItem value="wedding" className="cursor-pointer">Wedding</SelectItem>
-            <SelectItem value="corporate" className="cursor-pointer">Corporate</SelectItem>
-            <SelectItem value="festival" className="cursor-pointer">Festival</SelectItem>
-            <SelectItem value="private" className="cursor-pointer">Private Event</SelectItem>
-            <SelectItem value="venue" className="cursor-pointer">Venue</SelectItem>
+            {typeOptions.map((type) => (
+              <SelectItem key={type} value={type} className="cursor-pointer">
+                {formatLabel(type)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -102,9 +106,11 @@ export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
           </SelectTrigger>
           <SelectContent className="bg-[#1B2559] rounded-lg text-white z-[10000]">
             <SelectItem value="all" className="cursor-pointer">All Priority</SelectItem>
-            <SelectItem value="high" className="cursor-pointer">High</SelectItem>
-            <SelectItem value="medium" className="cursor-pointer">Medium</SelectItem>
-            <SelectItem value="low" className="cursor-pointer">Low</SelectItem>
+            {priorityOptions.map((priority) => (
+              <SelectItem key={priority} value={priority} className="cursor-pointer">
+                {formatLabel(priority)}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 
@@ -113,22 +119,6 @@ export default function LeadsSearch({ onFiltersChange }: LeadsSearchProps) {
           value={filters.dateRange}
           onChange={(value) => handleFilterChange('dateRange', value)}
         />
-
-        <Select
-          value={filters.location}
-          onValueChange={(value) => handleFilterChange('location', value)}
-        >
-          <SelectTrigger className="bg-[#1B2559] border-blue-600 text-white">
-            <SelectValue placeholder="Location" />
-          </SelectTrigger>
-          <SelectContent className="bg-[#1B2559] rounded-lg text-white z-[10000]">
-            <SelectItem value="all" className="cursor-pointer">All Locations</SelectItem>
-            <SelectItem value="local" className="cursor-pointer">Local</SelectItem>
-            <SelectItem value="regional" className="cursor-pointer">Regional</SelectItem>
-            <SelectItem value="national" className="cursor-pointer">National</SelectItem>
-            <SelectItem value="international" className="cursor-pointer">International</SelectItem>
-          </SelectContent>
-        </Select>
 
         <Select
           value={filters.sort}

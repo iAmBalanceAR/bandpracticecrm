@@ -429,7 +429,7 @@ export default function LeadDialog({ children, lead, mode = 'create', venue }: L
         </Dialog.Trigger>
         <Dialog.Portal>
           <Dialog.Overlay className="fixed inset-0 bg-black/80 z-[100]" />
-          <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[95vh] w-[95vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] overflow-y-auto rounded-lg bg-[#192555] border border-blue-800 p-6 text-white shadow-lg z-[101]">
+          <Dialog.Content className="fixed left-[50%] top-[50%] max-h-[95vh] w-[95vw] max-w-[800px] translate-x-[-50%] translate-y-[-50%] overflow-y-auto rounded-lg bg-[#192555] border border-blue-800 p-6 text-white shadow-lg z-[101] [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-[#1B2559] [&::-webkit-scrollbar-thumb]:bg-gray-500 [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
             <Dialog.Title className="text-xl font-bold mb-2">
               {mode === 'create' ? 'Create New Lead' : 'Edit Lead'}
             </Dialog.Title>

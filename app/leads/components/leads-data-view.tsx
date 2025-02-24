@@ -65,7 +65,6 @@ export default function LeadsDataView() {
     type: "all",
     priority: "all",
     dateRange: undefined,
-    location: "all",
     sort: "newest"
   });
   const { supabase } = useSupabase();
@@ -204,62 +203,90 @@ export default function LeadsDataView() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
               transition={{ duration: 0.2 }}
+              className="h-full"
             >
-              <Link href={`/leads/${lead.id}`}>
+              <Link href={`/leads/${lead.id}`} className="h-full block">
                 <motion.div
                   initial={{ opacity: 1, x: 0, y: 0 }}
-                  whileHover={{ scale: 1.01 }}
-                  animate={{ opacity: 1, x: -3, y: 0 }}
-                  transition={{ type: 'tween', duration: 0.02 }}
+                  whileHover={{ 
+                    scale: 1.02,
+                    transition: { type: "spring", stiffness: 300, damping: 20 }
+                  }}
+                  className="h-full"
                 >
-                  <Card className="bg-[#1B2559] border-blue-800 hover:bg-[#0F1729] transition-colors cursor-pointer min-h-[150px]">
-                    <div className="p-0 pt-0">
-                      <div className='bg-[#0F1729] rounded-md pt-1 pl-2 pr-2 pb-2'>
-                        <h3 className="clear-both pt-0 mt-0 text-lg font-semibold text-white truncate flex flex-row gap-1">
+                  <Card className="bg-[#1B2559] border-blue-800 hover:bg-[#192555] transition-all duration-200 cursor-pointer h-full flex flex-col shadow-lg shadow-black/20">
+                    {/* Header Section */}
+                    <div className="bg-[#0F1729] p-4 rounded-t-lg border-b border-blue-800">
+                      <h3 className="text-lg font-semibold text-white mb-2">
+                        <span className="text-shadow-blur-4 text-shadow-black text-shadow-sm text-shadow-x-2 text-shadow-y-2">
                           {lead.title}
-                        </h3>
-                        <div className="flex items-start mb-0 mt-1 p-0">
-                          <div className="text-black flex gap-1 p-0">
-                            <Badge 
-                              variant="secondary"
-                              className={priorityColors[lead.priority as keyof typeof priorityColors]}
-                            >
-                              {lead.priority}
-                            </Badge>
-                            &nbsp;
-                            <Badge 
-                              variant="secondary"
-                              className={statusColors[lead.status as keyof typeof statusColors]}
-                            >
-                              {lead.status.replace('_', ' ')}
-                            </Badge>
-                          </div>
-                        </div>
+                        </span>
+                      </h3>
+                      <div className="flex items-center gap-2">
+                        <Badge 
+                          variant="secondary"
+                          className={`${priorityColors[lead.priority as keyof typeof priorityColors]} text-white font-medium`}
+                        >
+                          {lead.priority.charAt(0).toUpperCase() + lead.priority.slice(1)}
+                        </Badge>
+                        <Badge 
+                          variant="secondary"
+                          className={`${statusColors[lead.status as keyof typeof statusColors]} text-white font-medium`}
+                        >
+                          {lead.status.replace('_', ' ').charAt(0).toUpperCase() + lead.status.replace('_', ' ').slice(1)}
+                        </Badge>
                       </div>
-                      <div className="text-sm text-gray-300m mb-0 pl-2 pr-2 pt-2 pb-0 ">
-                        <p className="text-gray-400 pt-0 mt-0 pb-0 font-bold">{lead.company || ''}</p>
-                        {lead.contact_info.name && (
-                          <p>Contact: {lead.contact_info.name}</p>
+                    </div>
+
+                    {/* Content Section */}
+                    <div className="p-4 flex-grow flex flex-col justify-between">
+                      <div className="space-y-2">
+                        {lead.company && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-[#008ffb] font-semibold">
+                              {lead.company}
+                            </span>
+                          </div>
                         )}
-                        <p className="text-gray-400">
-                          Last Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
-                        </p>
+                        {lead.contact_info.name && (
+                          <div className="flex items-start gap-2">
+                            <span className="text-gray-400">Contact:</span>
+                            <span className="text-white">
+                              {lead.contact_info.name}
+                            </span>
+                          </div>
+                        )}
                       </div>
 
-                      {lead.tags && lead.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3 pb-2 pl-2 pr-2">
-                          {lead.tags.slice(0, 3).map((tag) => (
-                            <Badge key={tag} variant="outline" className="text-xs">
-                              {tag}
-                            </Badge>
-                          ))}
-                          {lead.tags.length > 3 && (
-                            <Badge variant="outline" className="text-xs">
-                              +{lead.tags.length - 3}
-                            </Badge>
+                      {/* Footer Section */}
+                      <div className="mt-4 pt-3 border-t border-blue-800/50">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-400">
+                            Updated: {format(new Date(lead.updated_at), 'MMM d, yyyy')}
+                          </span>
+                          {lead.tags && lead.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-1 justify-end">
+                              {lead.tags.slice(0, 2).map((tag, index) => (
+                                <Badge 
+                                  key={index}
+                                  variant="outline" 
+                                  className="bg-[#0F1729]/50 text-gray-300 border-blue-900"
+                                >
+                                  {tag}
+                                </Badge>
+                              ))}
+                              {lead.tags.length > 2 && (
+                                <Badge 
+                                  variant="outline" 
+                                  className="bg-[#0F1729]/50 text-gray-300 border-blue-900"
+                                >
+                                  +{lead.tags.length - 2}
+                                </Badge>
+                              )}
+                            </div>
                           )}
                         </div>
-                      )}
+                      </div>
                     </div>
                   </Card>
                 </motion.div>
