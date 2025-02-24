@@ -59,8 +59,9 @@ export function PricingClient({ products, user, userSubscription }: PricingClien
       <div className="pr-6 pl-8 pb-6 pt-4 bg-[#131d43] text-white min-h-[500px] shadow-sm shadow-green-400 rounded-md border-blue-800 border">
         <p className="align-center text-center mb-4">
           <span className="text-lg text-white text-shadow-sm text-shadow-blur-4 text-shadow-black">
-            Enjoy the first 7 days of your new plan for FREE.<br />
+            Includes FREE Full Access ,7 day Trail.<br />
           </span>
+          NO CREDIT CARD REQUIRE FOR TRIAL<br />
           Cancel anytime.
         </p>
         
