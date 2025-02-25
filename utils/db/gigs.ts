@@ -240,6 +240,21 @@ export const gigHelpers = {
 
   // Helper function to get coordinates from an address
   async getCoordinates(address: string): Promise<[number, number]> {
+    // Check cache first if available
+    if (typeof window !== 'undefined') {
+      const coordCache = localStorage.getItem('geocode-cache');
+      if (coordCache) {
+        try {
+          const cache = JSON.parse(coordCache);
+          if (cache[address]) {
+            return cache[address];
+          }
+        } catch (e) {
+          console.error('Error parsing geocode cache:', e);
+        }
+      }
+    }
+
     const params = new URLSearchParams({
       format: 'json',
       q: address,
@@ -248,19 +263,66 @@ export const gigHelpers = {
     })
 
     try {
+      // Add a small delay to avoid rate limiting
+      await new Promise(resolve => setTimeout(resolve, 100));
+      
       const response = await fetch(`https://nominatim.openstreetmap.org/search?${params}`, {
-        headers: { 'User-Agent': 'BandPracticeTourManager/1.0' }
+        headers: { 
+          'User-Agent': 'BandPracticeTourManager/1.0',
+          'Accept-Language': 'en-US,en;q=0.9'
+        }
       })
+      
+      if (!response.ok) {
+        throw new Error(`Geocoding failed with status: ${response.status}`);
+      }
+      
       const data = await response.json()
 
       if (data && data[0]) {
-        return [parseFloat(data[0].lat), parseFloat(data[0].lon)]
+        const coordinates: [number, number] = [parseFloat(data[0].lat), parseFloat(data[0].lon)];
+        
+        // Cache the result
+        if (typeof window !== 'undefined') {
+          try {
+            const coordCache = localStorage.getItem('geocode-cache');
+            const cache = coordCache ? JSON.parse(coordCache) : {};
+            cache[address] = coordinates;
+            
+            // Limit cache size to prevent localStorage overflow
+            const cacheEntries = Object.keys(cache);
+            if (cacheEntries.length > 100) {
+              // Remove oldest entries if cache gets too large
+              const entriesToRemove = cacheEntries.slice(0, cacheEntries.length - 100);
+              entriesToRemove.forEach(key => delete cache[key]);
+            }
+            
+            localStorage.setItem('geocode-cache', JSON.stringify(cache));
+          } catch (e) {
+            console.error('Error updating geocode cache:', e);
+          }
+        }
+        
+        return coordinates;
       }
+      
+      console.warn(`No geocoding results found for address: ${address}`);
+      return [0, 0];
     } catch (error) {
       console.error('Error geocoding address:', error)
+      
+      // Implement exponential backoff for retries
+      if (typeof error === 'object' && error !== null && 'message' in error) {
+        const errorMessage = (error as Error).message;
+        if (errorMessage.includes('429') || errorMessage.includes('rate limit')) {
+          console.log('Rate limited by geocoding service, will retry with backoff');
+          await new Promise(resolve => setTimeout(resolve, 2000));
+          return this.getCoordinates(address);
+        }
+      }
+      
+      return [0, 0] // Return default coordinates if geocoding fails
     }
-
-    return [0, 0] // Return default coordinates if geocoding fails
   },
 
   async getGigsWithCoordinates(tourId?: string): Promise<{ tourStops: TourStop[] }> {
@@ -322,13 +384,79 @@ export const gigHelpers = {
       gig_date: gig.gig_date
     }))
 
-    // Get coordinates for each stop
-    for (const stop of tourStops) {
-      const coordinates = await this.getCoordinates(
-        `${stop.address}, ${stop.city}, ${stop.state} ${stop.zip}`
-      )
-      stop.lat = coordinates[0]
-      stop.lng = coordinates[1]
+    // Check for cached coordinates in localStorage
+    const cacheKey = `tour-${tourId}-coordinates`;
+    const cachedCoordinates = typeof window !== 'undefined' ? localStorage.getItem(cacheKey) : null;
+    
+    if (cachedCoordinates) {
+      try {
+        const coordinates = JSON.parse(cachedCoordinates);
+        
+        // Apply cached coordinates if the venues match
+        tourStops.forEach(stop => {
+          const cachedStop = coordinates.find((c: any) => 
+            c.id === stop.id && 
+            c.address === stop.address && 
+            c.city === stop.city && 
+            c.state === stop.state && 
+            c.zip === stop.zip
+          );
+          
+          if (cachedStop) {
+            stop.lat = cachedStop.lat;
+            stop.lng = cachedStop.lng;
+          }
+        });
+        
+        // Check if all stops have coordinates
+        const allHaveCoordinates = tourStops.every(stop => stop.lat !== 0 && stop.lng !== 0);
+        if (allHaveCoordinates) {
+          return { tourStops };
+        }
+      } catch (e) {
+        console.error('Error parsing cached coordinates:', e);
+      }
+    }
+
+    // Process geocoding in batches to avoid rate limiting
+    const batchSize = 3;
+    const delay = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+    
+    for (let i = 0; i < tourStops.length; i += batchSize) {
+      const batch = tourStops.slice(i, i + batchSize);
+      const batchPromises = batch.map(async (stop) => {
+        // Skip if we already have coordinates from cache
+        if (stop.lat !== 0 && stop.lng !== 0) return stop;
+        
+        const coordinates = await this.getCoordinates(
+          `${stop.address}, ${stop.city}, ${stop.state} ${stop.zip}`
+        );
+        stop.lat = coordinates[0];
+        stop.lng = coordinates[1];
+        return stop;
+      });
+      
+      await Promise.all(batchPromises);
+      
+      // Add a small delay between batches to avoid rate limiting
+      if (i + batchSize < tourStops.length) {
+        await delay(300);
+      }
+    }
+
+    // Cache the coordinates for future use
+    if (typeof window !== 'undefined') {
+      const coordinatesToCache = tourStops.map(stop => ({
+        id: stop.id,
+        address: stop.address,
+        city: stop.city,
+        state: stop.state,
+        zip: stop.zip,
+        lat: stop.lat,
+        lng: stop.lng
+      }));
+      
+      localStorage.setItem(cacheKey, JSON.stringify(coordinatesToCache));
     }
 
     return { tourStops }

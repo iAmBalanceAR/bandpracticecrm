@@ -2,8 +2,12 @@ import { createServerClient, type CookieOptions } from '@supabase/ssr'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
-// Cache duration in milliseconds (5 seconds)
-const CACHE_DURATION = 5000;
+// Increase cache duration to 5 minutes to reduce token refresh attempts
+const CACHE_DURATION = 300000; // 5 minutes
+
+// Track the last refresh attempt time
+const lastRefreshAttempt = new Map<string, number>();
+const MIN_REFRESH_INTERVAL = 60000; // 1 minute minimum between refresh attempts
 
 // Separate caches for different types of auth data
 const sessionCache = new Map<string, { data: any; timestamp: number }>();
@@ -23,6 +27,7 @@ const protectedPaths = [
 ]
 
 const publicPaths = [
+  '/test-email',  // Add test email route to public paths
   '/auth/signin',
   '/auth/signup',
   '/auth/callback',
@@ -63,6 +68,11 @@ const publicPaths = [
 export async function middleware(request: NextRequest) {
   let response = NextResponse.next()
 
+  // Skip auth checks in development for specific paths
+  if (process.env.NODE_ENV === 'development' && request.nextUrl.pathname.startsWith('/test-email')) {
+    return response;
+  }
+
   // Check if the path is in the public paths list
   const isPublicPath = publicPaths.some(path => {
     // Handle paths with wildcards for query parameters
@@ -89,14 +99,24 @@ export async function middleware(request: NextRequest) {
     return request.nextUrl.pathname === path || request.nextUrl.pathname.startsWith(path + '/')
   })
 
-  // If it's a public path, allow access immediately
   if (isPublicPath) {
     return response
   }
 
-  // Create a unique key for this request
+  // Get the session token
   const sessionToken = request.cookies.get('sb-xasfpbzzvsgzvdpjqwqe-auth-token')?.value;
-  const cacheKey = sessionToken || request.url;
+  
+  // If there's no session token and it's not a public path, redirect to signin
+  if (!sessionToken) {
+    return NextResponse.redirect(new URL('/auth/signin', request.url))
+  }
+
+  const cacheKey = sessionToken;
+
+  // Check if we've attempted a refresh recently
+  const now = Date.now();
+  const lastRefresh = lastRefreshAttempt.get(cacheKey) || 0;
+  const shouldAttemptRefresh = now - lastRefresh >= MIN_REFRESH_INTERVAL;
 
   // Create a Supabase client
   const supabase = createServerClient(
@@ -132,56 +152,82 @@ export async function middleware(request: NextRequest) {
     
     if (cachedSession && Date.now() - cachedSession.timestamp < CACHE_DURATION) {
       session = cachedSession.data;
+    } else if (shouldAttemptRefresh) {
+      try {
+        lastRefreshAttempt.set(cacheKey, now);
+        const { data: { session: newSession } } = await supabase.auth.getSession();
+        session = newSession;
+        if (newSession) {
+          sessionCache.set(cacheKey, { 
+            data: newSession, 
+            timestamp: Date.now() 
+          });
+        }
+      } catch (error: any) {
+        if (error?.status === 429 && cachedSession) {
+          session = cachedSession.data;
+        } else if (!cachedSession) {
+          return NextResponse.redirect(new URL('/auth/signin', request.url))
+        }
+      }
     } else {
-      const { data: { session: newSession } } = await supabase.auth.getSession();
-      session = newSession;
-      sessionCache.set(cacheKey, { 
-        data: newSession, 
-        timestamp: Date.now() 
-      });
+      // Use cached session if available, otherwise redirect
+      session = cachedSession?.data;
     }
 
     if (!session) {
       return NextResponse.redirect(new URL('/auth/signin', request.url))
     }
 
-    // Check user cache
+    // Similar changes for user and subscription checks...
+    // Only attempt to refresh if shouldAttemptRefresh is true
     const cachedUser = userCache.get(cacheKey);
-    let user;
+    let user = cachedUser?.data;
 
-    if (cachedUser && Date.now() - cachedUser.timestamp < CACHE_DURATION) {
-      user = cachedUser.data;
-    } else {
-      const { data: { user: newUser }, error: authError } = await supabase.auth.getUser();
-      if (authError || !newUser) {
-        return NextResponse.redirect(new URL('/auth/signin', request.url))
+    if (!cachedUser || (shouldAttemptRefresh && Date.now() - cachedUser.timestamp >= CACHE_DURATION)) {
+      try {
+        const { data: { user: newUser } } = await supabase.auth.getUser();
+        if (newUser) {
+          user = newUser;
+          userCache.set(cacheKey, {
+            data: newUser,
+            timestamp: Date.now()
+          });
+        }
+      } catch (error: any) {
+        if (error?.status === 429 && cachedUser) {
+          user = cachedUser.data;
+        } else if (!cachedUser?.data) {
+          return NextResponse.redirect(new URL('/auth/signin', request.url))
+        }
       }
-      user = newUser;
-      userCache.set(cacheKey, {
-        data: newUser,
-        timestamp: Date.now()
-      });
     }
 
     // For protected paths, check subscription
     if (protectedPaths.some(path => request.nextUrl.pathname.startsWith(path))) {
       const cachedSubscription = subscriptionCache.get(user.id);
-      let profile;
+      let profile = cachedSubscription?.data;
 
-      if (cachedSubscription && Date.now() - cachedSubscription.timestamp < CACHE_DURATION) {
-        profile = cachedSubscription.data;
-      } else {
-        const { data: newProfile } = await supabase
-          .from('profiles')
-          .select('subscription_status')
-          .eq('id', user.id)
-          .single();
-        
-        profile = newProfile;
-        subscriptionCache.set(user.id, {
-          data: newProfile,
-          timestamp: Date.now()
-        });
+      if (!cachedSubscription || (shouldAttemptRefresh && Date.now() - cachedSubscription.timestamp >= CACHE_DURATION)) {
+        try {
+          const { data: newProfile } = await supabase
+            .from('profiles')
+            .select('subscription_status')
+            .eq('id', user.id)
+            .single();
+          
+          if (newProfile) {
+            profile = newProfile;
+            subscriptionCache.set(user.id, {
+              data: newProfile,
+              timestamp: Date.now()
+            });
+          }
+        } catch (error: any) {
+          if (error?.status === 429 && cachedSubscription) {
+            profile = cachedSubscription.data;
+          }
+        }
       }
 
       if (!profile?.subscription_status || !['active', 'trialing'].includes(profile.subscription_status)) {
@@ -193,6 +239,10 @@ export async function middleware(request: NextRequest) {
 
   } catch (error) {
     console.error('Middleware error:', error)
+    // If we have cached data, use it instead of redirecting
+    if (sessionCache.get(cacheKey)?.data) {
+      return response
+    }
     return NextResponse.redirect(new URL('/auth/signin', request.url))
   }
 }
@@ -200,12 +250,21 @@ export async function middleware(request: NextRequest) {
 // Clean up expired cache entries periodically
 setInterval(() => {
   const now = Date.now();
+  
+  // Clean up session, user, and subscription caches
   [sessionCache, userCache, subscriptionCache].forEach(cache => {
     Array.from(cache.entries()).forEach(([key, value]) => {
       if (now - value.timestamp > CACHE_DURATION) {
         cache.delete(key);
       }
     });
+  });
+
+  // Clean up refresh attempt tracking
+  Array.from(lastRefreshAttempt.entries()).forEach(([key, timestamp]) => {
+    if (now - timestamp > CACHE_DURATION) {
+      lastRefreshAttempt.delete(key);
+    }
   });
 }, CACHE_DURATION);
 

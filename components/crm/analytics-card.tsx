@@ -35,6 +35,9 @@ type FeedbackModalState = {
   type: 'success' | 'error' | 'warning' | 'delete';
 }
 
+// Cache for route data to avoid recalculating on every render
+const routeCache = new Map<string, RouteInfo>();
+
 export default function AnalyticsCard() {
   const { currentTour } = useTour()
   const { isAuthenticated, loading: authLoading } = useAuth()
@@ -53,32 +56,63 @@ export default function AnalyticsCard() {
     type: 'error'
   })
 
-  // Separate route calculation function
-  const calculateRoutes = async (tourStops: any[]) => {
+  // Optimized route calculation function with batched requests
+  const calculateRoutes = React.useCallback(async (tourStops: any[]) => {
     if (tourStops.length <= 1) return null
 
-    const routePromises = tourStops.slice(0, -1).map(async (start, i) => {
-      const end = tourStops[i + 1]
-      const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=false`
-      try {
-        const response = await fetch(url)
-        const data = await response.json()
-        return data.code === 'Ok' ? data.routes[0].distance * 0.000621371 : 0
-      } catch (error) {
-        console.error('Error calculating route:', error)
-        return 0
-      }
-    })
-
-    try {
-      const distances = await Promise.all(routePromises)
-      const totalMileage = distances.reduce((sum, distance) => sum + distance, 0)
-      return { distances, totalMileage }
-    } catch (error) {
-      console.error('Error calculating routes:', error)
-      return null
+    // Check cache first
+    const cacheKey = tourStops.map(stop => `${stop.id}-${stop.lat}-${stop.lng}`).join('|');
+    if (routeCache.has(cacheKey)) {
+      return routeCache.get(cacheKey);
     }
-  }
+
+    // Process in batches of 5 to avoid overwhelming the API
+    const batchSize = 5;
+    const distances: number[] = [];
+    
+    for (let i = 0; i < tourStops.length - 1; i += batchSize) {
+      const batch = tourStops.slice(i, Math.min(i + batchSize, tourStops.length - 1));
+      const batchPromises = batch.map(async (start, idx) => {
+        const actualIdx = i + idx;
+        if (actualIdx >= tourStops.length - 1) return null;
+        
+        const end = tourStops[actualIdx + 1];
+        const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=false`;
+        
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return { 
+            index: actualIdx,
+            distance: data.code === 'Ok' ? data.routes[0].distance * 0.000621371 : 0 
+          };
+        } catch (error) {
+          console.error('Error calculating route:', error);
+          return { index: actualIdx, distance: 0 };
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises.filter(Boolean));
+      
+      // Sort results by index and add to distances array
+      batchResults.sort((a, b) => {
+        if (!a || !b) return 0;
+        return a.index - b.index;
+      });
+      
+      batchResults.forEach(result => {
+        if (result) distances[result.index] = result.distance;
+      });
+    }
+
+    const totalMileage = distances.reduce((sum, distance) => sum + distance, 0);
+    const result = { distances, totalMileage, stops: tourStops };
+    
+    // Cache the result
+    routeCache.set(cacheKey, result);
+    
+    return result;
+  }, []);
 
   // Fetch gigs and calculate route info
   React.useEffect(() => {
@@ -87,6 +121,8 @@ export default function AnalyticsCard() {
       return
     }
 
+    let isMounted = true;
+    
     const loadGigs = async () => {
       if (!currentTour) return
       
@@ -94,28 +130,74 @@ export default function AnalyticsCard() {
         // Phase 1: Load basic gig data
         setGigsLoading(true)
         const tourGigs = await gigHelpers.getGigs(currentTour.id)
+        if (!isMounted) return;
         setGigs(tourGigs)
         setGigsLoading(false)
 
+        // Check if we have cached route data in sessionStorage
+        const cacheKey = `tour-${currentTour.id}-routes`;
+        const cachedRouteInfo = typeof window !== 'undefined' ? sessionStorage.getItem(cacheKey) : null;
+        
+        if (cachedRouteInfo) {
+          // Use cached data if available
+          const parsedCache = JSON.parse(cachedRouteInfo);
+          if (!isMounted) return;
+          setRouteInfo(parsedCache);
+          return;
+        }
+
         // Phase 2: Load route data in the background
         if (tourGigs.length > 1) {
+          if (!isMounted) return;
           setRouteLoading(true)
-          const { tourStops } = await gigHelpers.getGigsWithCoordinates(currentTour.id)
           
-          if (tourStops.length > 1) {
-            const routeData = await calculateRoutes(tourStops)
-            if (routeData) {
-              setRouteInfo({
-                totalMileage: routeData.totalMileage,
-                distances: routeData.distances,
-                stops: tourStops
-              })
+          // Use a timeout to allow the UI to update before starting the heavy calculation
+          setTimeout(async () => {
+            try {
+              const { tourStops } = await gigHelpers.getGigsWithCoordinates(currentTour.id)
+              
+              if (!isMounted) return;
+              
+              if (tourStops.length > 1) {
+                const routeData = await calculateRoutes(tourStops)
+                if (!isMounted) return;
+                
+                if (routeData) {
+                  const newRouteInfo = {
+                    totalMileage: routeData.totalMileage,
+                    distances: routeData.distances,
+                    stops: tourStops
+                  };
+                  
+                  setRouteInfo(newRouteInfo);
+                  
+                  // Cache the result in sessionStorage
+                  if (typeof window !== 'undefined') {
+                    sessionStorage.setItem(cacheKey, JSON.stringify(newRouteInfo));
+                  }
+                }
+              }
+            } catch (error) {
+              console.error('Error calculating routes:', error);
+              if (!isMounted) return;
+              
+              setFeedbackModal({
+                isOpen: true,
+                title: 'Route Calculation Error',
+                message: 'Failed to calculate route information. Please try again later.',
+                type: 'error'
+              });
+            } finally {
+              if (isMounted) {
+                setRouteLoading(false);
+              }
             }
-          }
-          setRouteLoading(false)
+          }, 100);
         }
       } catch (error) {
         console.error('Error loading gigs:', error)
+        if (!isMounted) return;
+        
         setFeedbackModal({
           isOpen: true,
           title: 'Error Loading Data',
@@ -128,14 +210,18 @@ export default function AnalyticsCard() {
     }
 
     loadGigs()
-  }, [currentTour, isAuthenticated])
+    
+    return () => {
+      isMounted = false;
+    };
+  }, [currentTour, isAuthenticated, calculateRoutes])
 
   // Helper function for week number calculation
-  const getWeekNumber = (date: Date) => {
+  const getWeekNumber = React.useCallback((date: Date) => {
     const firstDayOfYear = new Date(date.getFullYear(), 0, 1);
     const pastDaysOfYear = (date.getTime() - firstDayOfYear.getTime()) / 86400000;
     return Math.ceil((pastDaysOfYear + firstDayOfYear.getDay() + 1) / 7);
-  }
+  }, []);
 
   // Memoized summary stats calculation
   const summaryStats = React.useMemo(() => {
@@ -170,7 +256,7 @@ export default function AnalyticsCard() {
     }, {})
 
     return { weeklyData }
-  }, [gigs])
+  }, [gigs, getWeekNumber])
 
   // Memoized chart data with specific dependency
   const chartData = React.useMemo(() => {
@@ -276,7 +362,7 @@ export default function AnalyticsCard() {
                         tick={{ fill: '#9CA3AF', fontSize: 12 }}
                         tickFormatter={(value) => `$${value.toLocaleString()}`}
                       />
-                      <Tooltip content={FinancialTooltip} />
+                      <Tooltip content={<FinancialTooltip />} />
                       <Legend />
                       <Bar 
                         dataKey="paidDeposits" 
@@ -328,7 +414,7 @@ export default function AnalyticsCard() {
                         tickFormatter={(value) => `${value} mi`}
                         width={80}
                       />
-                      <Tooltip content={RouteTooltip} />
+                      <Tooltip content={<RouteTooltip />} />
                       <Line 
                         type="monotone"
                         dataKey="distance" 

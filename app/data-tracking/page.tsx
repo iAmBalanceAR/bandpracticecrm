@@ -30,6 +30,56 @@ interface RouteInfo {
   stops: any[];
 }
 
+// Cache for route data to avoid recalculating on every render
+const routeCache = new Map<string, RouteInfo>();
+
+const RouteAnalyticCard = React.memo(({ 
+  title, 
+  value, 
+  subtitle, 
+  loading 
+}: { 
+  title: string; 
+  value: string; 
+  subtitle: string; 
+  loading: boolean;
+}) => {
+  return (
+    <Card className="p-4 bg-[#1B2559] border-gray-600">
+      <h3 className="text-sm font-semibold text-gray-400 mb-2">{title}</h3>
+      {loading ? (
+        <>
+          <div className="h-8 bg-gray-700 rounded w-1/2 animate-pulse mb-2"></div>
+          <div className="h-4 bg-gray-700 rounded w-1/3 animate-pulse"></div>
+        </>
+      ) : (
+        <>
+          <p className="text-2xl font-bold text-white">{value}</p>
+          <p className="text-sm text-gray-400 mt-1">{subtitle}</p>
+        </>
+      )}
+    </Card>
+  );
+});
+
+// Add custom scrollbar styles to the top of the file
+const customStyles = `
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #111c44;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #2d3a66;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #3a4980;
+}
+`;
+
 export default function DataTrackingPage() {
   const router = useRouter()
   const { isAuthenticated, loading: authLoading } = useAuth()
@@ -43,6 +93,17 @@ export default function DataTrackingPage() {
     stops: []
   })
 
+  // Add custom scrollbar styles
+  React.useEffect(() => {
+    const style = document.createElement('style');
+    style.textContent = customStyles;
+    document.head.appendChild(style);
+    
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
+
   // Authentication check
   useEffect(() => {
     if (!isAuthenticated && !authLoading) {
@@ -50,31 +111,61 @@ export default function DataTrackingPage() {
     }
   }, [isAuthenticated, authLoading, router])
 
-  // Separate route calculation function
+  // Optimized route calculation function with batched requests
   const calculateRoutes = async (tourStops: any[]) => {
     if (tourStops.length <= 1) return null
 
-    const routePromises = tourStops.slice(0, -1).map(async (start, i) => {
-      const end = tourStops[i + 1]
-      const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=false`
-      try {
-        const response = await fetch(url)
-        const data = await response.json()
-        return data.code === 'Ok' ? data.routes[0].distance * 0.000621371 : 0
-      } catch (error) {
-        console.error('Error calculating route:', error)
-        return 0
-      }
-    })
-
-    try {
-      const distances = await Promise.all(routePromises)
-      const totalMileage = distances.reduce((sum, distance) => sum + distance, 0)
-      return { distances, totalMileage }
-    } catch (error) {
-      console.error('Error calculating routes:', error)
-      return null
+    // Check cache first
+    const cacheKey = tourStops.map(stop => `${stop.id}-${stop.lat}-${stop.lng}`).join('|');
+    if (routeCache.has(cacheKey)) {
+      return routeCache.get(cacheKey);
     }
+
+    // Process in batches of 5 to avoid overwhelming the API
+    const batchSize = 5;
+    const distances: number[] = [];
+    
+    for (let i = 0; i < tourStops.length - 1; i += batchSize) {
+      const batch = tourStops.slice(i, Math.min(i + batchSize, tourStops.length - 1));
+      const batchPromises = batch.map(async (start, idx) => {
+        const actualIdx = i + idx;
+        if (actualIdx >= tourStops.length - 1) return null;
+        
+        const end = tourStops[actualIdx + 1];
+        const url = `https://router.project-osrm.org/route/v1/driving/${start.lng},${start.lat};${end.lng},${end.lat}?overview=false`;
+        
+        try {
+          const response = await fetch(url);
+          const data = await response.json();
+          return { 
+            index: actualIdx,
+            distance: data.code === 'Ok' ? data.routes[0].distance * 0.000621371 : 0 
+          };
+        } catch (error) {
+          console.error('Error calculating route:', error);
+          return { index: actualIdx, distance: 0 };
+        }
+      });
+
+      const batchResults = await Promise.all(batchPromises.filter(Boolean));
+      
+      // Sort results by index and add to distances array
+      batchResults.sort((a, b) => {
+        if (!a || !b) return 0;
+        return a.index - b.index;
+      });
+      batchResults.forEach(result => {
+        if (result) distances[result.index] = result.distance;
+      });
+    }
+
+    const totalMileage = distances.reduce((sum, distance) => sum + distance, 0);
+    const result = { distances, totalMileage, stops: tourStops };
+    
+    // Cache the result
+    routeCache.set(cacheKey, result);
+    
+    return result;
   }
 
   React.useEffect(() => {
@@ -91,22 +182,46 @@ export default function DataTrackingPage() {
         setGigs(tourGigs)
         setGigsLoading(false)
 
+        // Check if we have cached route data
+        const cacheKey = `tour-${currentTour.id}-routes`;
+        const cachedRouteInfo = sessionStorage.getItem(cacheKey);
+        
+        if (cachedRouteInfo) {
+          // Use cached data if available
+          setRouteInfo(JSON.parse(cachedRouteInfo));
+          return;
+        }
+
         // Phase 2: Load route data in the background
         if (tourGigs.length > 1) {
           setRouteLoading(true)
-          const { tourStops } = await gigHelpers.getGigsWithCoordinates(currentTour.id)
           
-          if (tourStops.length > 1) {
-            const routeData = await calculateRoutes(tourStops)
-            if (routeData) {
-              setRouteInfo({
-                totalMileage: routeData.totalMileage,
-                distances: routeData.distances,
-                stops: tourStops
-              })
+          // Use a timeout to allow the UI to update before starting the heavy calculation
+          setTimeout(async () => {
+            try {
+              const { tourStops } = await gigHelpers.getGigsWithCoordinates(currentTour.id)
+              
+              if (tourStops.length > 1) {
+                const routeData = await calculateRoutes(tourStops)
+                if (routeData) {
+                  const newRouteInfo = {
+                    totalMileage: routeData.totalMileage,
+                    distances: routeData.distances,
+                    stops: tourStops
+                  };
+                  
+                  setRouteInfo(newRouteInfo);
+                  
+                  // Cache the result in sessionStorage
+                  sessionStorage.setItem(cacheKey, JSON.stringify(newRouteInfo));
+                }
+              }
+            } catch (error) {
+              console.error('Error calculating routes:', error);
+            } finally {
+              setRouteLoading(false);
             }
-          }
-          setRouteLoading(false)
+          }, 100);
         }
       } catch (error) {
         console.error('Error loading gigs:', error)
@@ -447,6 +562,10 @@ export default function DataTrackingPage() {
                       <div className="absolute inset-0 bg-[#131d43]/80 backdrop-blur-sm flex flex-col items-center justify-center gap-2 z-50 rounded-lg">
                         <Loader2 className="h-8 w-8 animate-spin text-blue-500" />
                         <p className="text-white font-medium">Calculating route information...</p>
+                        <p className="text-xs text-gray-400 max-w-md text-center">
+                          This may take a moment as we calculate distances between all your tour stops.
+                          This data will be cached for faster loading next time.
+                        </p>
                       </div>
                     )}
                     <div className="space-y-6">
@@ -457,160 +576,168 @@ export default function DataTrackingPage() {
                       </div>
 
                       {/* Mileage Stats */}
-                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                        <Card className="p-4 bg-[#1B2559] border-gray-600">
-                          <h3 className="text-sm font-semibold text-gray-400 mb-2">Total Tour Mileage</h3>
-                          <p className="text-2xl font-bold text-white">
-                            {routeInfo?.totalMileage ? `${routeInfo.totalMileage.toFixed(1)} mi` : '0 mi'}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            {gigs.length} stops
-                          </p>
-                        </Card>
-                        <Card className="p-4 bg-[#1B2559] border-gray-600">
-                          <h3 className="text-sm font-semibold text-gray-400 mb-2">Average Per Stop</h3>
-                          <p className="text-2xl font-bold text-white">
-                            {routeInfo?.totalMileage && gigs.length > 1
-                              ? `${(routeInfo.totalMileage / (gigs.length - 1)).toFixed(1)} mi`
-                              : '0 mi'}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            between venues
-                          </p>
-                        </Card>
-                        <Card className="p-4 bg-[#1B2559] border-gray-600">
-                          <h3 className="text-sm font-semibold text-gray-400 mb-2">Estimated Fuel Cost</h3>
-                          <p className="text-2xl font-bold text-white">
-                            ${routeInfo?.totalMileage ? Math.ceil(routeInfo.totalMileage * 0.65).toLocaleString() : '0'}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            at $0.65/mile
-                          </p>
-                        </Card>
-                        <Card className="p-4 bg-[#1B2559] border-gray-600">
-                          <h3 className="text-sm font-semibold text-gray-400 mb-2">Estimated Drive Time</h3>
-                          <p className="text-2xl font-bold text-white">
-                            {routeInfo?.totalMileage
-                              ? `${Math.floor(routeInfo.totalMileage / 55)}h ${Math.round((routeInfo.totalMileage / 55) % 1 * 60)}m`
-                              : '0h 0m'}
-                          </p>
-                          <p className="text-sm text-gray-400 mt-1">
-                            at 55 mph average
-                          </p>
-                        </Card>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <RouteAnalyticCard 
+                          title="Total Tour Mileage"
+                          value={routeInfo?.totalMileage ? `${routeInfo.totalMileage.toFixed(1)} mi` : '0 mi'}
+                          subtitle={`${gigs.length} stops`}
+                          loading={routeLoading}
+                        />
+                        
+                        <RouteAnalyticCard 
+                          title="Average Per Stop"
+                          value={routeInfo?.totalMileage && gigs.length > 1
+                            ? `${(routeInfo.totalMileage / (gigs.length - 1)).toFixed(1)} mi`
+                            : '0 mi'}
+                          subtitle="between venues"
+                          loading={routeLoading}
+                        />
+                        
+                        <RouteAnalyticCard 
+                          title="Estimated Fuel Cost"
+                          value={routeInfo?.totalMileage ? `$${Math.ceil(routeInfo.totalMileage * 0.65).toLocaleString()}` : '$0'}
+                          subtitle="at $0.65/mile"
+                          loading={routeLoading}
+                        />
+                        
+                        <RouteAnalyticCard 
+                          title="Estimated Drive Time"
+                          value={routeInfo?.totalMileage
+                            ? `${Math.floor(routeInfo.totalMileage / 55)}h ${Math.round((routeInfo.totalMileage / 55) % 1 * 60)}m`
+                            : '0h 0m'}
+                          subtitle="at 55 mph average"
+                          loading={routeLoading}
+                        />
                       </div>
 
                       {/* Mileage Details and Chart */}
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {/* Stop Details */}
                         <Card className="p-4 bg-[#1B2559] border-gray-600">
-                          <h3 className="text-lg font-semibold text-white mb-0">Stop Details</h3>
-                          <div className="h-[335px] overflow-y-auto [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-[#1B2559] [&::-webkit-scrollbar-thumb]:bg-gray-500 [&::-webkit-scrollbar-thumb:hover]:bg-gray-400">
-                            {/* Column Headers */}
-                            <div className="flex items-center justify-between px-2 py-0 border-b border-gray-600 sticky top-0 bg-[#1B2559] font-medium text-sm">
-                              <div className="flex-1">
-                                <p className="text-gray-400">Stop</p>
-                              </div>
-                              <div className="flex-1 text-right">
-                                <p className="text-gray-400">Distance</p>
-                              </div>
-                              <div className="flex-1 text-right">
-                                <p className="text-gray-400">Drive Time</p>
-                              </div>
-                            </div>
-
-                            {/* Table Rows */}
-                            {gigs.map((gig, index) => (
-                              <div 
-                                key={gig.id} 
-                                className="flex items-center justify-between px-2 py-1 border-b border-gray-600 last:border-0 hover:bg-[#111C44] transition-colors cursor-pointer"
-                              >
-                                <div className="flex-1">
-                                  <h4 className="text-white font-medium text-sm">{gig.venue}</h4>
-                                  <p className="text-xs text-gray-400">{format(new Date(gig.gig_date), 'MMM d, yyyy')}</p>
+                          <h3 className="text-lg font-semibold text-white mb-2">Tour Stops</h3>
+                          <div className="h-[335px] overflow-y-auto pr-2 custom-scrollbar">
+                            {routeLoading ? (
+                              // Skeleton loader for stops
+                              Array(5).fill(0).map((_, index) => (
+                                <div 
+                                  key={index} 
+                                  className="flex items-center justify-between px-2 py-3 border-b border-gray-600 animate-pulse"
+                                >
+                                  <div className="flex-1">
+                                    <div className="h-4 bg-gray-700 rounded w-3/4 mb-2"></div>
+                                    <div className="h-3 bg-gray-700 rounded w-1/2"></div>
+                                  </div>
+                                  <div className="flex-1 text-right">
+                                    <div className="h-4 bg-gray-700 rounded w-16 ml-auto"></div>
+                                  </div>
+                                  <div className="flex-1 text-right">
+                                    <div className="h-4 bg-gray-700 rounded w-20 ml-auto"></div>
+                                  </div>
                                 </div>
-                                <div className="flex-1 text-right">
-                                  {index > 0 && routeInfo?.distances?.[index - 1] ? (
-                                    <p className="text-white font-medium text-sm">
-                                      {Math.round(routeInfo.distances[index - 1])} mi
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs text-gray-400">Start</p>
-                                  )}
+                              ))
+                            ) : (
+                              gigs.map((gig, index) => (
+                                <div 
+                                  key={gig.id} 
+                                  className="flex items-center justify-between px-2 py-1 border-b border-gray-600 last:border-0 hover:bg-[#111C44] transition-colors cursor-pointer"
+                                >
+                                  <div className="flex-1">
+                                    <h4 className="text-white font-medium text-sm">{gig.venue}</h4>
+                                    <p className="text-xs text-gray-400">{format(new Date(gig.gig_date), 'MMM d, yyyy')}</p>
+                                  </div>
+                                  <div className="flex-1 text-right">
+                                    {index > 0 && routeInfo?.distances?.[index - 1] ? (
+                                      <p className="text-white font-medium text-sm">
+                                        {Math.round(routeInfo.distances[index - 1])} mi
+                                      </p>
+                                    ) : (
+                                      <p className="text-xs text-gray-400">Start</p>
+                                    )}
+                                  </div>
+                                  <div className="flex-1 text-right">
+                                    {index > 0 && routeInfo?.distances?.[index - 1] ? (
+                                      <p className="text-white font-medium text-sm">
+                                        {Math.floor(routeInfo.distances[index - 1] / 55)}h {Math.round((routeInfo.distances[index - 1] / 55) % 1 * 60)}m
+                                      </p>
+                                    ) : (
+                                      <p className="text-xs text-gray-400">-</p>
+                                    )}
+                                  </div>
                                 </div>
-                                <div className="flex-1 text-right">
-                                  {index > 0 && routeInfo?.distances?.[index - 1] ? (
-                                    <p className="text-white font-medium text-sm">
-                                      {Math.floor(routeInfo.distances[index - 1] / 55)}h {Math.round((routeInfo.distances[index - 1] / 55) % 1 * 60)}m
-                                    </p>
-                                  ) : (
-                                    <p className="text-xs text-gray-400">-</p>
-                                  )}
-                                </div>
-                              </div>
-                            ))}
+                              ))
+                            )}
                           </div>
                         </Card>
 
-                        {/* Mileage Chart */}
+                        {/* Distance Chart */}
                         <Card className="p-4 bg-[#1B2559] border-gray-600">
                           <h3 className="text-lg font-semibold text-white mb-2">Distance Between Stops</h3>
                           <div className="h-[335px] w-full">
-                            <ResponsiveContainer width="100%" height="100%">
-                              <LineChart 
-                                data={routeInfo?.distances?.map((distance: number, index: number) => ({
-                                  name: `Stop ${index + 1} to ${index + 2}`,
-                                  distance: Math.round(distance),
-                                  fuelCost: Math.ceil(distance * 0.65)
-                                })) || []}
-                                margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
-                                style={{ backgroundColor: '#020817' }}
-                              >
-                                <CartesianGrid 
-                                  strokeDasharray="3 3" 
-                                  stroke="#6B7280" 
-                                  vertical={true}
-                                  horizontal={true}
-                                />
-                                <XAxis 
-                                  dataKey="name" 
-                                  stroke="#9CA3AF"
-                                  tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                                  height={20}
-                                />
-                                <YAxis 
-                                  stroke="#9CA3AF"
-                                  tick={{ fill: '#9CA3AF', fontSize: 12 }}
-                                  tickFormatter={(value) => `${value} mi`}
-                                  width={80}
-                                />
-                                <Tooltip content={({ active, payload, label }) => {
-                                  if (active && payload && payload.length) {
-                                    return (
-                                      <div className="bg-[#1B2559] border border-gray-600 p-3 rounded-lg shadow-lg">
-                                        <p className="text-white font-medium mb-1">{label}</p>
-                                        <p className="text-sm mb-1" style={{ color: '#008ffb' }}>
-                                          Distance: {payload[0].value} miles
-                                        </p>
-                                        <p className="text-sm text-green-400">
-                                          Est. Fuel Cost: ${payload[0].payload.fuelCost}
-                                        </p>
-                                      </div>
-                                    )
-                                  }
-                                  return null
-                                }} />
-                                <Line 
-                                  type="monotone"
-                                  dataKey="distance" 
-                                  name="Distance" 
-                                  stroke="#008ffb"
-                                  strokeWidth={2}
-                                  dot={{ fill: '#008ffb', r: 3 }}
-                                  activeDot={{ r: 5 }}
-                                />
-                              </LineChart>
-                            </ResponsiveContainer>
+                            {routeLoading ? (
+                              // Skeleton loader for chart
+                              <div className="h-full w-full bg-[#020817] rounded-md flex items-center justify-center">
+                                <div className="text-center">
+                                  <div className="w-8 h-8 border-t-2 border-b-2 border-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                                  <p className="text-gray-400 text-sm">Loading chart data...</p>
+                                </div>
+                              </div>
+                            ) : (
+                              <ResponsiveContainer width="100%" height="100%">
+                                <LineChart 
+                                  data={routeInfo?.distances?.map((distance: number, index: number) => ({
+                                    name: `Stop ${index + 1} to ${index + 2}`,
+                                    distance: Math.round(distance),
+                                    fuelCost: Math.ceil(distance * 0.65)
+                                  })) || []}
+                                  margin={{ top: 5, right: 5, bottom: 5, left: 5 }}
+                                  style={{ backgroundColor: '#020817' }}
+                                >
+                                  <CartesianGrid 
+                                    strokeDasharray="3 3" 
+                                    stroke="#6B7280" 
+                                    vertical={true}
+                                    horizontal={true}
+                                  />
+                                  <XAxis 
+                                    dataKey="name" 
+                                    stroke="#9CA3AF"
+                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                    height={20}
+                                  />
+                                  <YAxis 
+                                    stroke="#9CA3AF"
+                                    tick={{ fill: '#9CA3AF', fontSize: 12 }}
+                                    tickFormatter={(value) => `${value} mi`}
+                                    width={80}
+                                  />
+                                  <Tooltip content={({ active, payload, label }) => {
+                                    if (active && payload && payload.length) {
+                                      return (
+                                        <div className="bg-[#1B2559] border border-gray-600 p-3 rounded-lg shadow-lg">
+                                          <p className="text-white font-medium mb-1">{label}</p>
+                                          <p className="text-sm mb-1" style={{ color: '#008ffb' }}>
+                                            Distance: {payload[0].value} miles
+                                          </p>
+                                          <p className="text-sm text-green-400">
+                                            Est. Fuel Cost: ${payload[0].payload.fuelCost}
+                                          </p>
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  }} />
+                                  <Line 
+                                    type="monotone"
+                                    dataKey="distance" 
+                                    name="Distance" 
+                                    stroke="#008ffb"
+                                    strokeWidth={2}
+                                    dot={{ fill: '#008ffb', r: 3 }}
+                                    activeDot={{ r: 5 }}
+                                  />
+                                </LineChart>
+                              </ResponsiveContainer>
+                            )}
                           </div>
                         </Card>
                       </div>
