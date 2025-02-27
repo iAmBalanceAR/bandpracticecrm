@@ -64,16 +64,25 @@ export default function SuccessPage() {
         setStage('redirecting')
         await new Promise(resolve => setTimeout(resolve, 1000))
 
-        // Redirect based on whether user exists
+        // Conditionally redirect based on whether the user exists
         if (exists) {
+          // If user exists, redirect to sign in
           router.push(`/auth/signin?email=${encodeURIComponent(email)}`)
         } else {
-          const params = new URLSearchParams({
-            email: email || '',
-            name: name || '',
-            stripe_customer_id: stripeCustomerId as string
-          })
-          router.push(`/auth/signup?${params.toString()}`)
+          // If new user, redirect to sign up
+          let signupUrl = `/auth/signup?email=${encodeURIComponent(email)}`
+          
+          // Add name if available
+          if (name) {
+            signupUrl += `&name=${encodeURIComponent(name)}`
+          }
+          
+          // Add Stripe customer ID if available
+          if (stripeCustomerId) {
+            signupUrl += `&stripe_customer_id=${encodeURIComponent(stripeCustomerId)}`
+          }
+          
+          router.push(signupUrl)
         }
         
       } catch (err) {
@@ -159,7 +168,9 @@ export default function SuccessPage() {
           )}
           {stage === 'redirecting' && (
             <p className="text-sm text-gray-600">
-              Taking you to {userExists ? "sign in" : "create your account"}...
+              {userExists 
+                ? "Taking you to sign in..." 
+                : "Taking you to create your account..."}
             </p>
           )}
           <p className="text-xs text-gray-500">

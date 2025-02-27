@@ -1,5 +1,6 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
+import { normalizeEmail } from '@/utils/email-validator'
 
 export async function GET(request: Request) {
   try {
@@ -10,16 +11,30 @@ export async function GET(request: Request) {
       return NextResponse.json({ exists: false })
     }
 
+    // Normalize the email to handle case sensitivity and gmail dots
+    const normalizedEmail = normalizeEmail(email)
+    console.log(`Checking if email exists: ${email} (normalized: ${normalizedEmail})`)
+
     const supabase = createClient()
-    const { data, error } = await supabase
+    
+    // Check the profiles table with normalized email
+    const { data: profileData, error: profileError } = await supabase
       .from('profiles')
       .select('id')
-      .eq('email', email)
-      .single()
+      .eq('email', normalizedEmail)
+      .maybeSingle()
 
-    return NextResponse.json({ exists: !!data })
+    const exists = !!profileData
+    
+    console.log('Email check result:', { 
+      email: normalizedEmail, 
+      exists, 
+      error: profileError?.message 
+    })
+    
+    return NextResponse.json({ exists })
   } catch (error) {
     console.error('Error checking email:', error)
-    return NextResponse.json({ exists: false })
+    return NextResponse.json({ exists: false, error: 'Error checking email' })
   }
 } 

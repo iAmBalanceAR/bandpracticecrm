@@ -135,6 +135,7 @@ export function SignUpForm() {
         data: {
           first_name: firstName,
           last_name: lastName,
+          full_name: `${firstName} ${lastName}`.trim(),
           stripe_customer_id: searchParams.get('stripe_customer_id') || null
         },
         emailRedirectTo: `${getURL()}auth/callback`

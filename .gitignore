@@ -136,3 +136,4 @@ supabase/venues_schema.sql
 supabase/cleaned_venues.csv
 supabase/clean_venues.py
 
+scripts/update-env.js
