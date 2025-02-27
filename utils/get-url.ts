@@ -1,15 +1,15 @@
 export function getURL(): string {
-  // Force localhost for testing
-  return 'http://localhost:3000';
-  
-  // Comment out the original logic
-  /*
+  // Get the site URL from environment variables
   let url =
     process.env.NEXT_PUBLIC_SITE_URL ??
     process.env.NEXT_PUBLIC_VERCEL_URL ??
-    'http://localhost:3000';
+    'https://app.bandpracticecrm.com'; // Default to production URL instead of localhost
+  
+  // Ensure URL has proper protocol
   url = url.startsWith('http') ? url : `https://${url}`;
+  
+  // Remove trailing slashes
   url = url.replace(/\/+$/, '');
+  
   return url;
-  */
 } 

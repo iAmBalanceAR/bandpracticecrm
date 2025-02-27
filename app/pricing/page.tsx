@@ -35,6 +35,7 @@ export default async function Pricing() {
       )
     `)
     .eq('active', true)
+    .neq('id', 'prod_test')
     .eq('prices.active', true)
     .order('metadata->index')
 

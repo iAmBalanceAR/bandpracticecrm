@@ -1,4 +1,5 @@
 import Stripe from 'stripe'
+import { getURL } from './get-url'
 
 export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
   apiVersion: '2023-10-16' as const,
@@ -40,12 +41,10 @@ export async function createOrRetrieveCustomer(
 export async function createCheckoutSession(
   customerId: string,
   priceId: string,
-  returnUrl: string
+  returnUrl?: string
 ) {
-  // Ensure return URL is properly formatted
-  const baseUrl = returnUrl.startsWith('http') 
-    ? returnUrl 
-    : `https://${returnUrl.replace(/^\/+/, '')}`
+  // Use the provided returnUrl or get the default URL
+  const baseUrl = returnUrl || getURL()
 
   const checkout = await stripe.checkout.sessions.create({
     customer: customerId,
@@ -66,11 +65,14 @@ export async function createCheckoutSession(
 
 export async function createBillingPortalSession(
   customerId: string,
-  returnUrl: string
+  returnUrl?: string
 ) {
+  // Use the provided returnUrl or get the default URL
+  const baseUrl = returnUrl || getURL()
+  
   const portalSession = await stripe.billingPortal.sessions.create({
     customer: customerId,
-    return_url: returnUrl,
+    return_url: baseUrl,
   })
 
   return portalSession

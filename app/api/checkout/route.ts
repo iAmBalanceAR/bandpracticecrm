@@ -1,6 +1,7 @@
 import { createClient } from '@/utils/supabase/server'
 import { NextResponse } from 'next/server'
 import { stripe, createOrRetrieveCustomer } from '@/utils/stripe'
+import { getURL } from '@/utils/get-url'
 
 interface CheckoutRequest {
   priceId: string
@@ -30,7 +31,7 @@ export async function POST(request: Request) {
     console.log('Creating checkout session with:', {
       priceId: body.priceId,
       customerId: user.id,
-      siteUrl: process.env.NEXT_PUBLIC_SITE_URL
+      siteUrl: getURL()
     })
 
     let { priceId } = body as CheckoutRequest
@@ -55,11 +56,8 @@ export async function POST(request: Request) {
       priceId
     })
 
-    // Ensure site URL is properly formatted
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
-    const baseUrl = siteUrl.startsWith('http') 
-      ? siteUrl 
-      : `https://${siteUrl.replace(/^\/+/, '')}`
+    // Get the site URL using the getURL function
+    const baseUrl = getURL()
 
     // Create a checkout session with the latest Stripe best practices
     const session = await stripe.checkout.sessions.create({

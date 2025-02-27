@@ -1,0 +1,10 @@
+{
+  "name": "stripe-webhook-test-scripts",
+  "version": "1.0.0",
+  "description": "Test scripts for Stripe webhooks",
+  "type": "commonjs",
+  "dependencies": {
+    "node-fetch": "^2.6.9",
+    "uuid": "^9.0.1"
+  }
+} 

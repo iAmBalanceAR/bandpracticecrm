@@ -10,8 +10,8 @@ import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/toaster'
-import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
-import { PostHogProvider } from './providers'
+// import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
+// import { PostHogProvider } from './providers'
 import { TrialCountdown } from '@/components/ui/trial-countdown'
 
 export const viewport: Viewport = {
@@ -48,9 +48,15 @@ async function getSupabaseSession() {
   try {
     const { data: { user }, error } = await supabase.auth.getUser();
 
-    if (error) {
+    // AuthSessionMissingError is expected for new visitors, not a true error
+    if (error && error.name !== 'AuthSessionMissingError') {
       console.error('Error fetching user:', error);
       return { user: null, session: null, error };
+    }
+
+    // For new visitors or AuthSessionMissingError, just return null values without error
+    if (!user || (error && error.name === 'AuthSessionMissingError')) {
+      return { user: null, session: null, error: null };
     }
 
     // If you need the session object for other purposes, you can still retrieve it
@@ -65,11 +71,11 @@ async function getSupabaseSession() {
 }
 
 export default async function RootLayout({ children }: RootLayoutProps) {
-  const { session } = await getSupabaseSession()
+  const { session } = await getSupabaseSession();
 
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className=" bg-background font-sans antialiased">
+    <html lang="en" suppressHydrationWarning className="h-full">
+      <body className="h-full bg-background font-sans antialiased">
         <Analytics />
         <ClientErrorBoundary>
           <SupabaseClientProvider initialSession={session}>
@@ -79,14 +85,13 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                 storageKey="ui-theme"
                 enableSystem
               >
-                <PostHogProvider>
-                  <div className="flex min-h-screen">
-                    <main className="flex-1">{children}</main>
-                  </div>
+                <div className="relative flex min-h-screen flex-col">
+                  <main className="flex-1 flex flex-col">
+                    {children}
+                  </main>
                   <TrialCountdown />
-                </PostHogProvider>
+                </div>
                 <SpeedInsights />
-                <RemindersAlertSystem />
               </ThemeProvider>
             </MobileProvider>
           </SupabaseClientProvider>

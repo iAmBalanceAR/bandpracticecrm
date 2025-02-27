@@ -10,7 +10,7 @@ import StagePlotCard from "@/components/crm/stage-plot-card"
 import { CustomDialog } from "@/components/ui/custom-dialog"
 import { useTour } from "@/components/providers/tour-provider" 
 
-export function Dashboard() {
+export default function Dashboard() {
   const { currentTour, isLoading } = useTour()
   const [errorModalOpen, setErrorModalOpen] = useState(false)
   const [errorMessage, setErrorMessage] = useState('')

@@ -107,19 +107,6 @@ export function AuthForm() {
     }
 
     setLoading(true)
-    const isVerified = await verifyRecaptcha(token)
-      
-    if (!isVerified) {
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Verification Required',
-        message: 'Please check the reCAPTCHA box before proceeding.',
-        type: 'error'
-      })
-      setLoading(false)
-      return
-    }
-
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
@@ -176,19 +163,6 @@ export function AuthForm() {
     }
 
     setLoading(true)
-    const isVerified = await verifyRecaptcha(token)
-      
-    if (!isVerified) {
-      setFeedbackModal({
-        isOpen: true,
-        title: 'Verification Required',
-        message: 'Please check the reCAPTCHA box before proceeding.',
-        type: 'error'
-      })
-      setLoading(false)
-      return
-    }
-
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/callback`,

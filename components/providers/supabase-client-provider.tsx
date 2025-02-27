@@ -46,25 +46,10 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
 
   const refreshUser = async () => {
     try {
-      const { data: { session: currentSession }, error } = await supabase.auth.getSession()
-      if (error) {
-        console.error('Error refreshing session:', error)
-        setUser(null)
-        setSession(null)
-        return
-      }
-
-      if (currentSession) {
-        setUser(currentSession.user)
-        setSession(currentSession)
-      } else {
-        setUser(null)
-        setSession(null)
-      }
+      const { data: { user: currentUser } } = await supabase.auth.getUser()
+      setUser(currentUser)
     } catch (error) {
-      console.error('Error in session refresh:', error)
-      setUser(null)
-      setSession(null)
+      console.error('Error refreshing user:', error)
     }
   }
 
@@ -106,9 +91,14 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
           }
         }
       } catch (error) {
-        console.error('Error in auth initialization:', error)
+        if (error instanceof Error && error.name !== 'AuthSessionMissingError') {
+          console.error('Error in auth initialization:', error)
+        }
         setUser(null)
         setSession(null)
+        if (!isPublicRoute(pathname)) {
+          router.push('/auth/signin')
+        }
       } finally {
         setIsLoading(false)
       }
@@ -137,7 +127,6 @@ export default function SupabaseProvider({ children, initialSession }: Props) {
         await refreshUser()
       }
 
-      // Only refresh on sign in/out and avoid refreshing on error pages
       if (
         (event === 'SIGNED_IN' || event === 'SIGNED_OUT') &&
         !pathname.includes('404') && 

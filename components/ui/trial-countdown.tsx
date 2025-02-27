@@ -8,13 +8,19 @@ import Link from 'next/link';
 
 export function TrialCountdown() {
   const [daysRemaining, setDaysRemaining] = useState<number | null>(null);
+  const [isLoggedIn, setIsLoggedIn] = useState<boolean>(false);
   const supabase = createClient();
 
   useEffect(() => {
     async function checkTrialStatus() {
       const { data: { user } } = await supabase.auth.getUser();
       
-      if (!user) return;
+      if (!user) {
+        setIsLoggedIn(false);
+        return;
+      }
+
+      setIsLoggedIn(true);
 
       const { data: subscription } = await supabase
         .from('subscriptions')
@@ -34,9 +40,24 @@ export function TrialCountdown() {
     }
 
     checkTrialStatus();
+
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN') {
+        checkTrialStatus();
+      } else if (event === 'SIGNED_OUT') {
+        setIsLoggedIn(false);
+        setDaysRemaining(null);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, []);
 
-  if (!daysRemaining) return null;
+  // Don't render anything if user is not logged in or no days remaining
+  if (!isLoggedIn || !daysRemaining) return null;
 
   return (
     <AnimatePresence>

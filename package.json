@@ -2,6 +2,7 @@
 	"name": "band-practice-agent",
 	"version": "0.1.0",
 	"private": true,
+
 	"engines": {
 		"node": ">=20.0.0 <21.0.0",
 		"pnpm": ">=8.0.0"
@@ -14,7 +15,12 @@
 		"stripe:sync": "node scripts/stripe-sync.mjs",
 		"postinstall": "node node_modules/esbuild/install.js",
 		"test:stripe": "cross-env DEBUG=true tsx scripts/test-stripe-flow.ts",
-		"test:load": "npx artillery run tests/load/load-test.yml"
+		"test:load": "npx artillery run tests/load/load-test.yml",
+		"webhook:test": "node scripts/test-webhook-local.mjs",
+		"webhook:update-env": "node --experimental-modules scripts/update-env.js",
+		"webhook:restart": "node --experimental-modules scripts/restart-server.js",
+		"webhook:check": "curl http://localhost:3000/api/env-check",
+		"webhook:status": "node --experimental-modules scripts/check-server.js"
 	},
 	"dependencies": {
 		"@designbycode/tailwindcss-text-shadow": "^2.2.1",
@@ -90,6 +96,7 @@
 		"motion": "^11.15.0",
 		"next": "14.0.4",
 		"next-themes": "^0.4.4",
+		"node-fetch": "^3.3.2",
 		"nodemailer": "^6.9.16",
 		"pdf-lib": "^1.17.1",
 		"posthog-js": "^1.219.6",

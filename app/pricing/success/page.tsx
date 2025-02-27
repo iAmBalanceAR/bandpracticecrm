@@ -25,7 +25,8 @@ export default function SuccessPage() {
 
       try {
         setStage('loading')
-        const response = await fetch(`/api/stripe/session?sessionId=${sessionId}`)
+        // Use the new session endpoint
+        const response = await fetch(`/api/stripe/session-new?sessionId=${sessionId}`)
         const data = await response.json()
         
         console.log('Session data:', data)
@@ -35,7 +36,11 @@ export default function SuccessPage() {
         const email = data.customer_email
         const name = data.customer_details?.name
         const stripeCustomerId = data.customer
-        const subscriptionId = data.subscription
+        const subscriptionId = data.subscription?.id
+
+        if (!email) {
+          throw new Error('No customer email found in session data')
+        }
 
         console.log('Customer data:', {
           email,
@@ -48,6 +53,8 @@ export default function SuccessPage() {
         const checkResponse = await fetch(`/api/check-email?email=${encodeURIComponent(email)}`)
         const { exists } = await checkResponse.json()
         setUserExists(exists)
+
+        console.log('User exists check:', { email, exists })
 
         // Show preparing message for 1 second
         setStage('preparing')
@@ -71,10 +78,9 @@ export default function SuccessPage() {
         
       } catch (err) {
         console.error('Error fetching session:', err)
-        setError('Failed to load session data')
+        setError(err instanceof Error ? err.message : 'Failed to load session data')
+        setIsLoading(false)
       }
-      
-      setIsLoading(false)
     }
 
     getSessionData()
@@ -83,7 +89,33 @@ export default function SuccessPage() {
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <div className="text-lg text-red-500">{error}</div>
+        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-xl shadow-lg text-center">
+          <div className="w-16 h-16 mx-auto bg-red-100 rounded-full flex items-center justify-center">
+            <svg
+              className="w-8 h-8 text-red-500"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M6 18L18 6M6 6l12 12"
+              />
+            </svg>
+          </div>
+          <h2 className="mt-6 text-2xl font-bold text-gray-900">
+            Something went wrong
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">{error}</p>
+          <div className="mt-6">
+            <Link href="/">
+              <Button className="w-full">Return to Home</Button>
+            </Link>
+          </div>
+        </div>
       </div>
     )
   }

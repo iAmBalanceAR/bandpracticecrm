@@ -1,7 +1,12 @@
 import { redirect } from 'next/navigation'
 import { createClient } from '@/utils/supabase/server'
 import type { Database } from '@/types/supabase'
-import { Dashboard } from '@/components/crm/dashboard'
+import dynamic from 'next/dynamic'
+
+const Dashboard = dynamic(() => import('@/components/crm/dashboard'), {
+  ssr: false,
+  loading: () => <div>Loading...</div>
+})
 
 export default async function Home() {
   const supabase = createClient()
