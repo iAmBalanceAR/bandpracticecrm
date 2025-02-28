@@ -269,7 +269,10 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   // Show a minimal loading state if we're still loading and have a user
   if (loading && user) {
     return (
-      <aside className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out shadow-green-400 shadow-[2px_0_6px_-1px_rgba(0,0,0,0.1)] ${sidebarOpen ? 'w-72' : 'w-16'}`}>
+      <aside 
+        className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out shadow-green-400 shadow-[2px_0_6px_-1px_rgba(0,0,0,0.1)] ${sidebarOpen ? '!w-72' : '!w-16'}`}
+        style={{ width: sidebarOpen ? '18rem' : '4rem' }}
+      >
         <div className="h-full px-3 py-4 bg-[#111c44] shadow-lg">
           <HeaderSection />
           <div className="flex items-center justify-center p-4">
@@ -281,7 +284,10 @@ export default function SideMenu({ sidebarOpen, setSidebarOpen }: SideMenuProps)
   }
 
   return (
-    <aside className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out shadow-green-400 shadow-[2px_0_6px_-1px_rgba(0,0,0,0.1)] ${sidebarOpen ? 'w-72' : 'w-16'}`}>
+    <aside 
+      className={`fixed top-0 left-0 z-40 h-screen transition-all duration-300 ease-in-out shadow-green-400 shadow-[2px_0_6px_-1px_rgba(0,0,0,0.1)] ${sidebarOpen ? '!w-72' : '!w-16'}`}
+      style={{ width: sidebarOpen ? '18rem' : '4rem' }}
+    >
       <div className="h-full px-3 py-4 bg-[#111c44] shadow-lg flex flex-col justify-between">
         <div>
           <HeaderSection />

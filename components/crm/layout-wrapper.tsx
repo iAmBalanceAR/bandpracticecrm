@@ -69,11 +69,14 @@ export default function LayoutWrapper({
   // Preserve existing layout while auth is loading
   if (loading) {
     return (
-      <div className="flex">
+      <div className="flex max-w-[100vw] overflow-x-hidden">
         {showSidebar && (
-          <div className="w-72 bg-[#1B2559] animate-pulse" />
+          <div className="w-72 !important bg-[#1B2559] animate-pulse" />
         )}
-        <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
+        <div 
+          className={`flex-1 ${sidebarOpen ? '!ml-72' : '!ml-16'}`}
+          style={{ marginLeft: sidebarOpen ? '18rem' : '4rem' }}
+        >
           <div className="max-w-[1200px] w-full mx-auto px-4 relative flex flex-col">
             <div className="flex-1 pt-0">
               {children}
@@ -92,7 +95,10 @@ export default function LayoutWrapper({
       {showSidebar && (
         <SideMenu sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       )}     
-      <div className={`flex-1 ${sidebarOpen ? 'ml-72' : 'ml-16'}`}>
+      <div 
+        className={`flex-1 ${sidebarOpen ? '!ml-72' : '!ml-16'}`}
+        style={{ marginLeft: sidebarOpen ? '18rem' : '4rem' }}
+      >
         <div className="max-w-[1200px] w-full mx-auto px-4 relative flex flex-col">
           <div className="flex-1 pt-4">
             {children}
