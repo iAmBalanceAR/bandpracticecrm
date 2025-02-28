@@ -75,7 +75,7 @@ export default async function RootLayout({ children }: RootLayoutProps) {
 
   return (
     <html lang="en" suppressHydrationWarning className="h-full">
-      <body className="h-full bg-background font-sans antialiased">
+      <body className="h-full bg-[#020817] font-sans antialiased">
         <Analytics />
         <ClientErrorBoundary>
           <SupabaseClientProvider initialSession={session}>

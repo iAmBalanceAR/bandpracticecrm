@@ -596,9 +596,111 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
     })
   }
 
-  const handleAddNew = () => {
-    setCurrentGig(null)
-    setIsFormVisible(true)
+  const handleAddNew = async () => {
+    // Check if tours exist and if a default tour is set before allowing a user to add a calendar entry
+    try {
+      // Use the existing supabase client from the hook
+      const { data: { user } } = await supabase.auth.getUser()
+      
+      if (!user) {
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Authentication Error',
+          message: 'You need to be signed in to add calendar entries. Please sign in and try again.',
+          type: 'error'
+        })
+        return
+      }
+
+      // First check if any tours exist
+      const { data: tours, error: toursError } = await supabase
+        .from('tours')
+        .select('id')
+        .eq('user_id', user.id)
+        .limit(1)
+      
+      if (toursError) {
+        console.error('Error checking for tours:', toursError)
+        setFeedbackModal({
+          isOpen: true,
+          title: 'Database Error',
+          message: `Unable to check for tours: ${toursError.message || 'Unknown database error'}. Please try again or contact support if the issue persists.`,
+          type: 'error'
+        })
+        return
+      }
+      
+      if (!tours || tours.length === 0) {
+        // No tours exist, show error message with instructions
+        setFeedbackModal({
+          isOpen: true,
+          title: 'No Tours Available',
+          message: 'You need to create a tour before adding calendar entries. Please go to the Tour Management page and create a tour first.',
+          type: 'error'
+        })
+        return
+      }
+      
+      // Now check if a default tour is set
+      const { data: defaultTour, error: defaultTourError } = await supabase
+        .from('tours')
+        .select('id, title')
+        .eq('user_id', user.id)
+        .eq('is_default', true)
+        .single()
+      
+      if (defaultTourError) {
+        console.error('Error checking for default tour:', defaultTourError)
+        
+        // Check for the specific error message about JSON object/multiple rows
+        if (defaultTourError.message.includes('JSON object requested') || 
+            defaultTourError.message.includes('multiple') || 
+            defaultTourError.message.includes('no rows')) {
+          setFeedbackModal({
+            isOpen: true,
+            title: 'No Default Tour Selected',
+            message: 'Please set a default tour by clicking the star icon next to a tour in the Tour Management page. You need a default tour before adding calendar entries.',
+            type: 'error'
+          })
+        } else {
+          // Other database error
+          setFeedbackModal({
+            isOpen: true,
+            title: 'Database Error',
+            message: `Unable to check for default tour. Please try again or contact support if the issue persists.`,
+            type: 'error'
+          })
+        }
+        return
+      }
+      
+      // Default tour exists, proceed with adding a new calendar entry
+      setCurrentGig(null)
+      setIsFormVisible(true)
+    } catch (error: any) {
+      // Handle unexpected errors with more detailed information
+      console.error('Unexpected error checking for tours:', error)
+      
+      let errorMessage = 'An unexpected error occurred while checking for tours.';
+      
+      // Add more context based on the error type
+      if (error.message) {
+        errorMessage += ` Error details: ${error.message}`;
+      }
+      
+      if (error.code) {
+        errorMessage += ` (Error code: ${error.code})`;
+      }
+      
+      errorMessage += ' Please try again or contact support if the issue persists.';
+      
+      setFeedbackModal({
+        isOpen: true,
+        title: 'System Error',
+        message: errorMessage,
+        type: 'error'
+      })
+    }
   }
 
   const handleCloseForm = () => {
@@ -671,12 +773,14 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                 onClick={handleAddNew}
                 className="bg-green-700 text-white hover:bg-green-600 border border-black"
               >
-                <Plus className="mr-2 h-4 w-4" /> Add New Gig
+                <Plus className="mr-2 h-4 w-4 md:block hidden" /> 
+                <span className="hidden md:inline">Add New Gig</span>
+                <span className="md:hidden">Add</span>
               </Button>
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mx-auto max-w-7xl px-0 sm:px-3 lg:px-0 py0">
+            <div className="mx-auto max-w-7xl px-0 sm:px-2 lg:px-0 py0">
               <div className="flex justify-center mb-8">
                 <Tabs 
                   defaultValue="upcoming"
@@ -700,10 +804,10 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                     </TabsList>
                   </div>
                   <TabsContent value="upcoming">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto hidden md:block">
                       <div className="border-gray-500 border-2 rounded-lg">
                         <Table className="w-full">
-                          <TableHeader>
+                          <TableHeader className="hidden md:table-header-group">
                             <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Venue</TableHead>
@@ -729,80 +833,158 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                   No gigs found in the database. <br />Ensure you have created a tour and then: <br />Click the "Add New Gig" button above to create one.
                                 </TableCell>
                               </TableRow>
-
                             ) : (
-                              gigs.map((gig) => (
-                                <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
-                                  <TableCell className="font-medium text-gray-400 pt-4 pb-4">
-                                    <div className="flex items-center">
-                                      <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                                      <span className="line-clamp-1">{gig.title}</span>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    <div className="flex flex-col">
-                                    <span className="whitespace-nowrap">{gig.venue}</span>
-                                      {(gig.venue_city || gig.venue_state) && (
-                                        <span className="text-xs text-gray-500">
-                                          {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    <span className="whitespace-nowrap">{formatDateSafely(gig.gig_date)}</span>
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    {gig.tourInfo ? (
-                                      <div className="flex space-x-1">
-                                        <span className="whitespace-nowrap">{gig.tourInfo.title}</span>
-                                        {gig.tourInfo.is_default && (
-                                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <>
+                                {/* Desktop view - Table rows */}
+                                {gigs.map((gig) => (
+                                  <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base hidden md:table-row">
+                                    <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                                      <div className="flex items-center">
+                                        <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                                        <span className="line-clamp-1">{gig.title}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      <div className="flex flex-col">
+                                      <span className="whitespace-nowrap">{gig.venue}</span>
+                                        {(gig.venue_city || gig.venue_state) && (
+                                          <span className="text-xs text-gray-500">
+                                            {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
+                                          </span>
                                         )}
                                       </div>
-                                    ) : (
-                                      <span className="text-gray-400">No tour</span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="pt-4 pb-4">
-                                    <div className="flex space-x-2 w-full mx-auto">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        title="Click to Edit Gig"
-                                        onClick={() => handleEdit(gig)}
-                                        className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                                      >
-                                        <Edit2 className="w-4 h-4" />
-                                      </Button>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        onClick={() => handleDeleteClick(gig.id)}
-                                        title="Click to Delete Gig"
-                                        className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                                      >
-                                        {deletingGigId === gig.id ? (
-                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          <Trash2 className="w-4 h-4" />
-                                        )}
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      <span className="whitespace-nowrap">{formatDateSafely(gig.gig_date)}</span>
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      {gig.tourInfo ? (
+                                        <div className="flex space-x-1">
+                                          <span className="whitespace-nowrap">{gig.tourInfo.title}</span>
+                                          {gig.tourInfo.is_default && (
+                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <span className="text-gray-400">No tour</span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="pt-4 pb-4">
+                                      <div className="flex space-x-2 w-full mx-auto">
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          title="Click to Edit Gig"
+                                          onClick={() => handleEdit(gig)}
+                                          className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                                        >
+                                          <Edit2 className="w-4 h-4" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          onClick={() => handleDeleteClick(gig.id)}
+                                          title="Click to Delete Gig"
+                                          className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                                        >
+                                          {deletingGigId === gig.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                          ) : (
+                                            <Trash2 className="w-4 h-4" />
+                                          )}
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </>
                             )}
                           </TableBody>
                         </Table>
                       </div>
                     </div>
+                    
+                    {/* Mobile view - Cards */}
+                    <div className="md:hidden mt-4">
+                      {isLoading ? (
+                        <div className="flex justify-center items-center h-24">
+                          <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
+                          <span className="ml-2 text-gray-400">Loading gigs...</span>
+                        </div>
+                      ) : gigs.length === 0 ? (
+                        <div className="h-24 text-center text-lg text-gray-400">
+                          <Calendar className="h-24 w-24 text-[#ff9920] mb-4 mx-auto" />
+                          No gigs found in the database. <br />Ensure you have created a tour and then: <br />Click the "Add" button above to create one.
+                        </div>
+                      ) : (
+                        gigs.map((gig) => (
+                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md ">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center">
+                                <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />
+                                <h3 className="font-medium text-white text-lg truncate">{gig.title}</h3>
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleEdit(gig)}
+                                  className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-lime-400 text-white"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleDeleteClick(gig.id)}
+                                  className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-rose-500 text-red-500"
+                                >
+                                  {deletingGigId === gig.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                              <div>
+                                <p className="text-gray-500">Date</p>
+                                <p className="text-gray-300">{formatDateSafely(gig.gig_date)}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Tour</p>
+                                <div className="flex items-center">
+                                  <p className="text-gray-300 truncate mr-1">
+                                    {gig.tourInfo ? gig.tourInfo.title : 'No tour'}
+                                  </p>
+                                  {gig.tourInfo?.is_default && (
+                                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-2">
+                              <p className="text-gray-500">Venue</p>
+                              <p className="text-gray-300">{gig.venue}</p>
+                              {(gig.venue_city || gig.venue_state) && (
+                                <p className="text-xs text-gray-500">
+                                  {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
+                    </div>
                   </TabsContent>
                   <TabsContent value="past">
-                    <div className="overflow-x-auto">
+                    <div className="overflow-x-auto hidden md:block">
                       <div className="border-gray-500 border-2 rounded-lg">
                         <Table className="w-full">
-                          <TableHeader>
+                          <TableHeader className="hidden md:table-header-group">
                             <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
                               <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Venue</TableHead>
@@ -829,71 +1011,150 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                                 </TableCell>
                               </TableRow>
                             ) : (
-                              gigs.map((gig) => (
-                                <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
-                                  <TableCell className="font-medium text-gray-400 pt-4 pb-4">
-                                    <div className="flex items-center">
-                                      <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                                      <span>{gig.title}</span>
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    <div className="flex flex-col">
-                                      <span>{gig.venue}</span>
-                                      {(gig.venue_city || gig.venue_state) && (
-                                        <span className="text-xs text-gray-500">
-                                          {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
-                                        </span>
-                                      )}
-                                    </div>
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    {formatDateSafely(gig.gig_date)}
-                                  </TableCell>
-                                  <TableCell className="text-gray-400 pt-4 pb-4">
-                                    {gig.tourInfo ? (
-                                      <div className="flex space-x-1">
-                                        <span>{gig.tourInfo.title}</span>
-                                        {gig.tourInfo.is_default && (
-                                          <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                              <>
+                                {/* Desktop view - Table rows */}
+                                {gigs.map((gig) => (
+                                  <TableRow key={gig.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base hidden md:table-row">
+                                    <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                                      <div className="flex items-center">
+                                        <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                                        <span>{gig.title}</span>
+                                      </div>
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      <div className="flex flex-col">
+                                        <span>{gig.venue}</span>
+                                        {(gig.venue_city || gig.venue_state) && (
+                                          <span className="text-xs text-gray-500">
+                                            {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
+                                          </span>
                                         )}
                                       </div>
-                                    ) : (
-                                      <span className="text-gray-400">No tour</span>
-                                    )}
-                                  </TableCell>
-                                  <TableCell className="pt-4 pb-4">
-                                    <div className="flex space-x-2 justify-center">
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        title="Edit this Gig"
-                                        onClick={() => handleEdit(gig)}
-                                        className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
-                                      >
-                                        <Edit2 className="w-4 h-4" />
-                                      </Button>
-                                      <Button 
-                                        variant="ghost" 
-                                        size="sm" 
-                                        title="Delete this gig."
-                                        onClick={() => handleDeleteClick(gig.id)}
-                                        className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                                      >
-                                        {deletingGigId === gig.id ? (
-                                          <Loader2 className="h-4 w-4 animate-spin" />
-                                        ) : (
-                                          <Trash2 className="w-4 h-4" />
-                                        )}
-                                      </Button>
-                                    </div>
-                                  </TableCell>
-                                </TableRow>
-                              ))
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      {formatDateSafely(gig.gig_date)}
+                                    </TableCell>
+                                    <TableCell className="text-gray-400 pt-4 pb-4">
+                                      {gig.tourInfo ? (
+                                        <div className="flex space-x-1">
+                                          <span>{gig.tourInfo.title}</span>
+                                          {gig.tourInfo.is_default && (
+                                            <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <span className="text-gray-400">No tour</span>
+                                      )}
+                                    </TableCell>
+                                    <TableCell className="pt-4 pb-4">
+                                      <div className="flex space-x-2 justify-center">
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          title="Edit this Gig"
+                                          onClick={() => handleEdit(gig)}
+                                          className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                                        >
+                                          <Edit2 className="w-4 h-4" />
+                                        </Button>
+                                        <Button 
+                                          variant="ghost" 
+                                          size="sm" 
+                                          title="Delete this gig."
+                                          onClick={() => handleDeleteClick(gig.id)}
+                                          className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                                        >
+                                          {deletingGigId === gig.id ? (
+                                            <Loader2 className="h-4 w-4 animate-spin" />
+                                          ) : (
+                                            <Trash2 className="w-4 h-4" />
+                                          )}
+                                        </Button>
+                                      </div>
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </>
                             )}
                           </TableBody>
                         </Table>
                       </div>
+                    </div>
+                    
+                    {/* Mobile view - Cards for past gigs */}
+                    <div className="md:hidden mt-4">
+                      {isLoading ? (
+                        <div className="flex justify-center items-center h-24">
+                          <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
+                          <span className="ml-2 text-gray-400">Loading gigs...</span>
+                        </div>
+                      ) : gigs.length === 0 ? (
+                        <div className="h-24 text-center text-lg text-gray-400">
+                          <Calendar className="h-24 w-24 text-[#ff9920] mb-4 mx-auto" />
+                          No past gigs found in the database.
+                        </div>
+                      ) : (
+                        gigs.map((gig) => (
+                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md ">
+                            <div className="flex justify-between items-start mb-2">
+                              <div className="flex items-center">
+                                <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />
+                                <h3 className="font-medium text-white text-lg truncate">{gig.title}</h3>
+                              </div>
+                              <div className="flex space-x-1">
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleEdit(gig)}
+                                  className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-lime-400 text-white"
+                                >
+                                  <Edit2 className="h-4 w-4" />
+                                </Button>
+                                <Button 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => handleDeleteClick(gig.id)}
+                                  className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-rose-500 text-red-500"
+                                >
+                                  {deletingGigId === gig.id ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="h-4 w-4" />
+                                  )}
+                                </Button>
+                              </div>
+                            </div>
+                            
+                            <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                              <div>
+                                <p className="text-gray-500">Date</p>
+                                <p className="text-gray-300">{formatDateSafely(gig.gig_date)}</p>
+                              </div>
+                              <div>
+                                <p className="text-gray-500">Tour</p>
+                                <div className="flex items-center">
+                                  <p className="text-gray-300 truncate mr-1">
+                                    {gig.tourInfo ? gig.tourInfo.title : 'No tour'}
+                                  </p>
+                                  {gig.tourInfo?.is_default && (
+                                    <Star className="w-3 h-3 fill-yellow-400 text-yellow-400 flex-shrink-0" />
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <div className="mt-2">
+                              <p className="text-gray-500">Venue</p>
+                              <p className="text-gray-300">{gig.venue}</p>
+                              {(gig.venue_city || gig.venue_state) && (
+                                <p className="text-xs text-gray-500">
+                                  {[gig.venue_city, gig.venue_state].filter(Boolean).join(', ')}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -1317,4 +1578,4 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
       />
     </div>
   )
-}
+}                  

@@ -317,32 +317,45 @@ export default function TourList() {
   }
 
   return (
-    <div>
+    <div className="w-full pr-0 md:pr-4">
       {!isFormVisible ? (
         <>
-          <div className="flex-auto relative float-right -top-8">
+          <div className="flex justify-between items-center mb-4">
+            <div className="flex flex-auto tracking-tight text-3xl">
+              <span className="inline-flex items-center justify-center gap-1 whitespace-nowrap text-white text-shadow-sm font-mono font-normal text-shadow-x-2 text-shadow-y-2 text-shadow-black">
+                
+              </span>
+            </div>
             <Button 
               onClick={handleAddNew}
-              className="mb-4 bg-green-700 text-white hover:bg-green-600 float-right"
+              className="bg-green-700 text-white hover:bg-green-600 border border-black"
             >
-              <Plus className="mr-2 h-4 w-4" /> Add New Tour
+              <Plus className="mr-2 h-4 w-4 md:block hidden" /> 
+              <span className="hidden md:inline">Add New Tour</span>
+              <span className="md:hidden">Add</span>
             </Button>
           </div>
-          <div className="overflow-x-auto clear-both">
-            {loading ? (
-              <div className="flex justify-center items-center h-64">
-                <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
-              </div>
-            ) : tours.length === 0 ? (
-              <div className="text-center text-lg py-12">
-                <Route className="h-24 w-24 mb-4 mx-auto text-[#d83b34]" />
-                <p className="text-gray-400 mb-4">No Tours in the database. <br />Click the "Add New Tour" button above to create one.</p>
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <div className="border-gray-500 border-2 rounded-lg">
+          
+          {loading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
+            </div>
+          ) : tours.length === 0 ? (
+            <div className="text-center text-lg py-12">
+              <Route className="h-24 w-24 mb-4 mx-auto text-[#d83b34]" />
+              <p className="text-gray-400 mb-4">
+                No Tours in the database. <br />
+                <span className="hidden md:inline">Click the "Add New Tour" button above to create one.</span>
+                <span className="md:hidden">Click the "Add" button above to create one.</span>
+              </p>
+            </div>
+          ) : (
+            <div className="w-full overflow-hidden">
+              {/* Desktop table view */}
+              <div className="border-gray-500 border-2 rounded-lg w-full hidden md:block">
+                <div className="w-full overflow-x-auto">
                   <Table className="w-full">
-                    <TableHeader>
+                    <TableHeader className="hidden md:table-header-group">
                       <TableRow className="text-lg font-medium bg-[#1F2937] text-gray-100 text-shadow-x-2 text-shadow-y-2 text-shadow-black border-gray-500 border-b-1">
                         <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Title</TableHead>
                         <TableHead className="text-gray-100 bg-[#1F2937] pt-4 pb-4">Start Date</TableHead>
@@ -353,64 +366,123 @@ export default function TourList() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {tours.map((tour) => (
-                        <TableRow key={tour.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
-                          <TableCell className="font-medium text-gray-400 pt-4 pb-4">
-                            <div className="flex items-center">
-                              <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
-                              <span>{tour.title}</span>
-                            </div>
-                          </TableCell>
-                          <TableCell className="text-gray-400 pt-4 pb-4">
-                            {formatDate(tour.departure_date)}
-                          </TableCell>
-                          <TableCell className="text-gray-400 pt-4 pb-4">
-                            {formatDate(tour.return_date)}
-                          </TableCell>
-                          <TableCell className={`${getStatusColor(tour.status)} pt-4 pb-4`}>
-                            {tour.status}
-                          </TableCell>
-                          <TableCell className="text-gray-400 pt-4 pb-4 text-center">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              onClick={() => handleSetDefault(tour.id)}
-                              title="Clickk To Set Current Default Tour"
-                              className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
-                            >
-                              <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
-                            </Button>
-                          </TableCell>
-                          <TableCell className="pt-4 pb-4">
-                            <div className="flex space-x-2 justify-center">
+                      {/* Desktop view - Table rows */}
+                      <div className="hidden md:contents">
+                        {tours.map((tour) => (
+                          <TableRow key={tour.id} className="bg-[#111827] hover:bg-[#030817] transition-colors border-gray-500 border-b text-base">
+                            <TableCell className="font-medium text-gray-400 pt-4 pb-4">
+                              <div className="flex items-center">
+                                <Calendar className="w-4 h-4 text-[#ff9920] mr-2" />
+                                <span>{tour.title}</span>
+                              </div>
+                            </TableCell>
+                            <TableCell className="text-gray-400 pt-4 pb-4">
+                              {formatDate(tour.departure_date)}
+                            </TableCell>
+                            <TableCell className="text-gray-400 pt-4 pb-4">
+                              {formatDate(tour.return_date)}
+                            </TableCell>
+                            <TableCell className={`${getStatusColor(tour.status)} pt-4 pb-4`}>
+                              {tour.status}
+                            </TableCell>
+                            <TableCell className="text-gray-400 pt-4 pb-4 text-center">
                               <Button
                                 variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(tour)}
-                                title="Edit This Tour."
-                                className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                                size="icon"
+                                onClick={() => handleSetDefault(tour.id)}
+                                title="Click To Set Current Default Tour"
+                                className={tour.is_default ? 'text-yellow-400' : 'text-gray-400'}
                               >
-                                <Pencil className="h-4 w-4" />
+                                <Star className={`h-5 w-5 ${tour.is_default ? 'fill-current' : ''}`} />
                               </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleDeleteTour(tour.id)}
-                                title="Delete This Tour.."
-                                className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </Button>
-                            </div>
-                          </TableCell>
-                        </TableRow>
-                      ))}
+                            </TableCell>
+                            <TableCell className="pt-4 pb-4">
+                              <div className="flex space-x-2 justify-center">
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleEdit(tour)}
+                                  title="Edit This Tour."
+                                  className="hover:bg-[#2D3748] hover:text-lime-400 hover:shadow-green-400 hover:shadow-sm hover:font-semibold text-white"
+                                >
+                                  <Pencil className="h-4 w-4" />
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleDeleteTour(tour.id)}
+                                  title="Delete This Tour.."
+                                  className="hover:bg-[#2D3748] hover:text-rose-500 hover:shadow-rose-500 hover:shadow-sm hover:font-semibold text-red-500"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </Button>
+                              </div>
+                            </TableCell>
+                          </TableRow>
+                        ))}
+                      </div>
                     </TableBody>
                   </Table>
                 </div>
               </div>
-            )}
-          </div>
+              
+              {/* Mobile view - Cards */}
+              <div className="md:hidden">
+                {tours.map((tour) => (
+                  <div key={tour.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md">
+                    <div className="flex justify-between items-start mb-2">
+                      <div className="flex items-center ">
+                        <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />
+                        <h3 className="font-medium text-white text-lg truncate">{tour.title}</h3>
+                      </div>
+                      <div className="flex space-x-1">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleSetDefault(tour.id)}
+                          className={`h-8 w-8 p-0 ${tour.is_default ? 'text-yellow-400' : 'text-gray-400'}`}
+                        >
+                          <Star className={`h-4 w-4 ${tour.is_default ? 'fill-current' : ''}`} />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleEdit(tour)}
+                          className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-lime-400 text-white"
+                        >
+                          <Pencil className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          onClick={() => handleDeleteTour(tour.id)}
+                          className="h-8 w-8 p-0 hover:bg-[#2D3748] hover:text-rose-500 text-red-500"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+                    
+                    <div className="grid grid-cols-2 gap-2 text-sm mb-2">
+                      <div>
+                        <p className="text-gray-500">Start Date</p>
+                        <p className="text-gray-300">{formatDate(tour.departure_date)}</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500">End Date</p>
+                        <p className="text-gray-300">{formatDate(tour.return_date)}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="mt-2">
+                      <p className="text-gray-500">Status</p>
+                      <p className={`${getStatusColor(tour.status)}`}>{tour.status}</p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </>
       ) : (
         <div className="bg-[#111C44] rounded-lg w-full p-6">

@@ -172,9 +172,9 @@ export default function StagePlotCard() {
             <div 
               ref={tableRef}
               style={{ width: tableWidth, height: plotHeight }} 
-              className="border-2 border-solid border-gray-500 rounded-lg"
+              className="bg-[#020817] border-2 border-solid border-gray-500 rounded-lg"
             >
-              <Table>
+              <Table className="bg-[#020817] border-b border-gray-500">
                 <TableHeader>
 
                   <TableRow className="bg-[#1F2937] text-gray-100">
@@ -192,11 +192,11 @@ export default function StagePlotCard() {
                         ${selectedPlot === plot.id ? 'bg-[#1F2937]' : ''}`}
                       onClick={() => handlePlotSelect(plot)}
                     >
-                      <TableCell className="font-medium text-gray-400">{plot.name}</TableCell>
+                      <TableCell className="font-medium text-gray-400 line-clamp-1 overflow-hidden truncate block">{plot.name}</TableCell>
                       <TableCell className="text-gray-400">
                         {new Date(plot.created_at).toLocaleDateString()}
                       </TableCell>
-                      <TableCell className="text-gray-400">{plot.items.length} Items</TableCell>
+                      <TableCell className="text-gray-400 truncate block">{plot.items.length} </TableCell>
                       <TableCell className="text-gray-400 p-0">
                         <Link 
                           href="/stage-plot"

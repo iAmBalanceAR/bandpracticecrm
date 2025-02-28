@@ -3,7 +3,7 @@ const fs = require('fs');
 const path = require('path');
 
 // The new webhook secret
-const NEW_WEBHOOK_SECRET = 'whsec_ni2mS5bZ1blpp3Qz5y3E9FuXz2XL01oM';
+const NEW_WEBHOOK_SECRET = '';
 
 // Function to update environment variables
 function updateEnvFile(filePath, secretKey, secretValue) {

@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { Carousel, CarouselContent, CarouselItem } from "@/components/ui/carousel"
 import { 
   ChevronUp, 
+  Calendar,
   ChevronDown, 
   MapPin, 
   Clock, 
@@ -63,9 +64,10 @@ const GigDetailsModal = ({ gig, isOpen, onClose }: { gig: Gig | null, isOpen: bo
       <div className="fixed inset-0 bg-black/70 backdrop-blur-sm z-[49] " />
       <div className=" fixed inset-0 flex items-center justify-center z-[50]">
         <CustomDialog isOpen={isOpen} onClose={onClose} title={gig.title}>
-          <div className="space-y-4 p-4 bg-[#0f1729] text-white border border-[#008ffb] rounded-lg">
-            <div className="flex  justify-between items-start mb-6">
-          <h2 className="text-2xl font-mono">
+         
+          <div className="space-y-4 p-4 pb-0 bg-[#0f1729] text-white border border-[#008ffb] rounded-lg">
+            <div className="flex  justify-between items-start mb-0">
+          <h2 className="text-2xl font-mono pb-0 mb-0">
             <span className="text-white text-shadow-sm -text-shadow-x-2 text-shadow-y-2 text-shadow-gray-800">
               {gig.title}  
             </span>
@@ -73,13 +75,18 @@ const GigDetailsModal = ({ gig, isOpen, onClose }: { gig: Gig | null, isOpen: bo
           <Button 
             variant="ghost" 
             onClick={onClose}
-            className="mt-1 hover:bg-[#008ffb]/20 hover:text-white transition-colors rounded-full p-2 h-auto"
+            className="mt-1 hover:bg-[#008ffb]/20 hover:text-white transition-colors rounded-full h-auto"
           >
-            <X className="h-5 w-5 text-[#008ffb] hover:text-white" />
+            {/* <X className="h-5 w-5 text-[#008ffb] hover:text-white" /> */}
           </Button>
+        
+        </div>
+        <div className="flex items-center gap-2 mb-2 text-gray-200 text-lg -mt-4 absolute top-[30px]">
+          <Calendar className="w-5 h-5 text-[#008ffb]" />
+          {new Date(gig.gig_date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}
         </div>
         <div>
-          <div className="flex items-center gap-2 mb-2">
+          <div className="flex items-center gap-2 mb-0 pt-6">
             <MapPin className="w-5 h-5 text-[#008ffb]" />
             <h3 className="font-semibold text-[#008ffb]">Venue</h3>
           </div>
