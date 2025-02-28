@@ -12,8 +12,8 @@ export default function LayoutWrapper({
 }: {
   children: React.ReactNode
 }) {
-  // Initialize with true, but we'll update it in useEffect for mobile devices
-  const [sidebarOpen, setSidebarOpen] = React.useState(true)
+  // Initialize with false for mobile devices
+  const [sidebarOpen, setSidebarOpen] = React.useState(false)
   const sidebarOpenRef = React.useRef(sidebarOpen)
   const pathname = usePathname()
   const { loading } = useAuth()
@@ -29,12 +29,12 @@ export default function LayoutWrapper({
     // Check if we're on a mobile device (adjust breakpoint as needed)
     const isMobile = window.innerWidth < 768;
     
-    // Set initial state based on device type
-    setSidebarOpen(!isMobile);
+    // Set initial state based on device type - always closed on mobile
+    setSidebarOpen(false);
     
     // Optional: Handle window resizing
     const handleResize = () => {
-      // Only auto-close if going from desktop to mobile
+      // Always close on mobile
       if (window.innerWidth < 768 && sidebarOpenRef.current) {
         setSidebarOpen(false);
       }
@@ -88,7 +88,7 @@ export default function LayoutWrapper({
   }
 
   return (
-    <div className="flex">
+    <div className="flex max-w-[100vw] overflow-x-hidden">
       {showSidebar && (
         <SideMenu sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} />
       )}     

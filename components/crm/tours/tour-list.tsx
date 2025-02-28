@@ -317,7 +317,7 @@ export default function TourList() {
   }
 
   return (
-    <div className="w-full pr-0 md:pr-4">
+    <div className="w-full pr-0 md:pr-4 max-w-[100vw] overflow-x-hidden">
       {!isFormVisible ? (
         <>
           <div className="flex justify-between items-center mb-4">
@@ -427,9 +427,9 @@ export default function TourList() {
               </div>
               
               {/* Mobile view - Cards */}
-              <div className="md:hidden">
+              <div className="md:hidden max-w-full overflow-x-hidden">
                 {tours.map((tour) => (
-                  <div key={tour.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md">
+                  <div key={tour.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md w-[97.5%] !important mx-auto !important">
                     <div className="flex justify-between items-start mb-2">
                       <div className="flex items-center ">
                         <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />

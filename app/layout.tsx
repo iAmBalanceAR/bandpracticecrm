@@ -17,8 +17,8 @@ import { TrialCountdown } from '@/components/ui/trial-countdown'
 export const viewport: Viewport = {
   width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
+  maximumScale: 5,
+  userScalable: true,
   viewportFit: 'cover',
   themeColor: '#000000',
 }

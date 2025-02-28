@@ -759,7 +759,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
   }, [contractTotal, depositAmount, isDepositPaid])
 
   return (
-    <div>
+    <div className="max-w-[100vw] overflow-x-hidden">
       {!isFormVisible ? (
         <>
           <CardHeader className="pb-0 mb-0">
@@ -905,7 +905,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                     </div>
                     
                     {/* Mobile view - Cards */}
-                    <div className="md:hidden mt-4">
+                    <div className="md:hidden max-w-full overflow-x-hidden mt-4">
                       {isLoading ? (
                         <div className="flex justify-center items-center h-24">
                           <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
@@ -918,7 +918,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                         </div>
                       ) : (
                         gigs.map((gig) => (
-                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md ">
+                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md w-[97.5%] !important mx-auto !important">
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex items-center">
                                 <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />
@@ -1082,7 +1082,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                     </div>
                     
                     {/* Mobile view - Cards for past gigs */}
-                    <div className="md:hidden mt-4">
+                    <div className="md:hidden max-w-full overflow-x-hidden mt-4">
                       {isLoading ? (
                         <div className="flex justify-center items-center h-24">
                           <Loader2 className="h-8 w-8 animate-spin text-[#008ffb]" />
@@ -1095,7 +1095,7 @@ export default function GigManagement({ filterType, onAddNew }: GigManagementPro
                         </div>
                       ) : (
                         gigs.map((gig) => (
-                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md ">
+                          <div key={gig.id} className="bg-[#111827] p-2 mb-4 rounded-lg border border-gray-700 shadow-md w-[97.5%] !important mx-auto !important">
                             <div className="flex justify-between items-start mb-2">
                               <div className="flex items-center">
                                 <Calendar className="w-5 h-5 text-[#ff9920] mr-2 flex-shrink-0" />
