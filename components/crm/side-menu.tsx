@@ -18,7 +18,7 @@ import {
 import { 
   BarChart3, Calendar, ChevronLeft, ShipWheel, ChevronRight, 
   ClipboardList, LayoutDashboard, MapPin, Music, Users, 
-  LogOut, Route, BookOpen, ListVideo, LogIn, Guitar, CreditCard 
+  LogOut, Route, BookOpen, ListVideo, LogIn, Guitar, CreditCard
 } from 'lucide-react'
 
 interface SideMenuProps {

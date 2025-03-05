@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Lead, LeadReminder } from '@/app/types/lead';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -23,7 +23,56 @@ import { FeedbackModal } from '@/components/ui/feedback-modal';
 import { Trash2, CalendarIcon } from 'lucide-react';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { RichTextEditor } from '@/components/ui/rich-text-editor'
+import { useEditor, EditorContent } from '@tiptap/react';
+import Document from '@tiptap/extension-document';
+import Paragraph from '@tiptap/extension-paragraph';
+import Text from '@tiptap/extension-text';
+
+// Custom paragraph-only editor component
+function ParagraphOnlyEditor({
+  content,
+  onChange,
+  placeholder = 'Add reminder details...',
+  minHeight = '100px'
+}: {
+  content: string;
+  onChange: (content: string) => void;
+  placeholder?: string;
+  minHeight?: string;
+}) {
+  const editor = useEditor({
+    extensions: [
+      Document,
+      Paragraph.configure({
+        HTMLAttributes: {
+          class: 'mt-0 mb-1',
+        },
+      }),
+      Text,
+    ],
+    content,
+    editorProps: {
+      attributes: {
+        class: `prose prose-invert max-w-none focus:outline-none px-3 pt-1 pb-2 text-gray-200 text-base leading-relaxed w-full min-h-[${minHeight}]`,
+      },
+    },
+    onUpdate: ({ editor }) => {
+      onChange(editor.getHTML());
+    },
+  });
+
+  if (!editor) {
+    return null;
+  }
+
+  return (
+    <div className="rounded-md bg-[#1A2652] border-2 border-[#111C44] overflow-hidden">
+      <div className="prose-lg prose-invert w-full">
+        <EditorContent editor={editor} className="py-0" />
+      </div>
+    </div>
+  );
+}
 
 interface LeadRemindersProps {
   lead: Lead & {
@@ -59,6 +108,17 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
   const router = useRouter();
   const { supabase } = useSupabase();
   const { isAuthenticated, loading: authLoading } = useAuth();
+  const editorRef = useRef<HTMLDivElement>(null);
+  
+  // Hide the toolbar after the component mounts
+  useEffect(() => {
+    if (editorRef.current) {
+      const toolbar = editorRef.current.querySelector('.border-b');
+      if (toolbar) {
+        (toolbar as HTMLElement).style.display = 'none';
+      }
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -257,7 +317,7 @@ export default function LeadReminders({ lead, onUpdate }: LeadRemindersProps) {
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <RichTextEditor
+            <ParagraphOnlyEditor
               content=""
               onChange={(content: string) => {
                 const contentInput = document.createElement('input')

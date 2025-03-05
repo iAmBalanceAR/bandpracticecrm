@@ -10,8 +10,8 @@ import { ThemeProvider } from '@/lib/providers/theme-provider';
 import { Analytics } from "@vercel/analytics/react"
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from '@/components/ui/toaster'
-// import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
-// import { PostHogProvider } from './providers'
+import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
+import { PostHogProvider } from './providers'
 import { TrialCountdown } from '@/components/ui/trial-countdown'
 
 export const viewport: Viewport = {
@@ -77,9 +77,10 @@ export default async function RootLayout({ children }: RootLayoutProps) {
     <html lang="en" suppressHydrationWarning className="h-full">
       <body className="h-full bg-[#020817] font-sans antialiased">
         <Analytics />
-        <ClientErrorBoundary>
-          <SupabaseClientProvider initialSession={session}>
-            <MobileProvider>
+        <PostHogProvider>
+          <ClientErrorBoundary>
+            <SupabaseClientProvider initialSession={session}>
+              <MobileProvider>
               <ThemeProvider
                 defaultTheme="system"
                 storageKey="ui-theme"
@@ -90,12 +91,14 @@ export default async function RootLayout({ children }: RootLayoutProps) {
                     {children}
                   </main>
                   <TrialCountdown />
+                  <RemindersAlertSystem />
                 </div>
                 <SpeedInsights />
               </ThemeProvider>
             </MobileProvider>
-          </SupabaseClientProvider>
-        </ClientErrorBoundary>
+            </SupabaseClientProvider>
+          </ClientErrorBoundary>
+        </PostHogProvider>
         <Toaster />
       </body>
     </html>
