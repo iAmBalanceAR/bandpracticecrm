@@ -1,16 +1,9 @@
 "use client"
 
 import React from 'react'
-import dynamic from 'next/dynamic'
 import { Card } from "@/components/ui/card"
 import { useTour } from '@/components/providers/tour-provider'
 import { MapPin, Calendar, Clock, Phone, Mail, User, DollarSign, Navigation } from 'lucide-react'
-
-// Dynamically import the map component with no SSR
-const TourMap = dynamic(
-  () => import('@/components/crm/tour-map'),
-  { ssr: false }
-)
 
 interface ReportPreviewProps {
   data: any; // TODO: Add proper type
@@ -52,31 +45,6 @@ export function ReportPreview({ data }: ReportPreviewProps) {
           </div>
         </div>
       </Card>
-
-      {/* Map */}
-      {data.mapImageUrl ? (
-        <Card className="p-6 bg-[#1B2559] border-none shadow-lg">
-          <h3 className="text-xl font-semibold mb-4 text-white flex items-center">
-            <Navigation className="w-5 h-5 mr-2" />
-            Tour Route Map
-          </h3>
-          <div className="rounded-lg overflow-hidden">
-            <img src={data.mapImageUrl} alt="Tour Route Map" className="w-full" />
-          </div>
-        </Card>
-      ) : currentTour?.id && (
-        <Card className="p-6 bg-[#1B2559] border-none shadow-lg">
-          <h3 className="text-xl font-semibold mb-4 text-white flex items-center">
-            <Navigation className="w-5 h-5 mr-2" />
-            Tour Route Map
-          </h3>
-          <div className="rounded-lg overflow-hidden">
-            <div id="tour-route-map" className="w-full h-[400px]">
-              <TourMap isPdfExport={true} />
-            </div>
-          </div>
-        </Card>
-      )}
 
       {/* Gigs */}
       <Card className="p-6 bg-[#1B2559] border-none shadow-lg">

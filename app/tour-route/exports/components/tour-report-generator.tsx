@@ -24,7 +24,6 @@ const ReportPreview = dynamic(
 )
 
 interface ReportOptions {
-  includeMap: boolean;
   includeDirections: boolean;
   includeFinancials: boolean;
   includeContactInfo: boolean;
@@ -57,7 +56,6 @@ export function TourReportGenerator() {
     type: 'success'
   })
   const [options, setOptions] = useState<ReportOptions>({
-    includeMap: false,
     includeDirections: false,
     includeFinancials: true,
     includeContactInfo: true,
@@ -109,14 +107,6 @@ export function TourReportGenerator() {
       <PDFLoadingOverlay 
         onComplete={async () => {
           try {
-            // Capture the map if it's included in options
-            if (options.includeMap) {
-              const mapElement = document.getElementById('tour-route-map')
-              if (mapElement) {
-                const canvas = await html2canvas(mapElement)
-                previewData.mapImageUrl = canvas.toDataURL('image/png')
-              }
-            }
             await generatePDF(previewData)
             setFeedbackModal({
               isOpen: true,
@@ -190,17 +180,6 @@ export function TourReportGenerator() {
                 }
               />
               <Label htmlFor="includeContactInfo">Include Venue Contact Information</Label>
-            </div>
-            <div className="flex flex-col gap-2">
-              <label className="flex items-center gap-2">
-                <Checkbox 
-                  checked={options.includeMap}
-                  onChange={(e) => 
-                    setOptions(prev => ({ ...prev, includeMap: e.target.checked }))
-                  }
-                />
-                <span className="flex items-center gap-1">Include Map Overview <span className="text-sm text-red-400 inline-flex items-center gap-1">(beta <Sparkles className="h-3 w-3" />)</span></span>
-              </label>
             </div>
             <div className="flex items-center space-x-2">
               <Checkbox

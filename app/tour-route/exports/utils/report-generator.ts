@@ -1,11 +1,9 @@
 import { gigHelpers } from '@/utils/db/gigs'
 import createClient from '@/utils/supabase/client'
-import html2canvas from 'html2canvas'
 import jsPDF from 'jspdf'
 import { format, isAfter, startOfDay } from 'date-fns'
 
 interface ReportOptions {
-  includeMap: boolean;
   includeDirections: boolean;
   includeFinancials: boolean;
   includeContactInfo: boolean;
@@ -38,7 +36,6 @@ interface ReportData {
     distance: number;
     estimatedTime: string;
   }[];
-  mapImageUrl?: string;
   financials?: {
     totalDeposits: number;
     totalPayments: number;
@@ -191,7 +188,6 @@ export async function generateTourReport(tourId: string, options: ReportOptions)
       date: formatDate(gig.date)
     })),
     directions: options.includeDirections ? directions : undefined,
-    mapImageUrl: options.includeMap ? await captureMap() : undefined,
     financials: options.includeFinancials ? financials : undefined
   }
 }
@@ -200,48 +196,6 @@ function formatDuration(seconds: number): string {
   const hours = Math.floor(seconds / 3600)
   const minutes = Math.floor((seconds % 3600) / 60)
   return `${hours}h ${minutes}m`
-}
-
-async function captureMap(): Promise<string> {
-  const mapElement = document.getElementById('tour-route-map');
-  if (!mapElement) return '';
-
-  // A4 dimensions in mm
-  const A4_WIDTH_MM = 210;
-  const A4_HEIGHT_MM = 297;
-  const MARGIN_MM = 20;
-  
-  // Calculate available width in mm for the map (accounting for margins)
-  const availableWidthMM = A4_WIDTH_MM - (MARGIN_MM * 2);
-  
-  // Convert mm to pixels (assuming 96 DPI - standard screen resolution)
-  // 1 inch = 25.4 mm, 1 inch = 96 pixels
-  const pixelsPerMM = 96 / 25.4;
-  const mapWidthPx = Math.floor(availableWidthMM * pixelsPerMM);
-  const mapHeightPx = Math.floor((availableWidthMM * 0.6) * pixelsPerMM); // 0.6 aspect ratio for map
-
-  // Set map container dimensions
-  mapElement.style.width = `${mapWidthPx}px`;
-  mapElement.style.height = `${mapHeightPx}px`;
-
-  // Wait for map tiles to load and render
-  await new Promise(resolve => setTimeout(resolve, 2000));
-
-  try {
-    const canvas = await html2canvas(mapElement, {
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      scale: 2, // Increase quality
-      logging: false,
-      width: mapWidthPx,
-      height: mapHeightPx
-    });
-    return canvas.toDataURL('image/png');
-  } catch (error) {
-    console.error('Error capturing map:', error);
-    return '';
-  }
 }
 
 export async function generatePDF(reportData: ReportData) {
@@ -345,28 +299,6 @@ export async function generatePDF(reportData: ReportData) {
     textColor: '#6B7280'
   });
   y += 20;
-
-  // Map Section (if included)
-  if (reportData.mapImageUrl) {
-    renderText('Tour Route Map', margin, y, { 
-      fontSize: 16, 
-      isBold: true
-    });
-    y += 15;
-
-    try {
-      const img = reportData.mapImageUrl;
-      if (img) {
-        // Calculate dimensions to maintain aspect ratio
-        const mapWidth = contentWidth;
-        const mapHeight = mapWidth * 0.6; // 0.6 aspect ratio for map
-        pdf.addImage(img, 'PNG', margin, y, mapWidth, mapHeight);
-        y += mapHeight + 20;
-      }
-    } catch (error) {
-      console.error('Error adding map to PDF:', error);
-    }
-  }
 
   // Financial Summary Section
   if (reportData.financials) {
