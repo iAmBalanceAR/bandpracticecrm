@@ -70,53 +70,96 @@ export async function generateStagePlotPDF(
 
           // Capture the plot page exactly as rendered
           const plotCanvas = await html2canvas(plotElement, {
-            scale: 4, // High resolution
+            scale: 2, // Better quality while still maintaining reasonable file size
             logging: false,
             useCORS: true,
             allowTaint: true,
             backgroundColor: 'white',
             imageTimeout: 0,
             onclone: (clonedDoc) => {
-              // Ensure SVGs are properly rendered in the clone
+              // Convert SVGs to grayscale
               const svgs = Array.from(clonedDoc.getElementsByTagName('svg'))
               svgs.forEach(svg => {
                 svg.setAttribute('width', '100%')
                 svg.setAttribute('height', '100%')
                 svg.style.width = '100%'
                 svg.style.height = '100%'
+                svg.style.filter = 'grayscale(100%)'
               })
             }
           })
 
-          // Add plot to first page - use exact A4 dimensions in mm
+          // Convert canvas to grayscale
+          const ctx = plotCanvas.getContext('2d')
+          if (ctx) {
+            const imageData = ctx.getImageData(0, 0, plotCanvas.width, plotCanvas.height)
+            const data = imageData.data
+            for (let i = 0; i < data.length; i += 4) {
+              const avg = (data[i] + data[i + 1] + data[i + 2]) / 3
+              data[i] = avg     // red
+              data[i + 1] = avg // green
+              data[i + 2] = avg // blue
+            }
+            ctx.putImageData(imageData, 0, 0)
+          }
+
+          // Add plot to first page with compression
           pdf.addImage(
-            plotCanvas.toDataURL('image/png', 1.0),
+            plotCanvas.toDataURL('image/png', 0.8), // Good balance of quality and compression
             'PNG',
             0,
             0,
-            210, // A4 width in mm
-            297  // A4 height in mm
+            210,
+            297,
+            undefined,
+            'FAST'
           )
 
           // Add tech requirements if they exist
           if (techElement) {
             const techCanvas = await html2canvas(techElement, {
-              scale: 4,
+              scale: 2,
               logging: false,
               useCORS: true,
               allowTaint: true,
               backgroundColor: 'white',
-              imageTimeout: 0
+              imageTimeout: 0,
+              onclone: (clonedDoc) => {
+                const svgs = Array.from(clonedDoc.getElementsByTagName('svg'))
+                svgs.forEach(svg => {
+                  svg.setAttribute('width', '100%')
+                  svg.setAttribute('height', '100%')
+                  svg.style.width = '100%'
+                  svg.style.height = '100%'
+                  svg.style.filter = 'grayscale(100%)'
+                })
+              }
             })
+
+            // Convert canvas to grayscale
+            const techCtx = techCanvas.getContext('2d')
+            if (techCtx) {
+              const imageData = techCtx.getImageData(0, 0, techCanvas.width, techCanvas.height)
+              const data = imageData.data
+              for (let i = 0; i < data.length; i += 4) {
+                const avg = (data[i] + data[i + 1] + data[i + 2]) / 3
+                data[i] = avg     // red
+                data[i + 1] = avg // green
+                data[i + 2] = avg // blue
+              }
+              techCtx.putImageData(imageData, 0, 0)
+            }
 
             pdf.addPage()
             pdf.addImage(
-              techCanvas.toDataURL('image/png', 1.0),
+              techCanvas.toDataURL('image/png', 0.8),
               'PNG',
               0,
               0,
-              210, // A4 width in mm
-              297  // A4 height in mm
+              210,
+              297,
+              undefined,
+              'FAST'
             )
           }
 

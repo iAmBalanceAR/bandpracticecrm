@@ -5,6 +5,8 @@ import MobileProvider from '@/components/providers/mobile-provider'
 import SupabaseProvider from '@/components/providers/supabase-client-provider'
 import { AuthProvider } from '@/components/providers/auth-provider'
 import { TourProvider } from '@/components/providers/tour-provider'
+import AuthDebugger from '@/components/dev/AuthDebugger'
+
 export default function ClientProviders({
   children,
   session
@@ -23,6 +25,9 @@ export default function ClientProviders({
               enableSystem
             >
               {children}
+              
+              {/* Development-only auth debugger */}
+              {process.env.NODE_ENV === 'development' && <AuthDebugger />}
             </ThemeProvider>
           </MobileProvider>
         </TourProvider>

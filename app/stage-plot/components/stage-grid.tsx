@@ -32,7 +32,7 @@ export default function StageGrid({
   return (
     <div 
       id="stage-grid"
-      className="relative w-full aspect-[16/9] bg-red-900/70  border-2 border-gray-700 rounded-lg overflow-hidden"
+      className="relative w-full aspect-[16/9] bg-[#020817] border-2 border-gray-700 rounded-lg overflow-hidden"
     >
       {/* Stage front indicator */}
       <div className="absolute bottom-0 left-0 right-0 h-8 bg-black/80 flex items-center font-mono z-10 justify-center text-sm text-gray-400">
@@ -40,10 +40,19 @@ export default function StageGrid({
       </div>
 
       {/* Grid lines */}
-      <div className="absolute inset-0 grid grid-cols-12 grid-rows-6  gap-[1px] pointer-events-none">
-        {Array.from({ length: 72 }).map((_, i) => (
-          <div key={i} className="bg-gray-900 " />
-        ))}
+      <div className="absolute inset-0">
+        {/* Vertical lines */}
+        <div className="absolute inset-0 flex justify-between">
+          {Array.from({ length: 17 }).map((_, i) => (
+            <div key={`v${i}`} className="h-full w-[1px] bg-red-600/50" />
+          ))}
+        </div>
+        {/* Horizontal lines */}
+        <div className="absolute inset-0 flex flex-col justify-between">
+          {Array.from({ length: 10 }).map((_, i) => (
+            <div key={`h${i}`} className="w-full h-[1px] bg-red-600/50" />
+          ))}
+        </div>
       </div>
 
       {/* Stage items */}

@@ -13,6 +13,8 @@ import { Toaster } from '@/components/ui/toaster'
 import { RemindersAlertSystem } from '@/components/reminders/reminders-alert-system'
 import { PostHogProvider } from './providers'
 import { TrialCountdown } from '@/components/ui/trial-countdown'
+import AuthDebugger from '@/components/dev/AuthDebugger';
+import { cn } from '@/lib/utils';
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -81,21 +83,22 @@ export default async function RootLayout({ children }: RootLayoutProps) {
           <ClientErrorBoundary>
             <SupabaseClientProvider initialSession={session}>
               <MobileProvider>
-              <ThemeProvider
-                defaultTheme="system"
-                storageKey="ui-theme"
-                enableSystem
-              >
-                <div className="relative flex min-h-screen flex-col">
-                  <main className="flex-1 flex flex-col">
-                    {children}
-                  </main>
-                  <TrialCountdown />
-                  <RemindersAlertSystem />
-                </div>
-                <SpeedInsights />
-              </ThemeProvider>
-            </MobileProvider>
+                <ThemeProvider
+                  defaultTheme="system"
+                  storageKey="ui-theme"
+                  enableSystem
+                >
+                  <div className="relative flex min-h-screen flex-col">
+                    <main className="flex-1 flex flex-col">
+                      {children}
+                    </main>
+                    <TrialCountdown />
+                    <RemindersAlertSystem />
+                  </div>
+                  <SpeedInsights />
+                  {process.env.NODE_ENV === 'development' && <AuthDebugger />}
+                </ThemeProvider>
+              </MobileProvider>
             </SupabaseClientProvider>
           </ClientErrorBoundary>
         </PostHogProvider>

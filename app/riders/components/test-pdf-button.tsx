@@ -195,32 +195,17 @@ const SetlistPage = ({ setlist, songs }: { setlist: any, songs: any[] }) => (
         <Text style={[styles.tableCell, { width: '10%' }]}>#</Text>
         <Text style={[styles.tableCell, { width: '50%' }]}>Song</Text>
         <Text style={[styles.tableCell, { width: '20%' }]}>Duration</Text>
-        <Text style={[styles.tableCell, { width: '20%' }]}>Key</Text>
+        <Text style={[styles.tableCell, { width: '20%' }]}>Notes</Text>
       </View>
       {songs.map((song, index) => (
         <View key={song.id} style={styles.tableRow}>
           <Text style={[styles.tableCell, { width: '10%' }]}>{index + 1}</Text>
           <Text style={[styles.tableCell, { width: '50%' }]}>{song.title}</Text>
           <Text style={[styles.tableCell, { width: '20%' }]}>{song.duration || '--:--'}</Text>
-          <Text style={[styles.tableCell, { width: '20%' }]}>{song.key}</Text>
+          <Text style={[styles.tableCell, { width: '20%' }]}>{song.notes || '--'}</Text>
         </View>
       ))}
     </View>
-    {songs.some(song => song.notes) && (
-      <View style={{ marginTop: 20 }}>
-        <Text style={styles.sectionTitle}>Notes</Text>
-        {songs.map((song, index) => song.notes && (
-          <View key={song.id} style={{ marginBottom: 10 }}>
-            <Text style={{ fontSize: 12, marginBottom: 4 }}>
-              {index + 1}. {song.title}:
-            </Text>
-            <Text style={{ fontSize: 10, color: '#666', paddingLeft: 20 }}>
-              {song.notes}
-            </Text>
-          </View>
-        ))}
-      </View>
-    )}
     <Footer />
   </Page>
 )

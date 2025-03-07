@@ -173,8 +173,8 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         // Update existing plot
         const plotSuccess = await updateStagePlot(plotId, {
           name: plotName,
-          stage_width: 800,
-          stage_depth: 600
+          stage_width: 1600,
+          stage_depth: 900
         })
 
         if (!plotSuccess) {
@@ -196,8 +196,8 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         // Create new plot
         const plot = await createStagePlot(
           plotName,
-          800,
-          600,
+          1600,
+          900,
           items.map(({ id, stage_plot_id, created_at, ...item }) => item)
         )
 
@@ -261,8 +261,8 @@ export default function StagePlotEditor({ plotId, onSaved }: StagePlotEditorProp
         id: plotId || crypto.randomUUID(),
         user_id: '', // Will be set by the server
         name: plotName,
-        stage_width: 800,
-        stage_depth: 600,
+        stage_width: 1600,
+        stage_depth: 900,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString()
       }
