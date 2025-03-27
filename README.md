@@ -1,437 +1,104 @@
-# Band Practice Application
+# CometDocs
 
-## Design System and Layout Guidelines
+A lightweight documentation system for Next.js applications.
 
-### Color Palette
+Visit the [GitHub Repository](https://github.com/iAmBalanceAR/CometDocs) for the latest updates and source code.
 
-```typescript
-colors: {
-  primary: {
-    50: '#f0f9ff',
-    100: '#e0f2fe',
-    200: '#bae6fd',
-    300: '#7dd3fc',
-    400: '#38bdf8',
-    500: '#0ea5e9',
-    600: '#0284c7',
-    700: '#0369a1',
-    800: '#075985',
-    900: '#0c4a6e',
-  },
-  dark: {
-    background: '#111C44',
-    card: '#1B254B',
-    text: '#FFFFFF',
-    muted: '#A0AEC0',
-  },
-  light: {
-    background: '#F7FAFC',
-    card: '#FFFFFF',
-    text: '#2D3748',
-    muted: '#718096',
-  },
-  accent: {
-    success: '#48BB78',
-    error: '#F56565',
-    warning: '#ECC94B',
-    info: '#4299E1',
-  }
-}
+## Features
+
+- 📝 Markdown & MDX support
+- 🎨 Clean, modern design
+- 🔍 Full-text search
+- 📱 Mobile-first responsive layout
+- 🌙 Dark mode support
+- 📖 Simple documentation structure
+
+## Quick Start
+
+```bash
+# Install with your preferred package manager
+npm install cometdocs
+# or
+yarn add cometdocs
+# or
+pnpm add cometdocs
 ```
 
-### Typography
+Create your documentation directory:
 
-```typescript
-typography: {
-  fontFamily: {
-    sans: ['Inter', 'sans-serif'],
-    heading: ['Poppins', 'sans-serif'],
-  },
-  sizes: {
-    h1: 'text-4xl font-bold',
-    h2: 'text-3xl font-semibold',
-    h3: 'text-2xl font-medium',
-    body: 'text-base',
-    small: 'text-sm',
-    tiny: 'text-xs',
-  }
-}
+```bash
+mkdir -p docs/en
 ```
 
-### Layout Components
+Add your first documentation file:
 
-#### PageContainer
+```md
+---
+title: Welcome
+synopsis: Welcome to your documentation
+position: 1
+---
 
-The main layout wrapper for all pages:
+# Welcome
 
-```typescript
-
-<div className="min-h-screen bg-dark-background text-dark-text p-4 md:p-6 lg:p-8">
-  {children}
-</div>
+This is your first documentation page.
 ```
 
-#### Card
+Create the documentation route:
 
-Reusable card component with consistent styling:
+```tsx
+// app/docs/[[...slug]]/page.tsx
+import { CometDocs } from 'cometdocs';
 
-```typescript
-interface CardProps {
-  children: React.ReactNode;
-  className?: string;
-  padding?: 'none' | 'small' | 'normal' | 'large';
-}
-
-const Card: React.FC<CardProps> = ({
-  children,
-  className,
-  padding = 'normal'
-}) => {
-  const paddingClasses = {
-    none: '',
-    small: 'p-3',
-    normal: 'p-4 md:p-6',
-    large: 'p-6 md:p-8'
+interface DocsPageProps {
+  params: {
+    slug: string[];
   };
+}
 
-  return (
-    <div className={cn(
-      'bg-dark-card rounded-lg shadow-lg',
-      paddingClasses[padding],
-      className
-    )}>
-      {children}
-    </div>
-  );
-};
-```
-
-### Spacing System
-
-Consistent spacing using Tailwind's scale:
-
-- Extra small: `space-2` (0.5rem, 8px)
-- Small: `space-4` (1rem, 16px)
-- Medium: `space-6` (1.5rem, 24px)
-- Large: `space-8` (2rem, 32px)
-- Extra large: `space-12` (3rem, 48px)
-
-### Responsive Breakpoints
-
-```typescript
-screens: {
-  'sm': '640px',
-  'md': '768px',
-  'lg': '1024px',
-  'xl': '1280px',
-  '2xl': '1536px',
+export default async function DocsPage({ params }: DocsPageProps) {
+  const slug = params?.slug?.join('/') || 'index';
+  
+  return <CometDocs slug={slug} />;
 }
 ```
 
-### Common Components
+## Example Build
 
-#### Button
+You can find a complete example implementation in the `/example` directory. This example shows:
+  
+- Full documentation site setup
+  
+- Custom templates
+- Markdown style guide
+- Writing guidelines
+- Configuration examples
 
-Standard button component with variants:
+To run the example:
 
-```typescript
-interface ButtonProps {
-  variant?: 'primary' | 'secondary' | 'outline' | 'ghost';
-  size?: 'sm' | 'md' | 'lg';
-  isLoading?: boolean;
-  disabled?: boolean;
-}
-
-const buttonVariants = {
-  primary: 'bg-primary-600 hover:bg-primary-700 text-white',
-  secondary: 'bg-dark-card hover:bg-dark-card/80 text-white',
-  outline: 'border border-primary-600 text-primary-600 hover:bg-primary-600/10',
-  ghost: 'text-primary-600 hover:bg-primary-600/10'
-};
-
-const buttonSizes = {
-  sm: 'px-3 py-1.5 text-sm',
-  md: 'px-4 py-2',
-  lg: 'px-6 py-3 text-lg'
-};
+```bash
+cd example
+pnpm install
+pnpm dev
 ```
 
-#### Input
+Then visit `http://localhost:3000/docs` to see it in action.
 
-Standardized form input component:
+## Documentation
 
-```typescript
-interface InputProps {
-  error?: string;
-  label?: string;
-  helper?: string;
-}
+Visit our [documentation site](https://github.com/iAmBalanceAR/CometDocs/tree/main/example/docs/en) to learn more about:
 
-const inputStyles = {
-  base: 'w-full rounded-md bg-dark-card border border-dark-muted/30 text-dark-text',
-  focus: 'focus:ring-2 focus:ring-primary-600 focus:border-transparent',
-  error: 'border-accent-error focus:ring-accent-error',
-  disabled: 'opacity-50 cursor-not-allowed'
-};
-```
+- [Getting Started](/docs/guides/getting-started)
+- [Installation](/docs/guides/installation)
+- [Configuration](/docs/guides/configuration)
+- [Writing Guide](/docs/guides/writing)
 
-### Grid System
+## Requirements
 
-Flexible grid system using Tailwind's grid classes:
+- Next.js 14 or higher
+- Node.js 18.17 or higher
+- React 18 or higher
 
-```typescript
-// Basic grid
-<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+## License
 
-// Sidebar layout
-<div className="grid grid-cols-12 gap-4">
-  <aside className="col-span-12 lg:col-span-3">
-    {/* Sidebar content */}
-  </aside>
-  <main className="col-span-12 lg:col-span-9">
-    {/* Main content */}
-  </main>
-</div>
-```
-
-### Animation Classes
-
-Common animation utilities:
-
-```typescript
-animations: {
-  fadeIn: 'animate-fadeIn',
-  slideIn: 'animate-slideIn',
-  pulse: 'animate-pulse',
-  spin: 'animate-spin',
-}
-```
-
-### Best Practices
-
-1. **Responsive Design**
-   - Always start with mobile-first approach
-   - Use responsive classes systematically
-   - Test all breakpoints thoroughly
-
-2. **Dark Mode Support**
-   - Use `dark:` variant for dark mode styles
-   - Ensure sufficient contrast in both modes
-   - Test color combinations for accessibility
-
-3. **Component Structure**
-   - Keep components small and focused
-   - Use composition over inheritance
-   - Implement proper prop typing
-   - Include proper accessibility attributes
-
-4. **Performance**
-   - Lazy load images and heavy components
-   - Use proper caching strategies
-   - Implement proper code splitting
-
-## Dialog Boxes and Feedback Modals
-
-The application uses a consistent system of dialog boxes for user feedback and confirmations. Here's how to use them:
-
-### FeedbackModal Component
-
-The `FeedbackModal` component is used for displaying success messages, errors, and confirmation dialogs. It supports three types of modals:
-
-1. **Success Modal**
-
-```typescript
-setFeedbackModal({
-  isOpen: true,
-  title: "Success",
-  message: "Operation completed successfully",
-  type: 'success'
-});
-```
-
-. **Error Modal**
-
-```typescript
-setFeedbackModal({
-  isOpen: true,
-  title: "Error",
-  message: "An error occurred while processing your request",
-  type: 'error'
-});
-```
-
-. **Delete Confirmation Modal**
-
-```typescript
-showDeleteConfirmation(itemId, {
-  title: 'Delete Item',
-  message: 'Are you sure you want to delete this item?',
-  onConfirm: async () => {
-    // Handle deletion logic here
-  }
-});
-```
-
-1. **Success Messages**
-   - Use for confirming successful operations
-   - Keep messages clear and concise
-   - Include what was accomplished (e.g., "Tour created successfully")
-
-2. **Error Messages**
-   - Always provide helpful error messages
-   - Include what went wrong and possible solutions
-   - Log detailed errors to console for debugging
-
-3. **Delete Confirmations**
-   - Always require confirmation for destructive actions
-   - Clearly state what will be deleted
-   - Mention if the action cannot be undone
-
-### Implementation Example
-
-```typescript
-// State for feedback modal
-const [feedbackModal, setFeedbackModal] = useState<{
-  isOpen: boolean;
-  title: string;
-  message: string;
-  type: 'success' | 'error';
-}>({
-  isOpen: false,
-  title: '',
-  message: '',
-  type: 'success'
-});
-
-// Using the delete confirmation hook
-const { deleteConfirmation, showDeleteConfirmation } = useDeleteConfirmation();
-
-// Render the modals
-<FeedbackModal
-  isOpen={feedbackModal.isOpen}
-  onClose={() => setFeedbackModal(prev => ({ ...prev, isOpen: false }))}
-  title={feedbackModal.title}
-  message={feedbackModal.message}
-  type={feedbackModal.type}
-/>
-
-<FeedbackModal
-  isOpen={deleteConfirmation.isOpen}
-  onClose={deleteConfirmation.onClose}
-  title={deleteConfirmation.title}
-  message={deleteConfirmation.message}
-  type="delete"
-  onConfirm={deleteConfirmation.onConfirm}
-/>
-```
-
-### Styling Guidelines
-
-The modals follow the application's dark theme with consistent styling:
-
-- Background: `bg-[#111C44]`
-- Text: White for high contrast
-- Success actions: Green accents
-- Error/Delete actions: Red accents
-- Confirmation buttons: Contrasting colors for clear action distinction
-
-### Accessibility
-
-The modals are built with accessibility in mind:
-
-- Keyboard navigation support
-- ARIA labels for screen readers
-- Focus management
-- Escape key closes modals
-- Click outside modal area to close
-
-Remember to always provide clear feedback to users through these modals and maintain consistency in their usage throughout the application.
-
-## Custom Common Components
-
-### CustomSectionHeader
-
-A reusable header component that provides a consistent layout with a title, underline, and content area.
-
-```typescript
-import { CustomSectionHeader } from '@/components/common/CustomSectionHeader';
-
-// Basic usage
-<CustomSectionHeader title="Your Page Title">
-  {/* Your content here */}
-</CustomSectionHeader>
-
-// With custom styling
-<CustomSectionHeader 
-  title="Your Page Title"
-  underlineColor="#00E396"
-  addclassName="your-custom-class"
->
-  {/* Your content here */}
-</CustomSectionHeader>
-```
-
-Props:
-
-- `title`: string - The title to display in the header
-- `underlineColor?`: string - Optional color for the underline (default: #008ffb)
-- `addclassName?`: string - Optional additional CSS classes
-- `children`: React.ReactNode - The content to render inside the section
-
-### CustomCard
-
-A reusable card component that provides a consistent layout with a title and content area.
-
-```typescript
-import { CustomCard } from '@/components/common/CustomCard';
-
-// Basic usage
-<CustomCard title="Card Title">
-  {/* Your content here */}
-</CustomCard>
-
-// With custom styling
-<CustomCard 
-  title="Card Title"
-  cardColor="blue-500"
-  addclassName="your-custom-class"
->
-  {/* Your content here */}
-</CustomCard>
-```
-
-Props:
-
-- `title`: string - The title to display in the card
-- `cardColor?`: string - Optional color for the title text (default: white)
-- `addclassName?`: string - Optional additional CSS classes
-- `children`: React.ReactNode - The content to render inside the card
-
-### Example Page Layout
-
-```typescript
-import { CustomSectionHeader } from '@/components/common/CustomSectionHeader';
-import { CustomCard } from '@/components/common/CustomCard';
-
-export default function YourPage() {
-  return (
-    <CustomSectionHeader title="Page Title" underlineColor="#00E396">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <CustomCard title="Section 1">
-          {/* Section 1 content */}
-        </CustomCard>
-        <CustomCard title="Section 2">
-          {/* Section 2 content */}
-        </CustomCard>
-      </div>
-    </CustomSectionHeader>
-  );
-}
-```
-
-This layout pattern provides:
-
-- Consistent page headers with customizable styling
-- Organized content sections with standardized card layouts
-- Responsive grid layouts for content organization
-- Maintainable and reusable component structure
+MIT © CometDocs

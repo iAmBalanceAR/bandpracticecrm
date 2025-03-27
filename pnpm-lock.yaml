@@ -227,9 +227,6 @@ importers:
       next-themes:
         specifier: ^0.4.4
         version: 0.4.4(react-dom@18.2.0(react@18.2.0))(react@18.2.0)
-      node-fetch:
-        specifier: ^3.3.2
-        version: 3.3.2
       nodemailer:
         specifier: ^6.9.16
         version: 6.9.16
@@ -369,6 +366,9 @@ importers:
       eslint-plugin-next:
         specifier: ^0.0.0
         version: 0.0.0
+      node-fetch:
+        specifier: ^3.3.2
+        version: 3.3.2
       postcss:
         specifier: ^8.4.49
         version: 8.4.49

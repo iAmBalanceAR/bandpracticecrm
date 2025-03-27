@@ -43,15 +43,18 @@ const pdfStyles = {
   songList: {
     width: '100%',
     borderCollapse: 'collapse' as const,
+    color: 'black',
   },
   songRow: {
     borderBottom: '1px solid #ddd',
-    height: '12mm', // Increased row height for better spacing
+    height: '12mm', // Increased row height for better spacing,
+    color: 'black',
   },
   songCell: {
     padding: '4mm 2mm', // Increased padding
     fontSize: '14pt', // Increased font size
     verticalAlign: 'middle' as const,
+    color: 'black',
   },
   headerCell: {
     padding: '4mm 2mm', // Increased padding
